@@ -11,7 +11,7 @@ import { Link } from "react-router-dom";
 export const Footer = () => {
   return (
     <>
-      <footer className="bg-white py-8 px-4 border-t border-gray-200">
+      <footer className="bg-white py-8 px-4 ">
         <div className="container mx-auto flex flex-col md:flex-row justify-between items-start">
           <div className="flex items-center">
             <Link to="/" className="inline-block">
@@ -25,29 +25,40 @@ export const Footer = () => {
 
           <div className="mb-6 md:mb-0">
             <h3 className="font-semibold mb-2">Contributors</h3>
-            <ul className="text-sm">
-              <li>21110798 - Bui Chien</li>
-              <li>Thang</li>
+            <ul className="text-sm prose">
+              <li>21110798 - Bui Chien Thang</li>
               <li>21110098 - Vo Dang Trinh</li>
-              <li>21110116 - Nguyen Van</li>
-              <li>Anh Dong</li>
+              <li>21110116 - Nguyen Van Anh Dong</li>
             </ul>
           </div>
 
           <div className="mb-6 md:mb-0">
             <h3 className="font-semibold mb-2">Used technologies</h3>
-            <ul className="text-sm">
-              <li>Frontend: React, Typescript</li>
-              <li>Backend: Spring Boot, Spring</li>
-              <li>Security</li>
+            <ul className="text-sm prose">
+              <li>
+                <b>Frontend</b>: React, Typescript
+              </li>
+              <li>
+                <b>Backend</b>: Spring Boot, Spring Security
+              </li>
             </ul>
           </div>
 
           <div className="mb-6 md:mb-0">
             <h3 className="font-semibold mb-2">Contact Us</h3>
-            <ul className="text-sm">
-              <li>Email: 21110798@student.hcmute.edu.vn</li>
-              <li>Ticket Office: 123-456-7890</li>
+            <ul className="prose text-sm ">
+              <li>
+                <b>
+                  <i>Email</i>
+                </b>
+                : 21110798@student.hcmute.edu.vn
+              </li>
+              <li>
+                <b>
+                  <i>Ticket Office</i>
+                </b>
+                : 123-456-7890
+              </li>
             </ul>
           </div>
 
@@ -63,7 +74,10 @@ export const Footer = () => {
           </div>
         </div>
 
-        <div className="text-center mt-8 text-sm text-gray-500">
+        <div className="flex justify-center mt-10">
+          <hr className="w-9/12 border-gray-300" />
+        </div>
+        <div className="text-center mt-5 text-sm text-gray-500">
           © 2019 UH Media | All Rights Reserved
         </div>
       </footer>

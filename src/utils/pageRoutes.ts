@@ -32,3 +32,32 @@ export const pageRoutes: Routes[] = [
     },
 
 ]
+
+export const bookingRoutes: Route[] = [
+    {
+      id: 1,
+      path: "service", // relative path
+      location: "Service"
+    },
+    {
+      id: 2,
+      path: "choosedatetime",
+      location: "ChooseDateTime"
+    },
+    {
+      id: 3,
+      path: "bookinfo",
+      location: "BookInfo"
+    },
+    {
+      id: 4,
+      path: "payment",
+      location: "Payment"
+    },
+    {
+      id: 5,
+      path: "finish",
+      location: "Finish"
+    }
+  ];
+  
