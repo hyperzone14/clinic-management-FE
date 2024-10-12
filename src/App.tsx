@@ -1,15 +1,14 @@
 import "./App.css";
-import { Route, BrowserRouter, Routes } from "react-router-dom";
+import { Route, BrowserRouter, Routes, Navigate } from "react-router-dom";
 import { Header } from "./components/layout/Header";
 import { Footer } from "./components/layout/Footer";
-import { pageRoutes } from "./utils/pageRoutes";
+import { BackToTop } from "./components/layout/BackToTop";
+import { pageRoutes, bookingRoutes } from "./utils/pageRoutes";
 import React, { Suspense, lazy } from "react";
+import Booking from "./components/common/Booking";
 
 // Automatically import all page components
-const pageComponents: Record<
-  string,
-  () => Promise<{ default: React.ComponentType<unknown> }>
-> = import.meta.glob("./pages/*.tsx");
+const pageComponents = import.meta.glob(["./pages/*.tsx", "./pages/**/*.tsx"]);
 
 function App() {
   return (
@@ -19,14 +18,11 @@ function App() {
         <Suspense fallback={<div>Loading...</div>}>
           <Routes>
             {pageRoutes.map((route) => {
-              // Dynamically import the component
-              const Component = lazy(() =>
-                pageComponents[`./pages/${route.location}.tsx`]().then(
-                  (module) => ({
-                    default: module.default,
-                  })
-                )
-              );
+              const Component = lazy(() => {
+                return pageComponents[
+                  `./pages/${route.location}.tsx`
+                ]() as Promise<{ default: React.ComponentType<unknown> }>;
+              });
               return (
                 <Route
                   key={route.id}
@@ -35,8 +31,41 @@ function App() {
                 />
               );
             })}
+            <Route
+              path="/booking/*"
+              element={<Booking steps={bookingRoutes} />}
+            >
+              {bookingRoutes.map((step) => {
+                const StepComponent = lazy(() => {
+                  return pageComponents[
+                    `./pages/Bookingpages/${step.location}.tsx`
+                  ]() as Promise<{ default: React.ComponentType<unknown> }>;
+                });
+                return (
+                  <Route
+                    key={step.id}
+                    path={step.path.split("/").pop()}
+                    element={
+                      <Suspense fallback={<div>Loading step...</div>}>
+                        <StepComponent />
+                      </Suspense>
+                    }
+                  />
+                );
+              })}
+            </Route>
+            <Route
+              path="/booking"
+              element={
+                <Navigate
+                  to={`/booking/${bookingRoutes[0].path.split("/").pop()}`}
+                  replace
+                />
+              }
+            />
           </Routes>
         </Suspense>
+        <BackToTop />
         <Footer />
       </div>
     </BrowserRouter>

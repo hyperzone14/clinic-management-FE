@@ -1,17 +1,33 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 import { pageRoutes } from "../../utils/pageRoutes.ts";
+import { Link, useLocation } from "react-router-dom";
 
 export const Header = () => {
+  const location = useLocation();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
   return (
     <>
-      <header className="bg-[#87ceeb]">
+      <header
+        className={`sticky top-0 transition-all duration-300 ${
+          isScrolled ? "bg-[#87ceeb]" : "bg-transparent"
+        }`}
+      >
         <nav>
           <div className="flex justify-between items-center w-full p-5">
             <div className="logo">
               <Link to="/">
                 <img
-                  src="assets/images/medpal.png"
+                  src="/assets/images/medpal.png"
                   alt="Medpal"
                   className="w-2/12 ms-11"
                 />
@@ -24,7 +40,11 @@ export const Header = () => {
                   <li key={route.id}>
                     <Link
                       to={route.path}
-                      className="font-bold font-['Inter'] text-lg hover:text-[#4567b7] hover:underline transition duration-50 ease-in-out"
+                      className={`font-bold font-['Inter'] text-lg hover:text-[#4567b7] hover:underline transition duration-50 ease-in-out ${
+                        location.pathname === route.path
+                          ? "text-[#4567b7] underline"
+                          : ""
+                      }`}
                     >
                       {route.location}
                     </Link>
