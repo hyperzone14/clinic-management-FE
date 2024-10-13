@@ -27,8 +27,8 @@ export const pageRoutes: Routes[] = [
     },
     {
         id:5,
-        path: "/rollcall",
-        location: "Rollcall"
+        path: "/booking",
+        location: "Booking"
     },
 
 ]
