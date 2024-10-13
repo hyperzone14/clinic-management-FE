@@ -5,7 +5,8 @@ import { Footer } from "./components/layout/Footer";
 import { BackToTop } from "./components/layout/BackToTop";
 import { pageRoutes, bookingRoutes } from "./utils/pageRoutes";
 import React, { Suspense, lazy } from "react";
-import Booking from "./components/common/Booking";
+import Booking from "./pages/Booking";
+import NotFound from "./pages/error/NotFound";
 
 // Automatically import all page components
 const pageComponents = import.meta.glob(["./pages/*.tsx", "./pages/**/*.tsx"]);
@@ -13,58 +14,63 @@ const pageComponents = import.meta.glob(["./pages/*.tsx", "./pages/**/*.tsx"]);
 function App() {
   return (
     <BrowserRouter>
-      <div>
+      <div className="flex flex-col min-h-screen">
         <Header />
-        <Suspense fallback={<div>Loading...</div>}>
-          <Routes>
-            {pageRoutes.map((route) => {
-              const Component = lazy(() => {
-                return pageComponents[
-                  `./pages/${route.location}.tsx`
-                ]() as Promise<{ default: React.ComponentType<unknown> }>;
-              });
-              return (
-                <Route
-                  key={route.id}
-                  path={route.path}
-                  element={<Component />}
-                />
-              );
-            })}
-            <Route
-              path="/booking/*"
-              element={<Booking steps={bookingRoutes} />}
-            >
-              {bookingRoutes.map((step) => {
-                const StepComponent = lazy(() => {
+        <main className="flex-grow">
+          <Suspense fallback={<div>Loading...</div>}>
+            <Routes>
+              {pageRoutes.map((route) => {
+                const Component = lazy(() => {
                   return pageComponents[
-                    `./pages/Bookingpages/${step.location}.tsx`
+                    `./pages/${route.location}.tsx`
                   ]() as Promise<{ default: React.ComponentType<unknown> }>;
                 });
                 return (
                   <Route
-                    key={step.id}
-                    path={step.path.split("/").pop()}
-                    element={
-                      <Suspense fallback={<div>Loading step...</div>}>
-                        <StepComponent />
-                      </Suspense>
-                    }
+                    key={route.id}
+                    path={route.path}
+                    element={<Component />}
                   />
                 );
               })}
-            </Route>
-            <Route
-              path="/booking"
-              element={
-                <Navigate
-                  to={`/booking/${bookingRoutes[0].path.split("/").pop()}`}
-                  replace
+              <Route
+                path="/booking"
+                element={<Booking steps={bookingRoutes} />}
+              >
+                <Route
+                  index
+                  element={
+                    <Navigate
+                      to={`/booking/${bookingRoutes[0].path.split("/").pop()}`}
+                      replace
+                    />
+                  }
                 />
-              }
-            />
-          </Routes>
-        </Suspense>
+                {bookingRoutes.map((step) => {
+                  const StepComponent = lazy(() => {
+                    return pageComponents[
+                      `./pages/Bookingpages/${step.location}.tsx`
+                    ]() as Promise<{ default: React.ComponentType<unknown> }>;
+                  });
+                  return (
+                    <Route
+                      key={step.id}
+                      path={step.path.split("/").pop()}
+                      element={
+                        <Suspense fallback={<div>Loading step...</div>}>
+                          <StepComponent />
+                        </Suspense>
+                      }
+                    />
+                  );
+                })}
+              </Route>
+              <Route path="*" element={<NotFound />}>
+                <Route path="*" element={<Navigate to="/error" replace />} />
+              </Route>
+            </Routes>
+          </Suspense>
+        </main>
         <BackToTop />
         <Footer />
       </div>
