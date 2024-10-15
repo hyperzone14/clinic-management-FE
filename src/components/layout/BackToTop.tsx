@@ -31,7 +31,7 @@ export const BackToTop = () => {
     <>
       {backToTop && (
         <button
-          className="fixed bottom-5 right-5 bg-blue-500 text-white p-3 rounded-full shadow-lg hover:bg-blue-600 transition-colors duration-300"
+          className="fixed bottom-5 right-5 bg-[#4567b7] text-white p-3 rounded-full shadow-lg hover:bg-[#3E5CA3] transition-colors duration-300"
           onClick={scrollUp}
           aria-label="Back to top"
         >

@@ -17,7 +17,7 @@ const NotFound: React.FC = () => {
     nav(-1);
   };
   return (
-    <div className="flex flex-col items-center justify-center mt-20  px-4">
+    <div className="flex flex-col items-center justify-center mt-20 px-4">
       <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-8 text-center">
         <h1 className="text-3xl font-bold text-gray-800 mb-4">
           404: Page Not Found
