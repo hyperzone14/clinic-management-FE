@@ -40,7 +40,7 @@ export const Header = () => {
                   <li key={route.id}>
                     <Link
                       to={route.path}
-                      className={`font-bold font-['Inter'] text-lg hover:text-[#4567b7] hover:underline transition duration-50 ease-in-out ${
+                      className={`font-bold font-sans text-lg hover:text-[#4567b7] hover:underline transition duration-50 ease-in-out ${
                         location.pathname === route.path
                           ? "text-[#4567b7] underline"
                           : ""

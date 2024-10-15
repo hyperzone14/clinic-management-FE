@@ -7,7 +7,11 @@ export default {
       lg: "1440px",
       sm: "576px",
     },
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: ["Inter", "sans-serif"],
+      },
+    },
   },
   plugins: [require("@tailwindcss/typography")],
 };
