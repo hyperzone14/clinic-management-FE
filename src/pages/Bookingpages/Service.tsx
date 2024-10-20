@@ -182,12 +182,14 @@ const Service: React.FC = () => {
                         </div>
                       ))
                     )}
+
                   </div>
                 </div>
               </div>
             </div>
             {/* Your component content here */}
             <div className="mt-10 mb-20 flex justify-center items-center gap-3">
+
               <button
                 className="bg-[#34a85a] hover:bg-[#2e8b57] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out"
                 onClick={goToPreviousStep}
