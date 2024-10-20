@@ -16,7 +16,7 @@ function App() {
     <BrowserRouter>
       <div className="flex flex-col min-h-screen">
         <Header />
-        <main className="flex-grow">
+        <main className="flex-grow mx-[11rem]">
           <Suspense fallback={<div>Loading...</div>}>
             <Routes>
               {pageRoutes.map((route) => {

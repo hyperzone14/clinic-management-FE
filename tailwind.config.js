@@ -11,6 +11,9 @@ export default {
       fontFamily: {
         sans: ["Inter", "sans-serif"],
       },
+      plugins: [
+        require('tailwind-scrollbar'),
+      ]
     },
   },
   plugins: [require("@tailwindcss/typography")],

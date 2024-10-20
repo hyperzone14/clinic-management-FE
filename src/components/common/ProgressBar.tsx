@@ -8,18 +8,18 @@ interface ProgressBarProps {
 const steps = [
   {
     label: "Select Service",
-    dotPos: "left-[20.5rem]",
-    wordPos: "ms-[-3.5rem]",
+    dotPos: "left-[20rem]",
+    wordPos: "ms-[-4.25rem]",
   },
-  { label: "Booking", dotPos: "left-[41.75rem]", wordPos: "ms-[14.5rem]" },
-  { label: "Purchase", dotPos: "right-[41.75rem]", wordPos: "ms-[15.75rem]" },
-  { label: "Finish", dotPos: "right-[20rem] ", wordPos: "ms-[17.25rem]" },
+  { label: "Booking", dotPos: "left-[41.5rem]", wordPos: "ms-[13.5rem]" },
+  { label: "Purchase", dotPos: "right-[41.5rem]", wordPos: "ms-[14.25rem]" },
+  { label: "Finish", dotPos: "right-[19.75rem] ", wordPos: "ms-[15.75rem]" },
 ];
 
 const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep }) => {
   return (
     <>
-      <div>
+      <div className="z-[-10]">
         <div className="flex my-16">
           <div className="w-[1050px] border-2 border-[#d9d9d9] relative"></div>
           {steps.map((step, index) => (
@@ -36,7 +36,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep }) => {
           {steps.map((step, index) => (
             <span
               key={index}
-              className={`font-bold text-xl ${step.wordPos} ${
+              className={`font-bold text-2xl ${step.wordPos} ${
                 currentStep === index ? "text-[#6B87C7]" : "text-[#d9d9d9]"
               }`}
             >
