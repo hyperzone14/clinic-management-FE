@@ -44,6 +44,10 @@ const Service: React.FC = () => {
   const filterBySpecialties = specialtiesInfo.filter((specialty) =>
     specialty.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const noResultsFound =
+    (serviceType === "By doctor" && filterByDoctors.length === 0) ||
+    (serviceType !== "By doctor" && filterBySpecialties.length === 0);
   return (
     <>
       <div className="w-full">
@@ -111,75 +115,81 @@ const Service: React.FC = () => {
                     scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100
                     hover:scrollbar-thumb-gray-500"
                   >
-                    {serviceType === "By doctor"
-                      ? filterByDoctors.map((doctor) => (
-                          <div
-                            className="bg-[#fff] w-full h-fit rounded-lg flex shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                            onClick={() => setType(doctor.name)}
-                          >
-                            <img
-                              src={doctor.image}
-                              alt="test"
-                              className="rounded-l-lg"
-                            />
-                            <div className="ms-5 mt-3">
-                              <h1 className="font-bold text-3xl">
-                                {doctor.name}
-                              </h1>
-                              <div className="mb-3 mt-5">
-                                <div className="flex my-3">
-                                  <BsGenderAmbiguous className="w-8 h-8" />
-                                  <p className="ms-5 text-2xl">
-                                    {doctor.gender}
-                                  </p>
-                                </div>
-                                <div className="flex my-3">
-                                  <FaUserDoctor className="w-8 h-8" />
-                                  <p className="ms-5 text-2xl">
-                                    {doctor.specialty}
-                                  </p>
-                                </div>
-                                <div className="flex my-3">
-                                  <FaRegCalendarAlt className="w-8 h-8" />
-                                  <p className="ms-5 text-2xl">
-                                    {doctor.schedule}
-                                  </p>
-                                </div>
+                    {noResultsFound ? (
+                      <p className="text-xl text-gray-500 text-center">
+                        No results found
+                      </p>
+                    ) : serviceType === "By doctor" ? (
+                      filterByDoctors.map((doctor) => (
+                        <div
+                          className="bg-[#fff] w-full h-fit rounded-lg flex shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                          onClick={() => setType(doctor.name)}
+                        >
+                          <img
+                            src={doctor.image}
+                            alt="test"
+                            className="rounded-l-lg"
+                          />
+                          <div className="ms-5 mt-3">
+                            <h1 className="font-bold text-3xl">
+                              {doctor.name}
+                            </h1>
+                            <div className="mb-3 mt-5">
+                              <div className="flex my-3">
+                                <BsGenderAmbiguous className="w-8 h-8" />
+                                <p className="ms-5 text-2xl">{doctor.gender}</p>
+                              </div>
+                              <div className="flex my-3">
+                                <FaUserDoctor className="w-8 h-8" />
+                                <p className="ms-5 text-2xl">
+                                  {doctor.specialty}
+                                </p>
+                              </div>
+                              <div className="flex my-3">
+                                <FaRegCalendarAlt className="w-8 h-8" />
+                                <p className="ms-5 text-2xl">
+                                  {doctor.schedule}
+                                </p>
                               </div>
                             </div>
                           </div>
-                        ))
-                      : filterBySpecialties.map((specialty) => (
-                          <div
-                            className="bg-[#fff] w-full h-fit rounded-lg flex shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                            onClick={() => setType(specialty.name)}
-                          >
-                            <img
-                              src={specialty.image}
-                              alt="test"
-                              className="rounded-l-lg"
-                            />
-                            <div className="ms-5 mt-3">
-                              <h1 className="font-bold text-3xl">
-                                {specialty.name}
-                              </h1>
-                              <div className="mb-3 mt-5">
-                                <div className="flex my-3">
-                                  <FaNotesMedical className="w-12 h-12" />
-                                  <p className="ms-5 text-lg">
-                                    {specialty.description}
-                                  </p>
-                                </div>
+                        </div>
+                      ))
+                    ) : (
+                      filterBySpecialties.map((specialty) => (
+                        <div
+                          className="bg-[#fff] w-full h-fit rounded-lg flex shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                          onClick={() => setType(specialty.name)}
+                        >
+                          <img
+                            src={specialty.image}
+                            alt="test"
+                            className="rounded-l-lg"
+                          />
+                          <div className="ms-5 mt-3">
+                            <h1 className="font-bold text-3xl">
+                              {specialty.name}
+                            </h1>
+                            <div className="mb-3 mt-5">
+                              <div className="flex my-3">
+                                <FaNotesMedical className="w-12 h-12" />
+                                <p className="ms-5 text-lg">
+                                  {specialty.description}
+                                </p>
                               </div>
                             </div>
                           </div>
-                        ))}
+                        </div>
+                      ))
+                    )}
+
                   </div>
                 </div>
               </div>
             </div>
             {/* Your component content here */}
-            <div className="mt-10 flex justify-center items-center gap-3">
+            <div className="mt-10 mb-20 flex justify-center items-center gap-3">
+
               <button
                 className="bg-[#34a85a] hover:bg-[#2e8b57] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out"
                 onClick={goToPreviousStep}
