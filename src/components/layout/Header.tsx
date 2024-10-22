@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { pageRoutes } from "../../utils/pageRoutes.ts";
+import { headerRoutes } from "../../utils/pageRoutes.ts";
 import { Link, useLocation } from "react-router-dom";
 
 export const Header = () => {
@@ -36,7 +36,7 @@ export const Header = () => {
 
             <div className="flex justify-center">
               <ul className="flex gap-10 me-10">
-                {pageRoutes.map((route) => (
+                {headerRoutes.map((route) => (
                   <li key={route.id}>
                     <Link
                       to={route.path}

@@ -4,6 +4,24 @@ export interface Routes {
   location: string;
 };
 
+export const headerRoutes: Routes[] = [
+  {
+    id: 1,
+    path: "/",
+    location: "Home"
+  },
+  {
+    id: 2,
+    path: "/booking",
+    location: "Booking"
+  },
+  {
+    id: 3,
+    path: "/dashboard",
+    location: "Dashboard"
+  },
+]
+
 export const pageRoutes: Routes[] = [
   {
     id: 1,
@@ -22,15 +40,28 @@ export const pageRoutes: Routes[] = [
   },
   {
     id: 4,
-    path: "/schedule",
-    location: "Schedule"
-  },
-  {
-    id: 5,
     path: "/booking",
     location: "Booking"
   },
+  {
+    id: 5,
+    path: "/dashboard",
+    location: "Dashboard"
+  },
 
+]
+
+export const dashboardRoutes: Routes[] = [
+  {
+    id: 1,
+    path: "schedule",
+    location: "Schedule"
+  },
+  {
+    id: 2,
+    path: "medical-service",
+    location: "MedicalService"
+  },
 ]
 
 export const bookingRoutes: Routes[] = [
@@ -41,7 +72,7 @@ export const bookingRoutes: Routes[] = [
   },
   {
     id: 2,
-    path: "choosedatetime",
+    path: "choose-datetime",
     location: "ChooseDateTime"
   },
   {
