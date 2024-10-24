@@ -1,0 +1,27 @@
+.react-calendar {
+  @apply w-[700px] h-fit;
+}
+
+.react-calendar__navigation button {
+  @apply text-gray-600 font-medium py-2 px-3 hover:bg-[#309C54] hover:text-white rounded;
+}
+
+.react-calendar__tile {
+  @apply p-2 text-center transition-colors duration-200 ease-in-out hover:bg-blue-500 hover:text-white rounded-lg;
+}
+
+.react-calendar__tile--active {
+  @apply bg-blue-500 text-white;
+}
+
+.react-calendar__tile--active:hover {
+  @apply bg-blue-600;
+}
+
+.react-calendar__tile--now {
+  @apply bg-gray-100;
+}
+
+.disabled-day {
+  @apply text-gray-400 pointer-events-none;
+}
