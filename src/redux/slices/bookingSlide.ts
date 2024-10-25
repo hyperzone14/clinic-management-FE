@@ -9,6 +9,7 @@ interface BookingState {
   patientPhoneNumber?: string;
   patientAddress?: string;
   doctor?: string;
+
   service?: string;
   type?: string;
   date?: string | null;
