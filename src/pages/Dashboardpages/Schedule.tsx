@@ -13,8 +13,8 @@ interface DashboardStepProps {
 
 const Schedule: React.FC = () => {
   const dispatch = useDispatch();
-  // const { goToNextStep, goToPreviousStep } =
-  //   useOutletContext<DashboardStepProps>();
+   const { goToNextStep, goToPreviousStep } =
+     useOutletContext<DashboardStepProps>();
   const { currentDoctor, appointments } = useSelector((state: RootState) => state.schedule);
 
   const handleStatusChange = (index: number, newStatus: StatusType) => {
@@ -23,9 +23,9 @@ const Schedule: React.FC = () => {
 
   return (
     <>
-      <div className="w-full">
-        <div className="flex flex-col my-5 mx-10 justify-center items-center">
-          <h1 className="text-4xl font-bold font-sans my-5">Schedule</h1>
+    <div className="w-full">
+      <div className="flex flex-col my-5 mx-10 justify-center items-center">
+        <h1 className="text-4xl font-bold font-sans my-5">SCHEDULE</h1>
           <div className="mb-4">
           <p className="text-gray-600 text-lg">
             {currentDoctor}'s today schedule
@@ -58,8 +58,8 @@ const Schedule: React.FC = () => {
           ))}
         </div>
 
-        {/* <button onClick={goToPreviousStep}>Previous</button>
-        <button onClick={goToNextStep}>Next</button> */}
+         <button onClick={goToPreviousStep}>Previous</button>
+        <button onClick={goToNextStep}>Next</button> 
       </div>
     </>
   );
