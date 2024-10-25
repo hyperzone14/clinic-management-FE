@@ -1,41 +1,82 @@
-import React from 'react';
-
-type StatusType = 'completed' | 'pending' | 'cancelled';
+import React, { useState } from 'react';
+import { Check, Clock, X } from 'lucide-react';
+import { StatusType } from '../../redux/slices/scheduleSlice';
 
 interface StatusCircleProps {
   status: StatusType;
+  onStatusChange?: (newStatus: StatusType) => void;
 }
 
-const StatusCircle: React.FC<StatusCircleProps> = ({ status }) => {
-  const getStatusColor = () => {
-    switch (status) {
+const StatusCircle: React.FC<StatusCircleProps> = ({ status, onStatusChange }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const getStatusStyles = (statusType: StatusType) => {
+    switch (statusType) {
       case 'completed':
-        return 'bg-green-500';
+        return {
+          background: '#34A85A',
+          icon: <Check className="w-5 h-5 text-white" />
+        };
       case 'pending':
-        return 'bg-yellow-500';
+        return {
+          background: '#FFB800',
+          icon: <Clock className="w-5 h-5 text-white" />
+        };
       case 'cancelled':
-        return 'bg-red-500';
-      default:
-        return 'bg-gray-500';
+        return {
+          background: '#FF4747',
+          icon: <X className="w-5 h-5 text-white" />
+        };
     }
   };
 
+  const handleStatusChange = (newStatus: StatusType) => {
+    if (status === 'cancelled') return;
+    if (onStatusChange) {
+      onStatusChange(newStatus);
+    }
+    setIsMenuOpen(false);
+  };
+
+  const { background, icon } = getStatusStyles(status);
+
   return (
-    <div className={`w-8 h-8 rounded-full ${getStatusColor()} flex items-center justify-center`}>
-      {status === 'completed' && (
-        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-        </svg>
-      )}
-      {status === 'cancelled' && (
-        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      )}
-      {status === 'pending' && (
-        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+    <div className="relative">
+      <div
+        onClick={() => status !== 'cancelled' && setIsMenuOpen(!isMenuOpen)}
+        className={`w-10 h-10 rounded-full flex items-center justify-center cursor-pointer ${
+          status === 'cancelled' ? 'cursor-not-allowed' : 'hover:opacity-80'
+        }`}
+        style={{ backgroundColor: background }}
+      >
+        {icon}
+      </div>
+
+      {isMenuOpen && status !== 'cancelled' && (
+        <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+          <div className="py-1">
+            {['completed', 'pending', 'cancelled'].map((statusOption) => {
+              const styles = getStatusStyles(statusOption as StatusType);
+              return (
+                <button
+                  key={statusOption}
+                  className={`flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 ${
+                    statusOption === status ? 'bg-gray-50' : ''
+                  }`}
+                  onClick={() => handleStatusChange(statusOption as StatusType)}
+                >
+                  <div
+                    className="w-5 h-5 rounded-full mr-3 flex items-center justify-center"
+                    style={{ backgroundColor: styles.background }}
+                  >
+                    {styles.icon}
+                  </div>
+                  {statusOption.charAt(0).toUpperCase() + statusOption.slice(1)}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       )}
     </div>
   );
