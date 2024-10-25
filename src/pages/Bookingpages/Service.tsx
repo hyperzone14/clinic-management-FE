@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 import ProgressBar from "../../components/common/ProgressBar";
 import { FaRegCalendarAlt } from "react-icons/fa";
@@ -8,6 +8,8 @@ import { IoSearchOutline } from "react-icons/io5";
 import { BsGenderAmbiguous } from "react-icons/bs";
 import { doctorInfo, specialtiesInfo } from "../../utils/Information";
 import InformationList from "../../components/common/InformationList";
+import { useDispatch } from "react-redux";
+import { setInfoList } from "../../redux/slices/infoListSlide";
 
 interface BookingStepProps {
   goToNextStep: () => void;
@@ -31,11 +33,11 @@ interface specialtiesInfo {
 }
 
 const Service: React.FC = () => {
+  const dispatch = useDispatch();
   const [serviceType, setServiceType] = React.useState<string>("");
   const [type, setType] = React.useState<string>("");
   const [searchTerm, setSearchTerm] = React.useState<string>("");
-  const { goToNextStep, goToPreviousStep } =
-    useOutletContext<BookingStepProps>();
+  const { goToNextStep } = useOutletContext<BookingStepProps>();
 
   const filterByDoctors = doctorInfo.filter((doctor) =>
     doctor.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -48,6 +50,15 @@ const Service: React.FC = () => {
   const noResultsFound =
     (serviceType === "By doctor" && filterByDoctors.length === 0) ||
     (serviceType !== "By doctor" && filterBySpecialties.length === 0);
+
+  useEffect(() => {
+    dispatch(
+      setInfoList({
+        service: serviceType,
+        type: type,
+      })
+    );
+  }, [dispatch, serviceType, type]);
   return (
     <>
       <div className="w-full">
@@ -182,38 +193,49 @@ const Service: React.FC = () => {
                         </div>
                       ))
                     )}
-
                   </div>
                 </div>
               </div>
             </div>
             {/* Your component content here */}
-            <div className="mt-10 mb-20 flex justify-center items-center gap-3">
-
-              <button
+            <div className="mt-16 mb-20 flex justify-center items-center gap-3">
+              {/* <button
                 className="bg-[#34a85a] hover:bg-[#2e8b57] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out"
-                onClick={goToPreviousStep}
+                onClick={() => {
+                  goToPreviousStep();
+                  window.scrollTo({
+                    top: 0,
+                    behavior: "smooth",
+                  });
+                }}
               >
                 Previous
-              </button>
+              </button> */}
               <button
                 className="bg-[#4567b7] hover:bg-[#3E5CA3] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out"
-                onClick={goToNextStep}
+                onClick={() => {
+                  if (serviceType && type) {
+                    goToNextStep();
+                  } else {
+                    alert(
+                      "Please select the service type that you want to book"
+                    );
+                  }
+
+                  window.scrollTo({
+                    top: 0,
+                    behavior: "smooth",
+                  });
+                }}
               >
                 Next
               </button>
             </div>
           </div>
           <div className="col-span-1">
-            <InformationList service={serviceType} type={type} />
+            <InformationList />
           </div>
         </div>
-
-        {/* Your component content here */}
-        {/* <div className="mt-10">
-          <button onClick={goToPreviousStep}>Previous</button>
-          <button onClick={goToNextStep}>Next</button>
-        </div> */}
       </div>
     </>
   );
