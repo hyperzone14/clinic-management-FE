@@ -4,7 +4,7 @@ interface InfoListState {
   name?: string;
   service?: string;
   type?: string;
-  date?: string | null;
+  date?: Date | null;
   time?: string;
   price?: string;
 }
@@ -13,7 +13,7 @@ const initialState: InfoListState = {
   name: "",
   service: "",
   type: "",
-  date: "",
+  date: null,
   time: "",
   price: "",
 };

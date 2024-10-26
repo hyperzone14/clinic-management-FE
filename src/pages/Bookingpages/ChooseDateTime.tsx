@@ -18,7 +18,6 @@ const ChooseDateTime: React.FC = () => {
   const dispatch = useDispatch();
   const today = new Date(); // Get today's date
   const [selectedDate, setSelectedDate] = useState<Date | null>(null); // Store Date or null
-  const [formattedDate, setFormattedDate] = useState<string | null>("");
   const [time, setTime] = useState<string>("");
 
   const timeset = [
@@ -51,31 +50,27 @@ const ChooseDateTime: React.FC = () => {
   const { goToNextStep, goToPreviousStep } =
     useOutletContext<BookingStepProps>();
 
+
+  // Ensure setSelectedDate and setFormattedDate have clear separate types
   const handleDateChange: CalendarProps["onChange"] = (value) => {
     if (value instanceof Date) {
-      setSelectedDate(value); // Store the Date object directly
-      setFormattedDate(
-        selectedDate
-          ? `${selectedDate.getDate()}/${
-              selectedDate.getMonth() + 1
-            }/${selectedDate.getFullYear()}`
-          : ""
-      );
+      setSelectedDate(value);
     } else if (Array.isArray(value) && value.length > 0) {
-      setSelectedDate(value[0]); // Store the first date in array if applicable
+      const firstDate = value[0];
+      setSelectedDate(firstDate);
     } else {
-      setSelectedDate(null); // Handle null case
+      setSelectedDate(null);
     }
   };
 
   useEffect(() => {
     dispatch(
       setInfoList({
-        date: formattedDate,
+        date: selectedDate,
         time: time,
       })
     );
-  }, [dispatch, formattedDate, time]);
+  }, [dispatch, selectedDate, time]);
 
   return (
     <>
@@ -130,7 +125,7 @@ const ChooseDateTime: React.FC = () => {
               <button
                 className="bg-[#4567b7] hover:bg-[#3E5CA3] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out"
                 onClick={() => {
-                  if (formattedDate && time) {
+                  if (selectedDate && time) {
                     goToNextStep();
                   } else {
                     alert(

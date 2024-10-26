@@ -17,11 +17,19 @@ const InformationList: React.FC = () => {
     return cleanPrice.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
 
+  const formatDate = (date: null | Date): string => {
+    if (!date) return "N/A";
+    if (date instanceof Date) {
+      return date.toLocaleDateString();
+    }
+    return date;
+  };
+
   const note = [
     infoList.name,
     infoList.service,
     infoList.type,
-    infoList.date,
+    infoList.date ? formatDate(infoList.date) : "N/A",
     infoList.time,
     infoList.price !== "N/A" ? `${formatPrice(infoList.price)} VNĐ` : null,
   ]
@@ -67,7 +75,8 @@ const InformationList: React.FC = () => {
           </div>
           <div className="flex justify-between mb-2">
             <dt className="font-semibold">Date:</dt>
-            <dd>{infoList.date ?? "N/A"}</dd>
+            <dd>{infoList.date ? formatDate(infoList.date) : "N/A"}</dd>
+
           </div>
           <div className="flex justify-between mb-2">
             <dt className="font-semibold">Time:</dt>
