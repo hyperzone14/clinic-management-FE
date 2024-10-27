@@ -19,13 +19,14 @@ interface BookingStepProps {
 interface PatientInfo {
   name: string;
   gender: string;
-  DoB: Date | null;
+  DoB: string | null;
   citizenId: string;
   phoneNumber: string;
   address: string;
 }
 
 const BookInfo: React.FC = () => {
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const dispatch = useDispatch();
   // const bookingInfo = useSelector((state: RootState) => state.bookingInfo);
   const price = "95000";
@@ -48,6 +49,15 @@ const BookInfo: React.FC = () => {
 
       return newFormData;
     });
+  };
+
+  const handleDateChange = (date: Date | null) => {
+    setSelectedDate(date);
+    // Convert Date to string format for Redux
+    setFormData((prevData) => ({
+      ...prevData,
+      DoB: date ? date.toUTCString() : null,
+    }));
   };
 
   const checkAvailability = () => {
@@ -166,14 +176,8 @@ const BookInfo: React.FC = () => {
                     <DatePicker
                       id="DoB"
                       name="DoB"
-                      selected={formData.DoB} // Use formData.DoB to display the selected date
-                      onChange={(date: Date | null) => {
-                        // Update the formData state for date
-                        setFormData((prevData) => ({
-                          ...prevData,
-                          DoB: date,
-                        }));
-                      }} // Update to handle the date change
+                      selected={selectedDate}
+                      onChange={handleDateChange}
                       dateFormat="dd/MM/yyyy"
                       className="w-[15rem] h-[2.5rem] bg-[#d9d9d9] rounded-md p-2"
                       placeholderText="DD/MM/YYYY"

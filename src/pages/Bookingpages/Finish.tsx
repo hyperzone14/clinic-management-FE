@@ -30,7 +30,6 @@ const Finish: React.FC = () => {
   ) as BookingState;
   const formatDate = (date: string | null): string => {
     if (!date) return "N/A";
-    console.log("Date string:", date); // Add this line
     try {
       const dateObj = new Date(date);
       if (isNaN(dateObj.getTime())) return "Invalid Date";
@@ -50,7 +49,6 @@ const Finish: React.FC = () => {
     );
   }, [dispatch]);
 
-  console.log(bookingInfo.date);
   return (
     <>
       <div className="w-full">

@@ -1,5 +1,5 @@
 import { RootState } from "../../redux/store";
-import React from "react";
+import React, { useEffect } from "react";
 import { IoNewspaperOutline } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
 import { setBooking } from "../../redux/slices/bookingSlide";
@@ -17,39 +17,57 @@ const InformationList: React.FC = () => {
     return cleanPrice.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
 
-  const formatDate = (date: null | Date): string => {
+  const formatDate = (date: null | Date | string): string => {
     if (!date) return "N/A";
+
+    // If it's already a Date object
     if (date instanceof Date) {
-      // Create DD/MM/YYYY format
       const day = String(date.getDate()).padStart(2, "0");
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const year = date.getFullYear();
       return `${day}/${month}/${year}`;
     }
-    return date;
+
+    // If it's a string, parse it first
+    if (typeof date === "string") {
+      const parsedDate = new Date(date);
+      if (!isNaN(parsedDate.getTime())) {
+        const day = String(parsedDate.getDate()).padStart(2, "0");
+        const month = String(parsedDate.getMonth() + 1).padStart(2, "0");
+        const year = parsedDate.getFullYear();
+        return `${day}/${month}/${year}`;
+      }
+    }
+
+    return "N/A";
   };
 
-  const note = [
-    infoList.name,
-    infoList.service,
-    infoList.type,
-    infoList.date ? formatDate(infoList.date) : "N/A",
-    infoList.time,
-    infoList.price !== "N/A" ? `${formatPrice(infoList.price)} VNĐ` : null,
-  ]
-    .filter((item) => item && item !== "N/A")
-    .join(", ");
+  const generateNote = () => {
+    return [
+      infoList.name,
+      infoList.service,
+      infoList.type,
+      infoList.date ? formatDate(infoList.date) : "N/A",
+      infoList.time,
+      infoList.price !== "N/A" ? `${formatPrice(infoList.price)} VNĐ` : null,
+    ]
+      .filter((item) => item && item !== "N/A")
+      .join(", ");
+  };
 
-  dispatch(
-    setBooking({
-      service: infoList.service,
-      type: infoList.type,
-      date: infoList.date,
-      time: infoList.time,
-      price: formatPrice(infoList.price),
-      note: note,
-    })
-  );
+  useEffect(() => {
+    const note = generateNote();
+    dispatch(
+      setBooking({
+        service: infoList.service,
+        type: infoList.type,
+        date: infoList.date ? infoList.date.toString() : null,
+        time: infoList.time,
+        price: formatPrice(infoList.price),
+        note: note,
+      })
+    );
+  }, [infoList, dispatch]);
 
   return (
     <div className="w-[430px] h-fit bg-gray-50 rounded-md shadow-md">
@@ -80,7 +98,6 @@ const InformationList: React.FC = () => {
           <div className="flex justify-between mb-2">
             <dt className="font-semibold">Date:</dt>
             <dd>{infoList.date ? formatDate(infoList.date) : "N/A"}</dd>
-
           </div>
           <div className="flex justify-between mb-2">
             <dt className="font-semibold">Time:</dt>
@@ -106,7 +123,7 @@ const InformationList: React.FC = () => {
         </div>
         <div className="mt-4 flex justify-between font-bold">
           <dt>Note:</dt>
-          <dd className="text-right">{note}</dd>
+          <dd className="text-right">{generateNote()}</dd>
         </div>
       </div>
     </div>

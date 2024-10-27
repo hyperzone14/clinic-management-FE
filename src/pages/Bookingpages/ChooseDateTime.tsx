@@ -50,7 +50,6 @@ const ChooseDateTime: React.FC = () => {
   const { goToNextStep, goToPreviousStep } =
     useOutletContext<BookingStepProps>();
 
-
   // Ensure setSelectedDate and setFormattedDate have clear separate types
   const handleDateChange: CalendarProps["onChange"] = (value) => {
     if (value instanceof Date) {
@@ -66,7 +65,7 @@ const ChooseDateTime: React.FC = () => {
   useEffect(() => {
     dispatch(
       setInfoList({
-        date: selectedDate,
+        date: selectedDate ? selectedDate.toUTCString() : null,
         time: time,
       })
     );

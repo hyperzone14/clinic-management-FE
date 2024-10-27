@@ -4,14 +4,13 @@ interface BookingState {
   bookingId?: number;
   patientName?: string;
   patientGender?: string;
-  patientDoB?: Date | string | null;
+  patientDoB?: string | null;
   patientCitizenId?: string;
   patientPhoneNumber?: string;
   patientAddress?: string;
-
   service?: string;
   type?: string;
-  date?: Date | string | null;
+  date?: string | null;
   time?: string;
   price?: string;
   note?: string;
