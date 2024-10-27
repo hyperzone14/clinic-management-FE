@@ -8,7 +8,6 @@ interface BookingState {
   patientCitizenId?: string;
   patientPhoneNumber?: string;
   patientAddress?: string;
-  doctor?: string;
 
   service?: string;
   type?: string;
@@ -26,7 +25,6 @@ const initialState: BookingState = {
   patientCitizenId: "",
   patientPhoneNumber: "",
   patientAddress: "",
-  doctor: "",
   service: "",
   type: "",
   date: null,
