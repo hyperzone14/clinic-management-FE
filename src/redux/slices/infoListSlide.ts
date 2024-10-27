@@ -4,7 +4,7 @@ interface InfoListState {
   name?: string;
   service?: string;
   type?: string;
-  date?: Date | null;
+  date?: string | null;
   time?: string;
   price?: string;
 }

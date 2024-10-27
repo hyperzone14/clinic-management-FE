@@ -30,7 +30,6 @@ const Finish: React.FC = () => {
   ) as BookingState;
   const formatDate = (date: string | null): string => {
     if (!date) return "N/A";
-    console.log("Date string:", date); // Add this line
     try {
       const dateObj = new Date(date);
       if (isNaN(dateObj.getTime())) return "Invalid Date";
@@ -50,7 +49,6 @@ const Finish: React.FC = () => {
     );
   }, [dispatch]);
 
-  console.log(bookingInfo.date);
   return (
     <>
       <div className="w-full">
@@ -248,7 +246,6 @@ const Finish: React.FC = () => {
                   <span className="ms-4 text-2xl text-[#A9A9A9] text-right w-5/12">
                     {/* Sigma, By doctor, Dr.John Doe, 11/09/2001, 15:30, 75.000 VND{" "} */}
                     {bookingInfo.note}
-
                   </span>
                 </div>
               </div>
@@ -265,10 +262,9 @@ const Finish: React.FC = () => {
                   });
                 }}
               >
-                Next
+                Back to Home
               </button>
             </div>
-
           </div>
         </div>
       </div>
