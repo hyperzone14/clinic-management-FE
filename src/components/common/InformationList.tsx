@@ -20,7 +20,11 @@ const InformationList: React.FC = () => {
   const formatDate = (date: null | Date): string => {
     if (!date) return "N/A";
     if (date instanceof Date) {
-      return date.toLocaleDateString();
+      // Create DD/MM/YYYY format
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const year = date.getFullYear();
+      return `${day}/${month}/${year}`;
     }
     return date;
   };
@@ -76,7 +80,6 @@ const InformationList: React.FC = () => {
           <div className="flex justify-between mb-2">
             <dt className="font-semibold">Date:</dt>
             <dd>{infoList.date ? formatDate(infoList.date) : "N/A"}</dd>
-
           </div>
           <div className="flex justify-between mb-2">
             <dt className="font-semibold">Time:</dt>
