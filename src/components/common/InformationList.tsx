@@ -80,6 +80,7 @@ const InformationList: React.FC = () => {
           <div className="flex justify-between mb-2">
             <dt className="font-semibold">Date:</dt>
             <dd>{infoList.date ? formatDate(infoList.date) : "N/A"}</dd>
+
           </div>
           <div className="flex justify-between mb-2">
             <dt className="font-semibold">Time:</dt>
