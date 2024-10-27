@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import bookingReducer from "./slices/bookingSlide";
 import infoListReducer from "./slices/infoListSlide";
 import scheduleReducer from "./slices/scheduleSlice"
+import treatmentReducer from "./slices/treatmentSlice";
 
 
 const store = configureStore({
@@ -9,6 +10,7 @@ const store = configureStore({
     bookingInfo: bookingReducer,
     infoList: infoListReducer,
     schedule: scheduleReducer,
+    treatment: treatmentReducer,
   },
 });
 

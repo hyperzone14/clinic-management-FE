@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export type StatusType = 'completed' | 'pending' | 'cancelled';
 
-interface Appointment {
+export interface Appointment {
   patientName: string;
   patientImage: string;
   gender: string;
@@ -63,14 +63,34 @@ const scheduleSlice = createSlice({
         state.appointments[index].status = newStatus;
       }
     },
+
+    completeTreatmentAndUpdateStatus(
+      state,
+      action: PayloadAction<{ patientName: string }>
+    ) {
+      const index = state.appointments.findIndex(
+        app => app.patientName === action.payload.patientName
+      );
+      if (index !== -1 && state.appointments[index].status !== 'cancelled') {
+        state.appointments[index].status = 'completed';
+      }
+    },
+
     setAppointments(state, action: PayloadAction<Appointment[]>) {
       state.appointments = action.payload;
     },
+
     setCurrentDoctor(state, action: PayloadAction<string>) {
       state.currentDoctor = action.payload;
     }
   }
 });
 
-export const { updateAppointmentStatus, setAppointments, setCurrentDoctor } = scheduleSlice.actions;
+export const {
+  updateAppointmentStatus,
+  setAppointments,
+  setCurrentDoctor,
+  completeTreatmentAndUpdateStatus
+} = scheduleSlice.actions;
+
 export default scheduleSlice.reducer;
