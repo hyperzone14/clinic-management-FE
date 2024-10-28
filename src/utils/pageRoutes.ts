@@ -48,6 +48,11 @@ export const pageRoutes: Routes[] = [
     path: "/dashboard",
     location: "Dashboard",
   },
+  {
+    id: 6,
+    path: "/profile",
+    location: "Profile",
+  },
 ];
 
 export const dashboardRoutes: Routes[] = [
