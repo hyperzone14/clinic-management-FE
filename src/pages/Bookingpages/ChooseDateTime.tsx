@@ -16,8 +16,8 @@ interface BookingStepProps {
 
 const ChooseDateTime: React.FC = () => {
   const dispatch = useDispatch();
-  const today = new Date(); // Get today's date
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null); // Store Date or null
+  const today = new Date();
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [time, setTime] = useState<string>("");
 
   const timeset = [
@@ -50,7 +50,6 @@ const ChooseDateTime: React.FC = () => {
   const { goToNextStep, goToPreviousStep } =
     useOutletContext<BookingStepProps>();
 
-  // Ensure setSelectedDate and setFormattedDate have clear separate types
   const handleDateChange: CalendarProps["onChange"] = (value) => {
     if (value instanceof Date) {
       setSelectedDate(value);
@@ -86,28 +85,27 @@ const ChooseDateTime: React.FC = () => {
               <Calendar
                 onChange={handleDateChange}
                 value={selectedDate}
-                minDetail="month" // Only show months
+                minDetail="month"
                 prevLabel="Previous"
                 nextLabel="Next"
-                tileDisabled={({ date }) => {
-                  // Disable dates in the past
-                  return date < today;
-                }}
+                tileDisabled={({ date }) => date < today}
               />
             </div>
             <div className="mt-5 grid grid-cols-3 gap-3 text-center">
-              {timeset.map((time) => (
-                <div className="col-span-1 flex justify-center items-center">
+              {timeset.map((timeSlot) => (
+                <div
+                  key={timeSlot.id}
+                  className="col-span-1 flex justify-center items-center"
+                >
                   <div
                     className="my-3 w-fit h-fit p-3 rounded-lg bg-[#BAE3F3] hover:bg-[#87ceeb] transition duration-200 ease-in-out cursor-pointer text-[#1F3658] hover:text-[#fff] hover:shadow-lg"
-                    onClick={() => setTime(time.time)}
+                    onClick={() => setTime(timeSlot.time)}
                   >
-                    <span className="font-bold">{time.time}</span>
+                    <span className="font-bold">{timeSlot.time}</span>
                   </div>
                 </div>
               ))}
             </div>
-            {/* Your component content here */}
             <div className="mt-16 mb-20 flex justify-center items-center gap-3">
               <button
                 className="bg-[#34a85a] hover:bg-[#2e8b57] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out"
