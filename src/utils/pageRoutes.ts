@@ -2,92 +2,109 @@ export interface Routes {
   id: number;
   path: string;
   location: string;
-};
+}
 
 export const headerRoutes: Routes[] = [
   {
     id: 1,
     path: "/",
-    location: "Home"
+    location: "Home",
   },
   {
     id: 2,
     path: "/booking",
-    location: "Booking"
+    location: "Booking",
   },
   {
     id: 3,
     path: "/dashboard",
-    location: "Dashboard"
+    location: "Dashboard",
   },
-]
+];
 
 export const pageRoutes: Routes[] = [
   {
     id: 1,
     path: "/",
-    location: "Home"
+    location: "Home",
   },
   {
     id: 2,
     path: "/feedback",
-    location: "Feedback"
+    location: "Feedback",
   },
   {
     id: 3,
     path: "/search",
-    location: "Search"
+    location: "Search",
   },
   {
     id: 4,
     path: "/booking",
-    location: "Booking"
+    location: "Booking",
   },
   {
     id: 5,
     path: "/dashboard",
-    location: "Dashboard"
+    location: "Dashboard",
   },
-
-]
+  {
+    id: 6,
+    path: "/profile",
+    location: "Profile",
+  },
+];
 
 export const dashboardRoutes: Routes[] = [
   {
     id: 1,
     path: "schedule",
-    location: "Schedule"
+    location: "Schedule",
   },
   {
     id: 2,
     path: "medical-service",
-    location: "MedicalService"
+    location: "MedicalService",
   },
-]
+];
 
 export const bookingRoutes: Routes[] = [
   {
     id: 1,
     path: "service", // relative path
-    location: "Service"
+    location: "Service",
   },
   {
     id: 2,
     path: "choose-datetime",
-    location: "ChooseDateTime"
+    location: "ChooseDateTime",
   },
   {
     id: 3,
     path: "bookinfo",
-    location: "BookInfo"
+    location: "BookInfo",
   },
   {
     id: 4,
     path: "payment",
-    location: "Payment"
+    location: "Payment",
   },
   {
     id: 5,
     path: "finish",
-    location: "Finish"
-  }
+    location: "Finish",
+  },
+];
+
+export const prescriptionRoutes: Routes[] = [
+  {
+    id: 1,
+    path: "prescription-list",
+    location: "PrescriptionList",
+  },
+  {
+    id: 2,
+    path: "create-prescribe",
+    location: "CreatePrescribe",
+  },
 ];

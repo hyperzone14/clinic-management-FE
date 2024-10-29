@@ -13,7 +13,7 @@ const initialState: InfoListState = {
   name: "",
   service: "",
   type: "",
-  date: "",
+  date: null,
   time: "",
   price: "",
 };

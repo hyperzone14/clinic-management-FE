@@ -1,10 +1,18 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { headerRoutes } from "../../utils/pageRoutes.ts";
 import { Link, useLocation } from "react-router-dom";
+import { FaRegUser } from "react-icons/fa";
+import Dropdown from "../common/Dropdown.tsx";
 
 export const Header = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
+
+  const toggleDropdown = () => {
+    setIsOpen(!isOpen);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,7 +31,7 @@ export const Header = () => {
         }`}
       >
         <nav>
-          <div className="flex justify-between items-center w-full p-5">
+          <div className="flex justify-between items-center w-full py-5 px-16">
             <div className="logo">
               <Link to="/">
                 <img
@@ -54,9 +62,20 @@ export const Header = () => {
             </div>
 
             <div className="mx-8">
-              <button className="bg-[#6B87C7] hover:bg-[#4567B7] text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out w-28">
+              {/* this will lead to the login page (for unauthorized users)*/}
+              {/* <button className="bg-[#6B87C7] hover:bg-[#4567B7] text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out w-28">
                 Log in
+              </button> */}
+
+              {/*this will be the icon for patient (for authorized users)*/}
+              <button
+                onClick={toggleDropdown}
+                className="bg-[#6B87C7] hover:bg-[#4567B7] text-white font-bold p-3 rounded-full transition duration-300 ease-in-out"
+              >
+                <FaRegUser size={30} />
               </button>
+
+              <Dropdown isOpen={isOpen} />
             </div>
           </div>
         </nav>

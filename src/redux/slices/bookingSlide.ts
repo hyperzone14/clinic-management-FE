@@ -1,9 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface BookingState {
+  bookingId?: number;
   patientName?: string;
   patientGender?: string;
-  patientDoB?: Date | null;
+  patientDoB?: string | null;
   patientCitizenId?: string;
   patientPhoneNumber?: string;
   patientAddress?: string;
@@ -16,6 +17,7 @@ interface BookingState {
 }
 
 const initialState: BookingState = {
+  bookingId: 0,
   patientName: "",
   patientGender: "",
   patientDoB: null,
