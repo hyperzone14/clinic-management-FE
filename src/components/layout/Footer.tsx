@@ -78,7 +78,7 @@ export const Footer = () => {
           <hr className="w-9/12 border-gray-300" />
         </div>
         <div className="text-center mt-5 text-sm text-gray-500">
-          © 2019 UH Media | All Rights Reserved
+          © 2024 MedPal team | All Rights Reserved
         </div>
       </footer>
     </>
