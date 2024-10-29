@@ -58,8 +58,10 @@ const Profile = () => {
           <h1 className="text-4xl font-bold font-sans my-5">Patient Profile</h1>
         </div>
 
+
         <div className="flex grid grid-cols-3 gap-4 justify-items-center mb-10">
           <div className="col-span-1 bg-[#fff] rounded-lg shadow-lg w-full h-fit">
+
             <div className="flex flex-col justify-center items-center">
               <PiUserCircleLight
                 size={100}
@@ -76,23 +78,28 @@ const Profile = () => {
           <div className="col-span-2 bg-[#fff] rounded-lg shadow-lg w-full">
             <div className="my-3">
               <h1 className="text-3xl font-bold text-center">Profile</h1>
+
               <div className="mt-3">
                 <form className="m-8 grid grid-cols-2 gap-x-8 gap-y-5">
                   <div className=" col-span-1">
+
                     <div className="flex flex-col">
                       <label className="font-bold text-2xl mb-1">Name</label>
                       <input
                         type="text"
                         id="name"
                         name="name"
+
                         value={formData.name}
                         onChange={handleChange}
                         className="w-full h-[2.5rem] bg-[#d9d9d9] rounded-md p-2"
+
                         placeholder="Enter your name..."
                         required
                       />
                     </div>
                   </div>
+
                   <div className=" col-span-1">
                     <div className="flex flex-col">
                       <label className="font-bold text-2xl mb-1">Gender</label>
@@ -201,6 +208,7 @@ const Profile = () => {
             <div className="my-10 flex justify-end">
               <button>Next</button>
             </div>
+
           </div>
         </div>
       </div>
