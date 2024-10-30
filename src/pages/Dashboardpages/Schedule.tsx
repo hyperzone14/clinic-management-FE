@@ -1,13 +1,13 @@
-import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { useOutletContext, useNavigate } from "react-router-dom";
-import AppointmentCard from '../../components/common/AppointmentCard';
-import { RootState } from '../../redux/store';
-import { 
-  updateAppointmentStatus, 
-  StatusType, 
-} from '../../redux/slices/scheduleSlice';
-import { setPatientInfo } from '../../redux/slices/treatmentSlice';
+import AppointmentCard from "../../components/common/AppointmentCard";
+import { RootState } from "../../redux/store";
+import {
+  updateAppointmentStatus,
+  StatusType,
+} from "../../redux/slices/scheduleSlice";
+import { setPatientInfo } from "../../redux/slices/treatmentSlice";
 
 interface DashboardStepProps {
   goToNextStep: () => void;
@@ -17,33 +17,41 @@ interface DashboardStepProps {
 const Schedule: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { goToNextStep, goToPreviousStep } = useOutletContext<DashboardStepProps>();
-  const { currentDoctor, appointments } = useSelector((state: RootState) => state.schedule);
+  const { goToNextStep, goToPreviousStep } =
+    useOutletContext<DashboardStepProps>();
+  const { currentDoctor, appointments } = useSelector(
+    (state: RootState) => state.schedule
+  );
 
   const handleStatusChange = (index: number, newStatus: StatusType) => {
     dispatch(updateAppointmentStatus({ index, newStatus }));
   };
 
-  const handlePatientClick = (appointment: typeof appointments[0], _index: number) => {
-    console.log('Patient clicked:', appointment);
-    
-    if (appointment.status === 'pending') {
+  const handlePatientClick = (
+    appointment: (typeof appointments)[0],
+    _index: number
+  ) => {
+    console.log("Patient clicked:", appointment);
+
+    if (appointment.status === "pending") {
       try {
-        console.log('Dispatching patient info...');
-        dispatch(setPatientInfo({
-          name: appointment.patientName,
-          dateOfBirth: '',
-          gender: appointment.gender as 'Male' | 'Female'
-        }));
-        
-        console.log('Using goToNextStep for navigation...');
+        console.log("Dispatching patient info...");
+        dispatch(
+          setPatientInfo({
+            name: appointment.patientName,
+            dateOfBirth: "",
+            gender: appointment.gender as "Male" | "Female",
+          })
+        );
+
+        console.log("Using goToNextStep for navigation...");
         goToNextStep(); // Use context's navigation function instead
-        console.log('Navigation complete');
+        console.log("Navigation complete");
       } catch (error) {
-        console.error('Error in handlePatientClick:', error);
+        console.error("Error in handlePatientClick:", error);
       }
     } else {
-      console.log('Patient status is not pending:', appointment.status);
+      console.log("Patient status is not pending:", appointment.status);
     }
   };
 
@@ -75,7 +83,7 @@ const Schedule: React.FC = () => {
           </div>
         </div>
 
-        <div className="space-y-4 mt-6 mx-10">
+        <div className="space-y-4 mt-6 mb-20 mx-10">
           {appointments.map((appointment, index) => (
             <AppointmentCard
               key={index}

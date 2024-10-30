@@ -1,8 +1,8 @@
 // src/components/common/AppointmentCard.tsx
 
-import React from 'react';
-import { StatusType } from '../../redux/slices/scheduleSlice';
-import StatusCircle from './StatusCircle';
+import React from "react";
+import { StatusType } from "../../redux/slices/scheduleSlice";
+import StatusCircle from "./StatusCircle";
 
 interface AppointmentCardProps {
   appointment: {
@@ -17,42 +17,41 @@ interface AppointmentCardProps {
   onStatusChange: (index: number, status: StatusType) => void;
 }
 
-const AppointmentCard: React.FC<AppointmentCardProps> = ({ 
-  appointment, 
-  index, 
-  onPatientClick, 
-  onStatusChange 
+const AppointmentCard: React.FC<AppointmentCardProps> = ({
+  appointment,
+  index,
+  onPatientClick,
+  onStatusChange,
 }) => {
   return (
-    <div 
+    <div
       onClick={() => onPatientClick(appointment, index)}
       className={`
         group relative
         flex items-center bg-white p-4 rounded-lg shadow-md transition-all duration-200
-        ${appointment.status === 'pending' 
-          ? 'hover:shadow-lg hover:bg-gray-50 cursor-pointer border-l-4 border-yellow-400' 
-          : appointment.status === 'completed'
-          ? 'border-l-4 border-green-500'
-          : 'border-l-4 border-red-500 opacity-75'
+        ${
+          appointment.status === "pending"
+            ? "hover:shadow-lg hover:bg-gray-50 cursor-pointer border-l-4 border-yellow-400"
+            : appointment.status === "completed"
+            ? "border-l-4 border-green-500"
+            : "border-l-4 border-red-500 opacity-75"
         }
       `}
     >
       {/* Tooltip */}
-      <div className={`
+      <div
+        className={`
         absolute invisible group-hover:visible
         px-2 py-1 rounded -top-8 left-1/2 transform -translate-x-1/2
         text-sm text-white
-        ${appointment.status === 'pending' 
-          ? 'bg-blue-600'
-          : 'bg-gray-600'
-        }
-      `}>
-        {appointment.status === 'pending' 
-          ? 'Click to start treatment'
-          : appointment.status === 'completed'
-          ? 'Treatment completed'
-          : 'Appointment cancelled'
-        }
+        ${appointment.status === "pending" ? "bg-blue-600" : "bg-gray-600"}
+      `}
+      >
+        {appointment.status === "pending"
+          ? "Click to start treatment"
+          : appointment.status === "completed"
+          ? "Treatment completed"
+          : "Appointment cancelled"}
       </div>
 
       <img
@@ -67,26 +66,30 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
         <p className="text-gray-600 mt-1">{appointment.gender}</p>
         <p className="text-gray-500">{appointment.appointmentType}</p>
         {/* Status Badge */}
-        <span className={`
+        <span
+          className={`
           inline-block mt-2 px-2 py-1 rounded-full text-sm
-          ${appointment.status === 'pending' 
-            ? 'bg-yellow-100 text-yellow-800'
-            : appointment.status === 'completed'
-            ? 'bg-green-100 text-green-800'
-            : 'bg-red-100 text-red-800'
+          ${
+            appointment.status === "pending"
+              ? "bg-yellow-100 text-yellow-800"
+              : appointment.status === "completed"
+              ? "bg-green-100 text-green-800"
+              : "bg-red-100 text-red-800"
           }
-        `}>
-          {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+        `}
+        >
+          {appointment.status.charAt(0).toUpperCase() +
+            appointment.status.slice(1)}
         </span>
       </div>
-      <div onClick={e => e.stopPropagation()}>
-        <StatusCircle 
+      <div onClick={(e) => e.stopPropagation()}>
+        <StatusCircle
           status={appointment.status}
-          onStatusChange={(newStatus) => onStatusChange(index, newStatus)} 
+          onStatusChange={(newStatus) => onStatusChange(index, newStatus)}
         />
       </div>
     </div>
   );
 };
 
-export default AppointmentCard;  // Added this line
+export default AppointmentCard; // Added this line

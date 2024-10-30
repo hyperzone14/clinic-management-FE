@@ -26,7 +26,7 @@ export const Header = () => {
   return (
     <>
       <header
-        className={`sticky top-0 transition-all duration-300 ${
+        className={`sticky top-0 transition-all duration-300 z-10 ${
           isScrolled ? "bg-[#87ceeb]" : "bg-transparent"
         }`}
       >
