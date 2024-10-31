@@ -45,7 +45,6 @@ const Profile = () => {
   const handleEditProfile = () => {
     setIsEditing(!isEditing);
   };
-
   const handleDateChange = (date: Date | null) => {
     setSelectedDate(date);
     // Convert Date to string format for Redux
@@ -205,6 +204,7 @@ const Profile = () => {
                           onChange={handleChange}
                           className="w-full h-[2.5rem] bg-[#d9d9d9] rounded-md p-2"
                           placeholder="Enter your Address..."
+
                           required
                         />
                       </div>
@@ -221,6 +221,7 @@ const Profile = () => {
                 Edit Profile
               </button>
             </div>
+
           </div>
         </div>
       </div>
