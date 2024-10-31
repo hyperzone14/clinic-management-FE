@@ -1,7 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
-import { PiUserCircleLight } from "react-icons/pi";
 import "react-datepicker/dist/react-datepicker.css";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import UserImage from "../components/common/UserImage";
+import { useDispatch } from "react-redux";
+import { setProfile } from "../redux/slices/profileSlide";
 
 interface PatientProfile {
   name: string;
@@ -15,10 +19,9 @@ interface PatientProfile {
 }
 
 const Profile = () => {
+  const dispatch = useDispatch();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
-  // const bookingInfo = useSelector((state: RootState) => state.bookingInfo);
-  // const price = "95000";
+  const [isEditing, setIsEditing] = useState<boolean>(false);
   const [formData, setFormData] = useState<PatientProfile>({
     name: "",
     gender: "",
@@ -29,6 +32,7 @@ const Profile = () => {
     email: "",
     password: "",
   });
+  const [initData, setInitData] = useState<PatientProfile>(formData);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -43,7 +47,21 @@ const Profile = () => {
   };
 
   const handleEditProfile = () => {
-    setIsEditing(!isEditing);
+    setIsEditing(true);
+    setInitData(formData);
+    toast.success("Profile is now editable!");
+  };
+
+  const handleSaveProfile = () => {
+    dispatch(setProfile(formData));
+    setIsEditing(false);
+    toast.success("Profile is now saved!");
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setFormData(initData);
+    toast.error("Profile editing canceled!");
   };
   const handleDateChange = (date: Date | null) => {
     setSelectedDate(date);
@@ -54,36 +72,38 @@ const Profile = () => {
     }));
   };
 
+  useEffect(() => {
+    dispatch(
+      setProfile({
+        name: formData.name,
+        gender: formData.gender,
+        DoB: formData.DoB,
+        citizenId: formData.citizenId,
+        phoneNumber: formData.phoneNumber,
+        address: formData.address,
+        email: formData.email,
+        password: formData.password,
+      })
+    );
+  }, [dispatch, formData]);
+
   return (
     <>
+      <ToastContainer />
       <div className="w-full">
         <div className="flex flex-col my-5 mx-10 justify-center items-center">
           <h1 className="text-4xl font-bold font-sans my-5">Patient Profile</h1>
         </div>
 
         <div className="flex grid grid-cols-3 gap-4 justify-items-center mb-10">
-          <div className="col-span-1 bg-[#fff] rounded-lg shadow-lg w-full h-fit">
-            <div className="flex flex-col justify-center items-center">
-              <PiUserCircleLight
-                size={100}
-                className="bg-[#4567B7] text-white font-bold p-2 rounded-full mt-5 mb-3"
-              />
-            </div>
-            <div className="flex flex-col justify-center items-center">
-              <span className="text-2xl font-bold">Patient Name</span>
-              <span className="text-lg text-[#A9A9A9] font-bold mt-1 mb-3">
-                Role
-              </span>
-            </div>
-          </div>
+          <UserImage isEditing={isEditing} />
           <div className="col-span-2 bg-[#fff] rounded-lg shadow-lg w-full">
-            <div className="my-3">
+            <div className="my-5">
               <h1 className="text-3xl font-bold text-center">Profile</h1>
-
               <div className="mt-3">
                 <form className="m-8">
                   <fieldset
-                    disabled={isEditing}
+                    disabled={!isEditing}
                     className="grid grid-cols-2 gap-x-8 gap-y-5"
                   >
                     <div className=" col-span-1">
@@ -213,13 +233,30 @@ const Profile = () => {
                 </form>
               </div>
             </div>
-            <div className="mt-10 mb-5 flex justify-end">
-              <button
-                className="bg-[#4567b7] hover:bg-[#3E5CA3] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out me-8"
-                onClick={handleEditProfile}
-              >
-                Edit Profile
-              </button>
+            <div className="mt-5 mb-5 flex justify-end">
+              {!isEditing ? (
+                <button
+                  className="bg-[#4567b7] hover:bg-[#3E5CA3] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out me-8"
+                  onClick={handleEditProfile}
+                >
+                  Edit Profile
+                </button>
+              ) : (
+                <div className="flex justtify-between items-center">
+                  <button
+                    className="bg-[#34a85a] hover:bg-[#309C54] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out me-8"
+                    onClick={handleSaveProfile}
+                  >
+                    Save
+                  </button>
+                  <button
+                    className="bg-[#D84846] hover:bg-[#D43835] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out me-8"
+                    onClick={handleCancelEdit}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
             </div>
 
           </div>

@@ -1,11 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import bookingReducer from "./slices/bookingSlide";
 import infoListReducer from "./slices/infoListSlide";
+import profileReducer from "./slices/profileSlide";
 
 const store = configureStore({
   reducer: {
     bookingInfo: bookingReducer,
     infoList: infoListReducer,
+    profile: profileReducer,
   },
 });
 
