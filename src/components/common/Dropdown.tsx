@@ -1,5 +1,4 @@
-import React from "react";
-import styles from "../../styles/dropdown.module.css";
+import React, { useEffect, useState, useRef } from "react";
 import { FaRegUser } from "react-icons/fa";
 import { PiUserCircleLight } from "react-icons/pi";
 import { IoNewspaperOutline } from "react-icons/io5";
@@ -9,19 +8,49 @@ import { useNavigate } from "react-router-dom";
 
 interface DropdownProps {
   isOpen: boolean;
+  onClose: () => void;
 }
 
-const Dropdown: React.FC<DropdownProps> = ({ isOpen }) => {
+const Dropdown: React.FC<DropdownProps> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
-  // const displayEmail =
-  //   userEmail.length > emailLimit
-  //     ? `${userEmail.slice(0, emailLimit)}...`
-  //     : userEmail;
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [shouldRender, setShouldRender] = useState(isOpen);
+
+  useEffect(() => {
+    if (isOpen) {
+      setShouldRender(true);
+    } else {
+      const timer = setTimeout(() => {
+        setShouldRender(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        onClose();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [onClose]);
+
+  if (!shouldRender) return null;
+
   return (
     <div
-      className={`${styles.dropdownMenu} ${
-        isOpen ? styles.fadeIn : styles.fadeOut
-      }`}
+      ref={dropdownRef}
+      className={`absolute right-2 mt-2 w-60 bg-white rounded-lg shadow-lg z-10
+        ${isOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}
+        transition-all duration-300 ease-in-out`}
     >
       <ul className="pt-2">
         <li className="px-4 py-2 mb-2">
@@ -38,30 +67,36 @@ const Dropdown: React.FC<DropdownProps> = ({ isOpen }) => {
         </li>
         <hr />
         <li
-          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-          onClick={() => navigate("/profile")}
+          className="px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors"
+          onClick={() => {
+            navigate("/profile");
+            onClose();
+          }}
         >
           <div className="flex items-center my-1">
-            <FaRegUser size={25} className="text-black font-bold " />
+            <FaRegUser size={25} className="text-black font-bold" />
             <span className="ms-5">Patient Profile</span>
           </div>
         </li>
-        <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+        <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors">
           <div className="flex items-center my-1">
-            <IoNewspaperOutline size={25} className="text-black font-bold " />
+            <IoNewspaperOutline size={25} className="text-black font-bold" />
             <span className="ms-5">Appointments</span>
           </div>
         </li>
-        <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+        <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors">
           <div className="flex items-center my-1">
-            <PiClockCountdown size={25} className="text-black font-bold " />
+            <PiClockCountdown size={25} className="text-black font-bold" />
             <span className="ms-5">Medical History</span>
           </div>
         </li>
         <hr />
-        <li className="px-4 py-3 hover:rounded-b-lg  hover:bg-gray-100 cursor-pointer">
+        <li
+          className="px-4 py-3 hover:bg-gray-100 cursor-pointer transition-colors rounded-b-lg"
+          onClick={onClose}
+        >
           <div className="flex items-center mt-1">
-            <IoMdLogOut size={25} className="text-black font-bold " />
+            <IoMdLogOut size={25} className="text-black font-bold" />
             <span className="ms-5">Log out</span>
           </div>
         </li>
