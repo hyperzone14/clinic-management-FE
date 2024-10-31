@@ -20,6 +20,11 @@ export const headerRoutes: Routes[] = [
     path: "/dashboard",
     location: "Dashboard",
   },
+  {
+    id: 4,
+    path: "/prescription",
+    location: "Prescription",
+  },
 ];
 
 export const pageRoutes: Routes[] = [
@@ -52,6 +57,11 @@ export const pageRoutes: Routes[] = [
     id: 6,
     path: "/profile",
     location: "Profile",
+  },
+  {
+    id: 7,
+    path: "/prescription",
+    location: "Prescription",
   },
 ];
 
