@@ -61,6 +61,7 @@ const Profile = () => {
   const handleCancelEdit = () => {
     setIsEditing(false);
     setFormData(initData);
+    setSelectedDate(initData.DoB ? new Date(initData.DoB) : null);
     toast.error("Profile editing canceled!");
   };
   const handleDateChange = (date: Date | null) => {
@@ -224,7 +225,6 @@ const Profile = () => {
                           onChange={handleChange}
                           className="w-full h-[2.5rem] bg-[#d9d9d9] rounded-md p-2"
                           placeholder="Enter your Address..."
-
                           required
                         />
                       </div>
@@ -258,7 +258,6 @@ const Profile = () => {
                 </div>
               )}
             </div>
-
           </div>
         </div>
       </div>

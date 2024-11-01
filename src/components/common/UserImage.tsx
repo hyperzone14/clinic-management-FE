@@ -11,7 +11,7 @@ interface UserImageProps {
 
 const UserImage: React.FC<UserImageProps> = ({ isEditing }) => {
   const dispatch = useDispatch();
-  const [image, setImage] = useState<string | null>(null);
+  const [imageURL, setImageURL] = useState<string | null>(null);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -51,7 +51,7 @@ const UserImage: React.FC<UserImageProps> = ({ isEditing }) => {
 
         // If valid, set the image
         const imageUrl = URL.createObjectURL(file);
-        setImage(imageUrl); // Update state with the new image URL
+        setImageURL(imageUrl); // Update state with the new image URL
         toast.success("Image has been uploaded!");
       };
 
@@ -62,19 +62,19 @@ const UserImage: React.FC<UserImageProps> = ({ isEditing }) => {
   useEffect(() => {
     dispatch(
       setProfile({
-        image: image,
+        imageURL: imageURL,
       })
     );
-  }, [dispatch, image]);
+  }, [dispatch, imageURL]);
 
   return (
     <>
       <div className="col-span-1 bg-[#fff] rounded-lg shadow-lg w-full h-fit">
         <div className="flex flex-col justify-center items-center">
           {/* Display the uploaded image or icon conditionally */}
-          {image ? (
+          {imageURL ? (
             <img
-              src={image}
+              src={imageURL}
               alt="Profile"
               className="w-24 h-24 rounded-full mt-5 mb-3 object-cover"
             />
