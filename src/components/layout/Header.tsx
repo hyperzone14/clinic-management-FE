@@ -1,10 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { headerRoutes } from "../../utils/pageRoutes.ts";
 import { Link, useLocation } from "react-router-dom";
-import { FaRegUser } from "react-icons/fa";
 import Dropdown from "../common/Dropdown.tsx";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store.ts";
+import { PiUserCircleLight } from "react-icons/pi";
 
 export const Header = () => {
+  const profile = useSelector((state: RootState) => state.profile);
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -80,12 +83,27 @@ export const Header = () => {
 
           <div className="mx-8" ref={dropdownRef}>
             {/* User icon for authorized users */}
-            <button
+            {/* <button
               onClick={toggleDropdown}
               className="bg-[#6B87C7] hover:bg-[#4567B7] text-white font-bold p-3 rounded-full transition duration-300 ease-in-out"
             >
-              <FaRegUser size={30} />
-            </button>
+              <PiUserCircleLight size={30} />
+            </button> */}
+
+            {profile.imageURL ? (
+              <img
+                src={profile.imageURL}
+                alt="Profile"
+                className="w-28 h-[3.25rem] rounded-full transition duration-300 ease-in-out object-cover cursor-pointer"
+                onClick={toggleDropdown}
+              />
+            ) : (
+              <PiUserCircleLight
+                size={55}
+                className="bg-[#6B87C7] hover:bg-[#4567B7] text-white font-bold p-1.5 rounded-full transition duration-300 ease-in-out"
+                onClick={toggleDropdown}
+              />
+            )}
 
             <Dropdown isOpen={isOpen} onClose={closeDropdown} />
           </div>

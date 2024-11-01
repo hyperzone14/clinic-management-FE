@@ -5,6 +5,8 @@ import { IoNewspaperOutline } from "react-icons/io5";
 import { PiClockCountdown } from "react-icons/pi";
 import { IoMdLogOut } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
 
 interface DropdownProps {
   isOpen: boolean;
@@ -12,6 +14,7 @@ interface DropdownProps {
 }
 
 const Dropdown: React.FC<DropdownProps> = ({ isOpen, onClose }) => {
+  const profile = useSelector((state: RootState) => state.profile);
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [shouldRender, setShouldRender] = useState(isOpen);
@@ -55,10 +58,22 @@ const Dropdown: React.FC<DropdownProps> = ({ isOpen, onClose }) => {
       <ul className="pt-2">
         <li className="px-4 py-2 mb-2">
           <div className="flex items-center">
-            <PiUserCircleLight
+            {/* <PiUserCircleLight
               size={55}
               className="bg-[#4567B7] text-white font-bold p-2 rounded-full"
-            />
+            /> */}
+            {profile.imageURL ? (
+              <img
+                src={profile.imageURL}
+                alt="Profile"
+                className="w-16 h-16 rounded-full object-cover"
+              />
+            ) : (
+              <PiUserCircleLight
+                size={55}
+                className="bg-[#4567B7] text-white font-bold p-2 rounded-full"
+              />
+            )}
             <div className="flex flex-col">
               <span className="ms-5">User name</span>
               <span className="ms-5">example@gma...</span>

@@ -9,7 +9,8 @@ interface ProfileState {
   address?: string;
   email?: string;
   password?: string;
-  image?: string | null;
+  imageURL?: string | null;
+  // imageFile?: File | null;
 }
 
 const initialState: ProfileState = {
@@ -21,7 +22,8 @@ const initialState: ProfileState = {
   address: "",
   email: "",
   password: "",
-  image: null,
+  imageURL: null,
+  // imageFile: null,
 };
 
 const profileSlice = createSlice({
