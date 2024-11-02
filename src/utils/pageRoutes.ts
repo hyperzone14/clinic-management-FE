@@ -22,8 +22,8 @@ export const headerRoutes: Routes[] = [
   },
   {
     id: 4,
-    path: "/prescription",
-    location: "Prescription",
+    path: "/roll-call",
+    location: "Rollcall",
   },
 ];
 
@@ -62,6 +62,16 @@ export const pageRoutes: Routes[] = [
     id: 7,
     path: "/prescription",
     location: "Prescription",
+  },
+  {
+    id: 8,
+    path: "/roll-call",
+    location: "Rollcall",
+  },
+  {
+    id: 9,
+    path: "/medical-history",
+    location: "MedicHistory"
   },
 ];
 

@@ -84,17 +84,17 @@ export const Header = () => {
 
           <div className="mx-8" ref={dropdownRef}>
             {/* this will lead to the login page (for unauthorized users)*/}
-            <button
+            {/* <button
               className="bg-[#6B87C7] hover:bg-[#4567B7] text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out w-28"
               onClick={() => {
                 navigate("/login");
               }}
             >
               Log in
-            </button>
+            </button> */}
 
             {/* this will be for authorized users*/}
-            {/* {profile.imageURL ? (
+            {profile.imageURL ? (
               <img
                 src={profile.imageURL}
                 alt="Profile"
@@ -107,7 +107,7 @@ export const Header = () => {
                 className="bg-[#6B87C7] hover:bg-[#4567B7] text-white font-bold p-1.5 rounded-full transition duration-300 ease-in-out"
                 onClick={toggleDropdown}
               />
-            )} */}
+            )}
 
             <Dropdown isOpen={isOpen} onClose={closeDropdown} />
           </div>
