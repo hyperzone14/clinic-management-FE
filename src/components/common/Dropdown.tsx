@@ -99,7 +99,13 @@ const Dropdown: React.FC<DropdownProps> = ({ isOpen, onClose }) => {
             <span className="ms-5">Appointments</span>
           </div>
         </li>
-        <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors">
+        <li
+          className="px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors"
+          onClick={() => {
+            navigate("/medical-history");
+            onClose();
+          }}
+        >
           <div className="flex items-center my-1">
             <PiClockCountdown size={25} className="text-black font-bold" />
             <span className="ms-5">Medical History</span>
