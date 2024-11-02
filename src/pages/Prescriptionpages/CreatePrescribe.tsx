@@ -102,7 +102,6 @@ const CreatePrescribe: React.FC = () => {
 
     const prescriptionData = {
       id: selectedDrug?.id || generatePrescriptionId(),
-      title: selectedDrug?.title || "Prescription",
       symptoms: formData.symptom,
       syndrome: formData.syndrome,
       medicines: formData.medicines,
