@@ -26,8 +26,8 @@ const PrescriptionList: React.FC = () => {
   // Filter prescriptions based on search
   const filteredDrugs = prescribeDrugs.filter(
     (drug) =>
-      drug.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      drug.symptoms.toLowerCase().includes(searchQuery.toLowerCase())
+      drug.symptoms.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      drug.syndrome.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Calculate pagination
@@ -110,16 +110,16 @@ const PrescriptionList: React.FC = () => {
                   <div className="flex items-start gap-6">
                     <div className="w-16 h-16 bg-red-100 rounded-lg flex items-center justify-center">
                       <img
-                        src={drug.title.toLowerCase() === 'cough' ? '/cough-icon.png' : '/fever-icon.png'}
-                        alt={drug.title}
+                        src={drug.symptoms.toLowerCase() === 'cough' ? '/cough-icon.png' : '/fever-icon.png'}
+                        alt={drug.symptoms}
                         className="w-12 h-12 object-contain"
                       />
                     </div>
                     <div>
                       <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                        {drug.title}
+                        {drug.symptoms}
                       </h2>
-                      <p className="text-gray-600">{drug.symptoms}</p>
+                      <p className="text-gray-600">{drug.syndrome}</p>
                     </div>
                   </div>
                   <button
