@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../../redux/store";
 import { Search, Plus, Trash2 } from "lucide-react";
@@ -19,7 +19,6 @@ const PrescriptionList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  // Add state for delete confirmation
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -32,38 +31,50 @@ const PrescriptionList: React.FC = () => {
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredDrugs.length / itemsPerPage);
+
+  // Effect to handle page adjustment when items length changes
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [filteredDrugs.length, totalPages]);
+
   const startIndex = (currentPage - 1) * itemsPerPage;
   const displayedDrugs = filteredDrugs.slice(startIndex, startIndex + itemsPerPage);
 
-  // Handle click on prescription item
   const handlePrescriptionClick = (id: string) => {
     dispatch(selectPrescribeDrug(id));
     goToNextStep();
   };
 
-  // Handle Add new button click
   const handleAddNew = () => {
     dispatch(clearSelectedDrug());
     goToNextStep();
   };
 
-  // Handle delete click
   const handleDeleteClick = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation(); // Prevent triggering the prescription click
+    e.stopPropagation();
     setDeleteId(id);
     setShowDeleteConfirm(true);
   };
 
-  // Handle delete confirmation
   const handleDeleteConfirm = () => {
     if (deleteId) {
       dispatch(deletePrescribeDrug(deleteId));
+      
+      // Calculate new total pages after deletion
+      const newTotalPages = Math.ceil((filteredDrugs.length - 1) / itemsPerPage);
+      
+      // If current page would be empty after deletion, go to previous page
+      if (currentPage > newTotalPages) {
+        setCurrentPage(Math.max(1, newTotalPages));
+      }
+      
       setShowDeleteConfirm(false);
       setDeleteId(null);
     }
   };
 
-  // Handle delete cancellation
   const handleDeleteCancel = () => {
     setShowDeleteConfirm(false);
     setDeleteId(null);
@@ -77,18 +88,17 @@ const PrescriptionList: React.FC = () => {
             Prescription List
           </h1>
           
-          {/* Search and Add New Section */}
           <div className="w-full flex justify-between items-center mb-6 gap-4">
-          <div className="relative flex-1"> {/* Removed max-w-2xl to allow more width */}
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={24} />
-            <input
-              type="text"
-              placeholder="Search..."
-              className="pl-12 pr-4 py-3 rounded-lg bg-white border border-gray-300 w-full text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={24} />
+              <input
+                type="text"
+                placeholder="Search..."
+                className="pl-12 pr-4 py-3 rounded-lg bg-white border border-gray-300 w-full text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
             <button
               onClick={handleAddNew}
               className="flex-shrink-0 flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -98,7 +108,6 @@ const PrescriptionList: React.FC = () => {
             </button>
           </div>
 
-          {/* Prescriptions List */}
           <div className="w-full space-y-4">
             {displayedDrugs.map((drug) => (
               <div
@@ -133,7 +142,6 @@ const PrescriptionList: React.FC = () => {
             ))}
           </div>
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex justify-center mt-8 gap-2">
               <button
@@ -170,7 +178,6 @@ const PrescriptionList: React.FC = () => {
         </div>
       </div>
 
-      {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
