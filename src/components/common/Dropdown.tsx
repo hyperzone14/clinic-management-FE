@@ -71,7 +71,7 @@ const Dropdown: React.FC<DropdownProps> = ({ isOpen, onClose }) => {
             ) : (
               <PiUserCircleLight
                 size={55}
-                className="bg-[#4567B7] text-white font-bold p-2 rounded-full"
+                className="bg-[#4567B7] text-white font-bold p-1.5 rounded-full"
               />
             )}
             <div className="flex flex-col">
