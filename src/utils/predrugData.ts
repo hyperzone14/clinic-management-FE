@@ -8,7 +8,6 @@ export interface Medicine {
   
   export interface PrescribeDrug {
     id: string;
-    title: string;
     symptoms: string;
     syndrome: string;
     medicines: Medicine[];
@@ -18,8 +17,7 @@ export interface Medicine {
   export const mockPrescribeDrugs: PrescribeDrug[] = [
     {
       id: '1',
-      title: 'Cough',
-      symptoms: 'Chronic cough, throat clearing, runny nose',
+      symptoms: 'Cough',
       syndrome: 'Chronic cough, throat clearing, runny nose, congestion, and sore throat',
       medicines: [
         {
@@ -41,8 +39,7 @@ export interface Medicine {
     },
     {
       id: '2',
-      title: 'Fever',
-      symptoms: 'High temperature, headache, body aches',
+      symptoms: 'Fever',
       syndrome: 'Acute febrile illness with associated symptoms of viral infection',
       medicines: [
         {
@@ -83,7 +80,6 @@ export interface Medicine {
   export const createEmptyPrescription = (): PrescribeDrug => {
     return {
       id: generatePrescriptionId(),
-      title: '',
       symptoms: '',
       syndrome: '',
       medicines: [],
