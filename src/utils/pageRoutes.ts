@@ -22,8 +22,8 @@ export const headerRoutes: Routes[] = [
   },
   {
     id: 4,
-    path: "/roll-call",
-    location: "Rollcall",
+    path: "/admin",
+    location: "Admin",
   },
 ];
 
@@ -78,6 +78,11 @@ export const pageRoutes: Routes[] = [
     path: "/medical-detail",
     location: "MedicDetail",
   },
+  {
+    id: 11,
+    path: "/admin",
+    location: "Admin",
+  },
 ];
 
 export const dashboardRoutes: Routes[] = [
@@ -131,5 +136,18 @@ export const prescriptionRoutes: Routes[] = [
     id: 2,
     path: "create-prescribe",
     location: "CreatePrescribe",
+  },
+];
+
+export const adminRoutes: Routes[] = [
+  {
+    id: 1,
+    path: "dashboard",
+    location: "Dashboard",
+  },
+  {
+    id: 2,
+    path: "user-manage",
+    location: "UserManage",
   },
 ];
