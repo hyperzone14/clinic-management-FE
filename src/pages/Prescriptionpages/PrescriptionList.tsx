@@ -22,11 +22,9 @@ const PrescriptionList: React.FC = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Filter prescriptions based on search
-  const filteredDrugs = prescribeDrugs.filter(
-    (drug) =>
-      drug.symptoms.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      drug.syndrome.toLowerCase().includes(searchQuery.toLowerCase())
+  // Updated filtering logic to only search symptoms
+  const filteredDrugs = prescribeDrugs.filter((drug) =>
+    drug.symptoms.toLowerCase().includes(searchQuery.toLowerCase().trim())
   );
 
   // Calculate pagination
@@ -93,7 +91,7 @@ const PrescriptionList: React.FC = () => {
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={24} />
               <input
                 type="text"
-                placeholder="Search..."
+                placeholder="Search symptoms..."  // Updated placeholder
                 className="pl-12 pr-4 py-3 rounded-lg bg-white border border-gray-300 w-full text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -109,37 +107,51 @@ const PrescriptionList: React.FC = () => {
           </div>
 
           <div className="w-full space-y-4">
-            {displayedDrugs.map((drug) => (
-              <div
-                key={drug.id}
-                onClick={() => handlePrescriptionClick(drug.id)}
-                className="bg-white rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer p-6"
-              >
-                <div className="flex items-start justify-between gap-6">
-                  <div className="flex items-start gap-6">
-                    <div className="w-16 h-16 bg-red-100 rounded-lg flex items-center justify-center">
-                      <img
-                        src={drug.symptoms.toLowerCase() === 'cough' ? '/cough-icon.png' : '/fever-icon.png'}
-                        alt={drug.symptoms}
-                        className="w-12 h-12 object-contain"
-                      />
+            {displayedDrugs.length > 0 ? (
+              displayedDrugs.map((drug) => (
+                <div
+                  key={drug.id}
+                  onClick={() => handlePrescriptionClick(drug.id)}
+                  className="bg-white rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer p-6"
+                >
+                  <div className="flex items-start justify-between gap-6">
+                    <div className="flex items-start gap-6">
+                      <div className="w-16 h-16 bg-red-100 rounded-lg flex items-center justify-center">
+                        <img
+                          src={drug.symptoms.toLowerCase() === 'cough' ? '/cough-icon.png' : '/fever-icon.png'}
+                          alt={drug.symptoms}
+                          className="w-12 h-12 object-contain"
+                        />
+                      </div>
+                      <div>
+                        <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                          {drug.symptoms}
+                        </h2>
+                        <p className="text-gray-600">{drug.syndrome}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                        {drug.symptoms}
-                      </h2>
-                      <p className="text-gray-600">{drug.syndrome}</p>
-                    </div>
+                    <button
+                      onClick={(e) => handleDeleteClick(e, drug.id)}
+                      className="p-2 text-red-500 hover:text-red-700 transition-colors"
+                    >
+                      <Trash2 size={20} />
+                    </button>
                   </div>
-                  <button
-                    onClick={(e) => handleDeleteClick(e, drug.id)}
-                    className="p-2 text-red-500 hover:text-red-700 transition-colors"
-                  >
-                    <Trash2 size={20} />
-                  </button>
                 </div>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <div className="text-gray-400 text-6xl mb-4">
+                  <Search className="mx-auto" size={64} />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-700 mb-2">No symptoms found</h3>
+                <p className="text-gray-500">
+                  {searchQuery 
+                    ? `No symptoms match "${searchQuery}"`
+                    : "No prescriptions available"}
+                </p>
               </div>
-            ))}
+            )}
           </div>
 
           {totalPages > 1 && (
