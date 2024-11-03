@@ -71,7 +71,12 @@ export const pageRoutes: Routes[] = [
   {
     id: 9,
     path: "/medical-history",
-    location: "MedicHistory"
+    location: "MedicHistory",
+  },
+  {
+    id: 10,
+    path: "/medical-detail",
+    location: "MedicDetail",
   },
 ];
 
