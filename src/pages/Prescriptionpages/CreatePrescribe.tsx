@@ -127,137 +127,140 @@ const CreatePrescribe: React.FC = () => {
 
   return (
     <>
-      <div className="w-full">
-        <div className="flex flex-col my-5 mx-10 justify-center items-center">
-          <h1 className="text-4xl font-bold font-sans my-5">
-            {selectedDrug ? 'Edit Prescription' : 'Create Prescription'}
-          </h1>
-        </div>
-        <div className="bg-white rounded-lg shadow p-6 space-y-6">
-          {/* Symptom Section */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Symptom
-            </label>
-            <textarea
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              rows={3}
-              value={formData.symptom}
-              onChange={(e) => setFormData(prev => ({ ...prev, symptom: e.target.value }))}
-              placeholder="Enter symptoms..."
-            />
+     <div className="min-h-screen flex flex-col pb-24">
+        <div className="flex-grow w-full">
+          <div className="flex flex-col my-5 mx-10 justify-center items-center">
+            <h1 className="text-4xl font-bold font-sans my-5">
+              {selectedDrug ? 'Edit Prescription' : 'Create Prescription'}
+            </h1>
           </div>
+          <div className="bg-white rounded-lg shadow p-6 space-y-6">
+            {/* Symptom Section */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Symptom
+              </label>
+              <textarea
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                rows={3}
+                value={formData.symptom}
+                onChange={(e) => setFormData(prev => ({ ...prev, symptom: e.target.value }))}
+                placeholder="Enter symptoms..."
+              />
+            </div>
 
-          {/* Syndrome Section */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Syndrome
-            </label>
-            <textarea
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              rows={3}
-              value={formData.syndrome}
-              onChange={(e) => setFormData(prev => ({ ...prev, syndrome: e.target.value }))}
-              placeholder="Enter syndrome..."
-            />
-          </div>
+            {/* Syndrome Section */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Syndrome
+              </label>
+              <textarea
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                rows={3}
+                value={formData.syndrome}
+                onChange={(e) => setFormData(prev => ({ ...prev, syndrome: e.target.value }))}
+                placeholder="Enter syndrome..."
+              />
+            </div>
 
-          {/* Medicines Section */}
-          <div>
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Medicine List</h2>
+            {/* Medicines Section */}
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">Medicine List</h2>
+                <button
+                  onClick={handleAddMedicine}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Add Medicine
+                </button>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  {/* Table head remains the same */}
+                  <thead>
+                    <tr className="bg-gray-50">
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Medicine name</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Quantity</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Note</th>
+                      {/* <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Price</th> */}
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {formData.medicines.map((medicine, index) => (
+                      <tr key={medicine.id} className="border-t border-gray-200">
+                        <td className="px-4 py-3">
+                          <input
+                            type="text"
+                            className="w-full p-2 border border-gray-300 rounded"
+                            value={medicine.name}
+                            onChange={(e) => handleMedicineChange(index, 'name', e.target.value)}
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <input
+                            type="number"
+                            className="w-full p-2 border border-gray-300 rounded"
+                            value={medicine.quantity}
+                            onChange={(e) => handleMedicineChange(index, 'quantity', parseInt(e.target.value))}
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <input
+                            type="text"
+                            className="w-full p-2 border border-gray-300 rounded"
+                            value={medicine.note}
+                            onChange={(e) => handleMedicineChange(index, 'note', e.target.value)}
+                          />
+                        </td>
+                        {/* <td className="px-4 py-3">
+                          <input
+                            type="number"
+                            className="w-full p-2 border border-gray-300 rounded"
+                            value={medicine.price}
+                            onChange={(e) => handleMedicineChange(index, 'price', parseInt(e.target.value))}
+                          />
+                        </td> */}
+                        <td className="px-4 py-3">
+                          <button
+                            onClick={() => handleRemoveMedicine(index)}
+                            className="p-2 text-red-500 hover:text-red-700 transition-colors rounded-full hover:bg-red-50"
+                          >
+                            <Trash2 size={20} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  {/* <tfoot>
+                    <tr className="border-t border-gray-200">
+                      <td colSpan={3} className="px-4 py-3 text-right font-semibold">Total:</td>
+                      <td className="px-4 py-3 font-semibold">${calculateTotal()}</td>
+                      <td></td>
+                    </tr>
+                  </tfoot> */}
+                </table>
+              </div>
+            </div>
+            <div className="flex justify-end space-x-4 mt-6 ">
               <button
-                onClick={handleAddMedicine}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                onClick={handleDiscard}
+                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
               >
-                Add Medicine
+                Discard
+              </button>
+              <button
+                onClick={handleSave}
+                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                Save
               </button>
             </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                {/* Table head remains the same */}
-                <thead>
-                  <tr className="bg-gray-50">
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Medicine name</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Quantity</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Note</th>
-                    {/* <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Price</th> */}
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {formData.medicines.map((medicine, index) => (
-                    <tr key={medicine.id} className="border-t border-gray-200">
-                      <td className="px-4 py-3">
-                        <input
-                          type="text"
-                          className="w-full p-2 border border-gray-300 rounded"
-                          value={medicine.name}
-                          onChange={(e) => handleMedicineChange(index, 'name', e.target.value)}
-                        />
-                      </td>
-                      <td className="px-4 py-3">
-                        <input
-                          type="number"
-                          className="w-full p-2 border border-gray-300 rounded"
-                          value={medicine.quantity}
-                          onChange={(e) => handleMedicineChange(index, 'quantity', parseInt(e.target.value))}
-                        />
-                      </td>
-                      <td className="px-4 py-3">
-                        <input
-                          type="text"
-                          className="w-full p-2 border border-gray-300 rounded"
-                          value={medicine.note}
-                          onChange={(e) => handleMedicineChange(index, 'note', e.target.value)}
-                        />
-                      </td>
-                      {/* <td className="px-4 py-3">
-                        <input
-                          type="number"
-                          className="w-full p-2 border border-gray-300 rounded"
-                          value={medicine.price}
-                          onChange={(e) => handleMedicineChange(index, 'price', parseInt(e.target.value))}
-                        />
-                      </td> */}
-                      <td className="px-4 py-3">
-                        <button
-                          onClick={() => handleRemoveMedicine(index)}
-                          className="p-2 text-red-500 hover:text-red-700 transition-colors rounded-full hover:bg-red-50"
-                        >
-                          <Trash2 size={20} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-                {/* <tfoot>
-                  <tr className="border-t border-gray-200">
-                    <td colSpan={3} className="px-4 py-3 text-right font-semibold">Total:</td>
-                    <td className="px-4 py-3 font-semibold">${calculateTotal()}</td>
-                    <td></td>
-                  </tr>
-                </tfoot> */}
-              </table>
-            </div>
-          </div>
-          <div className="flex justify-end space-x-4 mt-6">
-            <button
-              onClick={handleDiscard}
-              className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              Discard
-            </button>
-            <button
-              onClick={handleSave}
-              className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-            >
-              Save
-            </button>
           </div>
         </div>
       </div>
+      
     </>
   );
 };
