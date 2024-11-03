@@ -23,6 +23,7 @@ import Dashboard from "./pages/Dashboard";
 import { Provider } from "react-redux";
 import store from "./redux/store";
 import Prescription from "./pages/Prescription";
+import AdminSideBar from "./components/layout/AdminSideBar";
 
 // Layout wrapper component for pages that need header and footer
 const MainLayout: React.FC = () => {
@@ -51,8 +52,9 @@ const AuthLayout: React.FC = () => {
 
 const AdminLayout: React.FC = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f7f7f7]">
-      <main className="w-full">
+    <div className="flex min-h-screen bg-[#f7f7f7]">
+      <AdminSideBar />
+      <main className="w-4/5 p-4">
         <Outlet />
       </main>
     </div>
