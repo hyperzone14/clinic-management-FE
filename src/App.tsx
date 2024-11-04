@@ -54,7 +54,7 @@ const AdminLayout: React.FC = () => {
   return (
     <div className="flex min-h-screen bg-[#f7f7f7]">
       <AdminSideBar />
-      <main className="w-4/5 p-4">
+      <main className="w-4/5 p-4 mx-32 flex-grow">
         <Outlet />
       </main>
     </div>
@@ -77,10 +77,7 @@ function App() {
           <Routes>
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminLayout />}>
-              <Route
-                index
-                element={<Navigate to="/admin/dashboard" replace />}
-              />
+              {/* The dashboard is now directly at /admin */}
               {adminRoutes.map((route) => {
                 const AdminComponent = lazy(() => {
                   return pageComponents[

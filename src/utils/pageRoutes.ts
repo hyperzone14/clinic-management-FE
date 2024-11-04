@@ -142,12 +142,12 @@ export const prescriptionRoutes: Routes[] = [
 export const adminRoutes: Routes[] = [
   {
     id: 1,
-    path: "dashboard",
+    path: "",
     location: "Dashboard",
   },
   {
     id: 2,
-    path: "user-manage",
-    location: "UserManage",
+    path: "user-management",
+    location: "UserManagement",
   },
 ];
