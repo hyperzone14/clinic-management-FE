@@ -4,9 +4,14 @@ import { MedicalRecord } from '../redux/slices/medicHistorySlide';
 export const medicalHistoryData: MedicalRecord[] = [
   {
     id: '1',
+    patientInfo: {
+      name: 'John Smith',
+      dateOfBirth: '1990-01-15',
+      gender: 'Male'
+    },
     symptoms: 'Headache and fever',
     doctorName: 'Dr. JFK',
-    date: '2024-09-11', // Changed format to YYYY-MM-DD
+    date: '2024-09-11',
     image: '/images/acupuncture.jpg',
     treatment_medicine: [
       {
@@ -30,9 +35,14 @@ export const medicalHistoryData: MedicalRecord[] = [
   },
   {
     id: '2',
+    patientInfo: {
+      name: 'Emily Johnson',
+      dateOfBirth: '1985-03-22',
+      gender: 'Female'
+    },
     symptoms: 'Sore throat and cough',
     doctorName: 'Dr. Smith',
-    date: '2024-09-15', // Changed format to YYYY-MM-DD
+    date: '2024-09-15',
     image: '/images/acupuncture.jpg',
     treatment_medicine: [
       {
@@ -50,9 +60,14 @@ export const medicalHistoryData: MedicalRecord[] = [
   },
   {
     id: '3',
+    patientInfo: {
+      name: 'Michael Brown',
+      dateOfBirth: '1978-11-30',
+      gender: 'Male'
+    },
     symptoms: 'Back pain',
     doctorName: 'Dr. Johnson',
-    date: '2024-09-20', // Changed format to YYYY-MM-DD
+    date: '2024-09-20',
     image: '/images/acupuncture.jpg',
     treatment_medicine: [
       {
@@ -70,9 +85,14 @@ export const medicalHistoryData: MedicalRecord[] = [
   },
   {
     id: '4',
+    patientInfo: {
+      name: 'Sarah Wilson',
+      dateOfBirth: '1995-07-08',
+      gender: 'Female'
+    },
     symptoms: 'Allergic reaction',
     doctorName: 'Dr. JFK',
-    date: '2024-09-25', // Changed format to YYYY-MM-DD
+    date: '2024-09-25',
     image: '/images/acupuncture.jpg',
     treatment_medicine: [
       {

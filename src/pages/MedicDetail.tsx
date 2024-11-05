@@ -2,13 +2,14 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppSelector } from '../redux/store';
+import Title from '../components/common/Title';
+import { User, Calendar } from 'lucide-react';
 
 const MedicDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { records } = useAppSelector(state => state.medicHistory);
   
-  // Find the specific record from our Redux store
   const record = records.find(r => r.id === id);
 
   if (!record) {
@@ -16,37 +17,196 @@ const MedicDetail: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col my-5 mx-10 justify-center items-center">
-          <h1 className="text-4xl font-bold font-sans my-5">Medical Detail</h1>
-        </div>
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-2xl font-semibold mb-4">Symptoms</h2>
-        <p className="text-gray-700 mb-6">{record.symptoms}</p>
+    <div className="w-full">
+    {/* Header */}
+    <div className="flex flex-col my-5 mx-10 justify-center items-center">
+      <h1 className="text-4xl font-bold font-sans my-5">Medical Record Detail</h1>
+    </div>
 
-        <h2 className="text-2xl font-semibold mb-4">Treatment Medicines</h2>
-        <div className="space-y-4">
-          {record.treatment_medicine.map((medicine, index) => (
-            <div key={index} className="border-b pb-4">
-              <h3 className="font-medium">{medicine.medicine_name}</h3>
-              <p className="text-gray-600">Quantity: {medicine.quantity}</p>
-              <p className="text-gray-600">Note: {medicine.note}</p>
+    {/* Patient Information Section */}
+    <div className="mb-8 mx-10">
+      <Title id={5} />
+      <div className="bg-white p-6 rounded-lg shadow-md mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Name</label>
+              <input
+                type="text"
+                value="Patient Name" // You'll need to add this to your medical record data
+                readOnly
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-50"
+              />
             </div>
-          ))}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
+              <input
+                type="text"
+                value="01/01/1990" // You'll need to add this to your medical record data
+                readOnly
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-50"
+              />
+            </div>
+          </div>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Gender</label>
+              <div className="mt-1 space-x-4">
+                <label className="inline-flex items-center">
+                  <input
+                    type="radio"
+                    checked={true} // You'll need to add gender to your medical record data
+                    readOnly
+                    className="form-radio"
+                  />
+                  <span className="ml-2">Male</span>
+                </label>
+                <label className="inline-flex items-center">
+                  <input
+                    type="radio"
+                    checked={false}
+                    readOnly
+                    className="form-radio"
+                  />
+                  <span className="ml-2">Female</span>
+                </label>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
+    </div>
 
-        <h2 className="text-2xl font-semibold my-4">Examination</h2>
-        <div className="mb-6">
-          <p className="text-gray-700">Lab Test: {record.examination.lab_test}</p>
-          <p className="text-gray-700">Result: {record.examination.test_result}</p>
+    {/* Medical Record Information Section */}
+    <div className="mb-8 mx-10">
+      <Title id={6} />
+      <div className="bg-white p-6 rounded-lg shadow-md mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Symptoms</label>
+              <input
+                type="text"
+                value={record.symptoms}
+                readOnly
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-50"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+              <div className="flex items-center text-gray-600">
+                <Calendar className="w-4 h-4 mr-2 text-blue-500" />
+                <input
+                  type="text"
+                  value={new Date(record.date).toLocaleDateString('en-US')}
+                  readOnly
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-50"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Doctor</label>
+              <div className="flex items-center text-gray-600">
+                <User className="w-4 h-4 mr-2 text-blue-500" />
+                <input
+                  type="text"
+                  value={record.doctorName}
+                  readOnly
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-50"
+                />
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
+    </div>
 
-        <h2 className="text-2xl font-semibold mb-4">Doctor's Feedback</h2>
-        <p className="text-gray-700">{record.doctor_feedback}</p>
+      {/* Treatment Information Section */}
+      <div className="mb-8 mx-10">
+        <Title id={6} />
+        <div className="bg-white p-6 rounded-lg shadow-md mt-4">
+          {/* Medicine Table */}
+          <div className="mt-6">
+            <h3 className="font-semibold mb-4">Medicines</h3>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Medicine name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Quantity
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Note
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {record.treatment_medicine.map((medicine, index) => (
+                    <tr key={index}>
+                      <td className="px-6 py-4">{medicine.medicine_name}</td>
+                      <td className="px-6 py-4">{medicine.quantity}</td>
+                      <td className="px-6 py-4">{medicine.note}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
 
+      {/* Lab Test Section */}
+      <div className="mb-8 mx-10">
+        <Title id={6} />
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Lab Test Type</label>
+              <input
+                type="text"
+                value={record.examination.lab_test}
+                readOnly
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-50"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Test Results</label>
+              <input
+                type="text"
+                value={record.examination.test_result}
+                readOnly
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-50"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Doctor Feedback Section */}
+      <div className="mb-8 mx-10">
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Doctor Feedback</label>
+            <textarea
+              value={record.doctor_feedback}
+              readOnly
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-50"
+              rows={4}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Back Button */}
+      <div className="flex justify-center mx-10 mb-8">
         <button
           onClick={() => navigate('/medical-history')}
-          className="mt-8 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
         >
           Back to History
         </button>

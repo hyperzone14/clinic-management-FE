@@ -13,6 +13,11 @@ export interface Examination {
   lab_test?: string;
   test_result?: string;
 }
+export interface PatientInfo {
+  name: string;
+  dateOfBirth: string;
+  gender: 'Male' | 'Female';
+}
 
 export interface MedicalRecord {
   id: string;
