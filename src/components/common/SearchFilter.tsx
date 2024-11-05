@@ -11,7 +11,9 @@ const SearchFilter = () => {
   const dateInputRef = useRef<HTMLInputElement>(null);
 
   const handleCalendarClick = () => {
-    dateInputRef.current?.showPicker();
+    if (dateInputRef.current) {
+      dateInputRef.current.showPicker();
+    }
   };
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,7 +40,7 @@ const SearchFilter = () => {
   const isFiltersActive = searchTerm || filterDoctor || filterDate;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mb-8">
       {/* Search Bar */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
@@ -85,20 +87,19 @@ const SearchFilter = () => {
                 placeholder="mm/dd/yyyy"
                 value={displayDate}
                 className="w-48 px-4 py-2 rounded-lg border border-gray-200 focus:outline-none cursor-pointer bg-white"
+              />
+              <Calendar 
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 cursor-pointer z-10" 
                 onClick={handleCalendarClick}
               />
               <input 
                 ref={dateInputRef}
                 type="date" 
-                className="absolute inset-0 opacity-0 cursor-pointer"
+                className="absolute inset-0 opacity-0"
                 onChange={handleDateChange}
                 value={filterDate}
               />
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                <Calendar className="h-5 w-5 text-gray-400" />
-              </div>
             </div>
-
             {/* Clear Filters Button */}
             {isFiltersActive && (
               <button
