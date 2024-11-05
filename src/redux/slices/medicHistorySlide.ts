@@ -21,6 +21,7 @@ export interface PatientInfo {
 
 export interface MedicalRecord {
   id: string;
+  patientInfo: PatientInfo;
   symptoms: string;
   doctorName: string;
   date: string;
