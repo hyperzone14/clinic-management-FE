@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import AddModal from "../../components/common/AddModal";
 
 interface Data {
   id: number;
@@ -97,6 +98,11 @@ const UserManagement: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [filteredData, setFilteredData] = useState<Data[]>(data);
+  const [openAdd, setOpenAdd] = useState(false);
+
+  const handleOpenAdd = () => {
+    setOpenAdd(!openAdd);
+  };
 
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
@@ -175,24 +181,13 @@ const UserManagement: React.FC = () => {
               className="mb-4"
             />
           </div>
-          <button className="bg-[#6B87C7] hover:bg-[#4567B7] text-white font-bold p-2  rounded-lg transition duration-300 ease-in-out text-lg">
+          <button
+            className="bg-[#6B87C7] hover:bg-[#4567B7] text-white font-bold p-2  rounded-lg transition duration-300 ease-in-out text-lg"
+            onClick={handleOpenAdd}
+          >
             + Add User
           </button>
-        </div>
-
-        {/* Rows per page selector */}
-        <div className="flex items-center mb-4">
-          <span className="mr-2">Rows per page:</span>
-          <select
-            value={rowsPerPage}
-            onChange={handleRowsPerPageChange}
-            className="border rounded px-2 py-1"
-          >
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-            <option value={15}>15</option>
-            <option value={20}>20</option>
-          </select>
+          <AddModal openAdd={openAdd} />
         </div>
 
         <TableContainer
@@ -253,7 +248,21 @@ const UserManagement: React.FC = () => {
         </TableContainer>
         <div className="flex items-center justify-between px-4 py-3 bg-white border-t">
           <div className="flex items-center">
-            <span className="text-sm text-gray-700">
+            {/* Rows per page selector */}
+            <div className="flex items-center">
+              <span className="mr-2">Rows per page:</span>
+              <select
+                value={rowsPerPage}
+                onChange={handleRowsPerPageChange}
+                className="border rounded px-2 py-1"
+              >
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+              </select>
+            </div>
+            <span className="text-sm text-gray-700 ms-5">
               Showing {startIndex + 1} to{" "}
               {Math.min(endIndex, filteredData.length)} of {filteredData.length}{" "}
               entries
