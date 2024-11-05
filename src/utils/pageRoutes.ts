@@ -23,8 +23,8 @@ export const headerRoutes: Routes[] = [
   },
   {
     id: 4,
-    path: "/admin",
-    location: "Admin",
+    path: "/schedule",
+    location: "Schedule",
   },
 ];
 
@@ -51,8 +51,8 @@ export const pageRoutes: Routes[] = [
   },
   {
     id: 5,
-    path: "/dashboard",
-    location: "Dashboard",
+    path: "/schedule",
+    location: "Schedule",
     children: [
       {
         id: 51,
