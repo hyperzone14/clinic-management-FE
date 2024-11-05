@@ -1,23 +1,21 @@
 import React from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
-import { useSelector, useDispatch, } from 'react-redux';
-import { RootState } from '../../redux/store';
-import Title from '../../components/common/Title';
-import SymptomSelect from '../../components/common/SymptomSelect';
-import { Trash2 } from 'lucide-react';
-import { 
-  removeMedicine, 
-  updateMedicine, 
-  setDoctorFeedback, 
-  LabTest, 
-  setLabTest, 
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "../redux/store";
+import Title from "../components/common/Title";
+import SymptomSelect from "../components/common/SymptomSelect";
+import { Trash2 } from "lucide-react";
+import {
+  removeMedicine,
+  updateMedicine,
+  setDoctorFeedback,
+  LabTest,
+  setLabTest,
   addMedicine,
   resetTreatment,
   completeTreatment,
-} from '../../redux/slices/treatmentSlice';
-import {
-  completeTreatmentAndUpdateStatus
-} from '../../redux/slices/scheduleSlice';
+} from "../redux/slices/treatmentSlice";
+import { completeTreatmentAndUpdateStatus } from "../redux/slices/scheduleSlice";
 
 interface DashboardStepProps {
   goToNextStep: () => void;
@@ -27,40 +25,50 @@ interface DashboardStepProps {
 // Default state values
 const defaultTreatmentState = {
   patientInfo: {
-    name: '',
-    dateOfBirth: '',
-    gender: 'Male' as const
+    name: "",
+    dateOfBirth: "",
+    gender: "Male" as const,
   },
   selectedSymptoms: [],
   medicines: [],
   labTest: {
-    type: '',
-    results: ''
+    type: "",
+    results: "",
   },
-  doctorFeedback: '',
-  total: 0
+  doctorFeedback: "",
+  total: 0,
 };
 
 const MedicalService: React.FC = () => {
   const dispatch = useDispatch();
   const treatment = useSelector((state: RootState) => state.treatment);
-  const { goToNextStep, goToPreviousStep } = useOutletContext<DashboardStepProps>();
+  const { goToNextStep, goToPreviousStep } =
+    useOutletContext<DashboardStepProps>();
   const navigate = useNavigate();
 
   // Safe destructuring with defaults
-  const { 
+  const {
     patientInfo = defaultTreatmentState.patientInfo,
     medicines = defaultTreatmentState.medicines,
     labTest = defaultTreatmentState.labTest,
     doctorFeedback = defaultTreatmentState.doctorFeedback,
-    total = defaultTreatmentState.total
+    total = defaultTreatmentState.total,
   } = treatment || defaultTreatmentState;
 
-  const handleMedicineChange = (id: string, field: string, value: string | number) => {
-    dispatch(updateMedicine({ 
-      id, 
-      updates: { [field]: field === 'quantity' || field === 'price' ? Number(value) : value }
-    }));
+  const handleMedicineChange = (
+    id: string,
+    field: string,
+    value: string | number
+  ) => {
+    dispatch(
+      updateMedicine({
+        id,
+        updates: {
+          [field]:
+            field === "quantity" || field === "price" ? Number(value) : value,
+        },
+      })
+    );
   };
 
   const handleRemoveMedicine = (id: string) => {
@@ -68,10 +76,12 @@ const MedicalService: React.FC = () => {
   };
 
   const handleLabTestChange = (field: keyof LabTest, value: string) => {
-    dispatch(setLabTest({
-      ...labTest,
-      [field]: value
-    }));
+    dispatch(
+      setLabTest({
+        ...labTest,
+        [field]: value,
+      })
+    );
   };
 
   const handleFeedbackChange = (value: string) => {
@@ -81,16 +91,16 @@ const MedicalService: React.FC = () => {
   const handleAddCustomMedicine = () => {
     const newMedicine = {
       id: `custom-${Date.now()}`,
-      name: '',
+      name: "",
       quantity: 0,
-      note: '',
-      price: 0
+      note: "",
+      price: 0,
     };
     dispatch(addMedicine(newMedicine));
   };
 
   const handleDiscard = () => {
-    if (window.confirm('Are you sure you want to discard your changes?')) {
+    if (window.confirm("Are you sure you want to discard your changes?")) {
       dispatch(resetTreatment());
       goToPreviousStep();
     }
@@ -99,33 +109,34 @@ const MedicalService: React.FC = () => {
   const handleCompleteTreatment = () => {
     try {
       // Complete the treatment in treatment slice
-      dispatch(completeTreatment({
-        patientId: treatment.patientInfo.name, // Using name as ID for now
-        treatmentData: {
-          symptoms: treatment.selectedSymptoms,
-          medicines: treatment.medicines,
-          labTest: treatment.labTest,
-          doctorFeedback: treatment.doctorFeedback
-        }
-      }));
+      dispatch(
+        completeTreatment({
+          patientId: treatment.patientInfo.name, // Using name as ID for now
+          treatmentData: {
+            symptoms: treatment.selectedSymptoms,
+            medicines: treatment.medicines,
+            labTest: treatment.labTest,
+            doctorFeedback: treatment.doctorFeedback,
+          },
+        })
+      );
 
       // Update the appointment status in schedule slice
-      dispatch(completeTreatmentAndUpdateStatus({
-        patientName: treatment.patientInfo.name
-      }));
+      dispatch(
+        completeTreatmentAndUpdateStatus({
+          patientName: treatment.patientInfo.name,
+        })
+      );
 
       // Reset treatment state
       dispatch(resetTreatment());
 
       // Navigate back to schedule
-      navigate('/dashboard/schedule', { replace: true });
-
+      navigate("/dashboard/schedule", { replace: true });
     } catch (error) {
-      console.error('Error completing treatment:', error);
+      console.error("Error completing treatment:", error);
     }
   };
-
-  
 
   return (
     <>
@@ -142,7 +153,9 @@ const MedicalService: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Name</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Name
+                  </label>
                   <input
                     type="text"
                     value={patientInfo.name}
@@ -151,7 +164,9 @@ const MedicalService: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Date of Birth
+                  </label>
                   <input
                     type="text"
                     value={patientInfo.dateOfBirth}
@@ -162,12 +177,14 @@ const MedicalService: React.FC = () => {
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Gender</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Gender
+                  </label>
                   <div className="mt-1 space-x-4">
                     <label className="inline-flex items-center">
                       <input
                         type="radio"
-                        checked={patientInfo.gender === 'Male'}
+                        checked={patientInfo.gender === "Male"}
                         disabled
                         className="form-radio"
                       />
@@ -176,7 +193,7 @@ const MedicalService: React.FC = () => {
                     <label className="inline-flex items-center">
                       <input
                         type="radio"
-                        checked={patientInfo.gender === 'Female'}
+                        checked={patientInfo.gender === "Female"}
                         disabled
                         className="form-radio"
                       />
@@ -195,7 +212,9 @@ const MedicalService: React.FC = () => {
           <div className="bg-white p-6 rounded-lg shadow-md mt-4">
             {/* Symptoms MultiSelect */}
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Symptoms</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Symptoms
+              </label>
               <SymptomSelect />
             </div>
 
@@ -238,7 +257,13 @@ const MedicalService: React.FC = () => {
                           <input
                             type="text"
                             value={medicine.name}
-                            onChange={(e) => handleMedicineChange(medicine.id, 'name', e.target.value)}
+                            onChange={(e) =>
+                              handleMedicineChange(
+                                medicine.id,
+                                "name",
+                                e.target.value
+                              )
+                            }
                             className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                           />
                         </td>
@@ -246,7 +271,13 @@ const MedicalService: React.FC = () => {
                           <input
                             type="number"
                             value={medicine.quantity}
-                            onChange={(e) => handleMedicineChange(medicine.id, 'quantity', e.target.value)}
+                            onChange={(e) =>
+                              handleMedicineChange(
+                                medicine.id,
+                                "quantity",
+                                e.target.value
+                              )
+                            }
                             className="w-24 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                           />
                         </td>
@@ -254,7 +285,13 @@ const MedicalService: React.FC = () => {
                           <input
                             type="text"
                             value={medicine.note}
-                            onChange={(e) => handleMedicineChange(medicine.id, 'note', e.target.value)}
+                            onChange={(e) =>
+                              handleMedicineChange(
+                                medicine.id,
+                                "note",
+                                e.target.value
+                              )
+                            }
                             className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                           />
                         </td>
@@ -303,20 +340,26 @@ const MedicalService: React.FC = () => {
           <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Lab Test Type</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Lab Test Type
+                </label>
                 <input
                   type="text"
                   value={labTest.type}
-                  onChange={(e) => handleLabTestChange('type', e.target.value)}
+                  onChange={(e) => handleLabTestChange("type", e.target.value)}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
                   placeholder="Select lab test type"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Test Results</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Test Results
+                </label>
                 <textarea
                   value={labTest.results}
-                  onChange={(e) => handleLabTestChange('results', e.target.value)}
+                  onChange={(e) =>
+                    handleLabTestChange("results", e.target.value)
+                  }
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
                   rows={3}
                   placeholder="Enter test results"
@@ -330,7 +373,9 @@ const MedicalService: React.FC = () => {
         <div className="mb-8 mx-10">
           <div className="bg-white p-6 rounded-lg shadow-md">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Doctor Feedback</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Doctor Feedback
+              </label>
               <textarea
                 value={doctorFeedback}
                 onChange={(e) => handleFeedbackChange(e.target.value)}
