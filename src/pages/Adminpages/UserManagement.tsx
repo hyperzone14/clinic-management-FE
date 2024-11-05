@@ -101,7 +101,11 @@ const UserManagement: React.FC = () => {
   const [openAdd, setOpenAdd] = useState(false);
 
   const handleOpenAdd = () => {
-    setOpenAdd(!openAdd);
+    setOpenAdd(true);
+  };
+
+  const handleCloseAdd = () => {
+    setOpenAdd(false);
   };
 
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
@@ -187,7 +191,7 @@ const UserManagement: React.FC = () => {
           >
             + Add User
           </button>
-          <AddModal openAdd={openAdd} />
+          <AddModal openAdd={openAdd} handleClose={handleCloseAdd} />
         </div>
 
         <TableContainer
