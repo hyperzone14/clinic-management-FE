@@ -1,17 +1,13 @@
 // components/common/HistoryCard.tsx
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { MedicalRecord } from '../../redux/slices/medicHistorySlide';
-import { User, Calendar, ChevronRight } from 'lucide-react';
+import { User, Calendar } from 'lucide-react';
 
 interface HistoryCardProps {
   record: MedicalRecord;
 }
 
-const HistoryCard = ({ record }: HistoryCardProps) => {
-  const navigate = useNavigate();
-
-  // Format date to mm/dd/yyyy
+const HistoryCard: React.FC<HistoryCardProps> = ({ record }) => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -22,10 +18,7 @@ const HistoryCard = ({ record }: HistoryCardProps) => {
   };
 
   return (
-    <div 
-      className="flex items-center p-4 mb-4 bg-white rounded-lg shadow hover:shadow-md transition-all duration-300 cursor-pointer border border-gray-100"
-      onClick={() => navigate(`/medical-detail/${record.id}`)}
-    >
+    <div className="flex items-center p-4 mb-4 bg-white rounded-lg shadow hover:shadow-md transition-all duration-300 cursor-pointer border border-gray-100">
       <div className="flex-shrink-0">
         <img 
           src={record.image} 
@@ -46,10 +39,6 @@ const HistoryCard = ({ record }: HistoryCardProps) => {
             <span className="text-sm">{formatDate(record.date)}</span>
           </div>
         </div>
-      </div>
-
-      <div className="flex-shrink-0 ml-4">
-        <ChevronRight className="w-6 h-6 text-gray-400" />
       </div>
     </div>
   );
