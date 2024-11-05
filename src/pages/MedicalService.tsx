@@ -1,5 +1,5 @@
-import React from "react";
-import { useOutletContext, useNavigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../redux/store";
 import Title from "../components/common/Title";
@@ -16,11 +16,6 @@ import {
   completeTreatment,
 } from "../redux/slices/treatmentSlice";
 import { completeTreatmentAndUpdateStatus } from "../redux/slices/scheduleSlice";
-
-interface DashboardStepProps {
-  goToNextStep: () => void;
-  goToPreviousStep: () => void;
-}
 
 // Default state values
 const defaultTreatmentState = {
@@ -41,12 +36,18 @@ const defaultTreatmentState = {
 
 const MedicalService: React.FC = () => {
   const dispatch = useDispatch();
-  const treatment = useSelector((state: RootState) => state.treatment);
-  const { goToNextStep, goToPreviousStep } =
-    useOutletContext<DashboardStepProps>();
   const navigate = useNavigate();
+  const treatment = useSelector((state: RootState) => state.treatment);
+  const currentAppointment = useSelector((state: RootState) => 
+    state.schedule.appointments.find(app => app.patientName === treatment.patientInfo.name)
+  );
 
-  // Safe destructuring with defaults
+  useEffect(() => {
+    if (!treatment.patientInfo.name) {
+      navigate('/schedule');
+    }
+  }, [treatment.patientInfo.name, navigate]);
+
   const {
     patientInfo = defaultTreatmentState.patientInfo,
     medicines = defaultTreatmentState.medicines,
@@ -102,16 +103,15 @@ const MedicalService: React.FC = () => {
   const handleDiscard = () => {
     if (window.confirm("Are you sure you want to discard your changes?")) {
       dispatch(resetTreatment());
-      goToPreviousStep();
+      navigate('/schedule');
     }
   };
 
-  const handleCompleteTreatment = () => {
+  const handleCompleteTreatment = async () => {
     try {
-      // Complete the treatment in treatment slice
       dispatch(
         completeTreatment({
-          patientId: treatment.patientInfo.name, // Using name as ID for now
+          patientId: treatment.patientInfo.name,
           treatmentData: {
             symptoms: treatment.selectedSymptoms,
             medicines: treatment.medicines,
@@ -120,19 +120,19 @@ const MedicalService: React.FC = () => {
           },
         })
       );
-
+  
       // Update the appointment status in schedule slice
       dispatch(
         completeTreatmentAndUpdateStatus({
           patientName: treatment.patientInfo.name,
         })
       );
-
+  
       // Reset treatment state
       dispatch(resetTreatment());
-
+  
       // Navigate back to schedule
-      navigate("/dashboard/schedule", { replace: true });
+      navigate("/schedule");
     } catch (error) {
       console.error("Error completing treatment:", error);
     }
@@ -142,7 +142,13 @@ const MedicalService: React.FC = () => {
     <>
       <div className="w-full">
         {/* Header */}
-        <div className="flex flex-col my-5 mx-10 justify-center items-center">
+        <div className="flex flex-col my-5 mx-10 justify-center items-center relative">
+          <button
+            onClick={() => navigate('/schedule')}
+            className="absolute left-0 px-4 py-2 text-gray-600 hover:text-gray-800"
+          >
+            ← Back
+          </button>
           <h1 className="text-4xl font-bold font-sans my-5">Medical Service</h1>
         </div>
 
@@ -242,9 +248,6 @@ const MedicalService: React.FC = () => {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Note
                       </th>
-                      {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Price
-                      </th> */}
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Action
                       </th>
@@ -295,14 +298,6 @@ const MedicalService: React.FC = () => {
                             className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                           />
                         </td>
-                        {/* <td className="px-6 py-4">
-                          <input
-                            type="number"
-                            value={medicine.price}
-                            onChange={(e) => handleMedicineChange(medicine.id, 'price', e.target.value)}
-                            className="w-24 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                          />
-                        </td> */}
                         <td className="px-6 py-4">
                           <button
                             onClick={() => handleRemoveMedicine(medicine.id)}
@@ -314,18 +309,6 @@ const MedicalService: React.FC = () => {
                       </tr>
                     ))}
                   </tbody>
-                  {/* For latter use */}
-                  {/* <tfoot>
-                    <tr>
-                      <td colSpan={3} className="px-6 py-4 text-right font-semibold">
-                        Total:
-                      </td>
-                      <td className="px-6 py-4 font-semibold">
-                        $ {total}
-                      </td>
-                      <td></td>
-                    </tr>
-                  </tfoot> */}
                 </table>
               </div>
             </div>
@@ -357,9 +340,7 @@ const MedicalService: React.FC = () => {
                 </label>
                 <textarea
                   value={labTest.results}
-                  onChange={(e) =>
-                    handleLabTestChange("results", e.target.value)
-                  }
+                  onChange={(e) => handleLabTestChange("results", e.target.value)}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
                   rows={3}
                   placeholder="Enter test results"
@@ -388,13 +369,7 @@ const MedicalService: React.FC = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-between mx-10 mb-8">
-          {/* <button 
-            onClick={goToPreviousStep}
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
-          >
-            Previous
-          </button> */}
+        <div className="flex justify-end mx-10 mb-8">
           <div className="space-x-4">
             <button
               onClick={handleDiscard}

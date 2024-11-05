@@ -4,6 +4,8 @@ import infoListReducer from "./slices/infoListSlide";
 import profileReducer from "./slices/profileSlide";
 import predrugReducer from "./slices/predrugSlide";
 import medicHistoryReducer from "./slices/medicHistorySlide";
+import scheduleReducer from './slices/scheduleSlice'; // Add this import
+import treatmentReducer from './slices/treatmentSlice';
 
 const store = configureStore({
   reducer: {
@@ -12,6 +14,8 @@ const store = configureStore({
     profile: profileReducer,
     predrug: predrugReducer,
     medicHistory: medicHistoryReducer,
+    schedule: scheduleReducer,     // Add this line
+    treatment: treatmentReducer, 
   },
 });
 

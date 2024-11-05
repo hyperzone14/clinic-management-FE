@@ -1,6 +1,8 @@
+// scheduleSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { sampleScheduleData } from '../../utils/scheduleData';
 
-export type StatusType = 'completed' | 'pending' | 'cancelled';
+export type StatusType = 'completed' | 'pending' | 'cancelled' | 'check-in' | 'confirm';
 
 export interface Appointment {
   patientName: string;
@@ -15,39 +17,7 @@ interface ScheduleState {
   appointments: Appointment[];
 }
 
-const initialState: ScheduleState = {
-  currentDoctor: "Dr.John Doe",
-  appointments: [
-    {
-      patientName: "John F. Kennedy",
-      patientImage: "https://placehold.co/150x150",
-      gender: "Male",
-      appointmentType: "Appointment type: By doctor",
-      status: "completed"
-    },
-    {
-      patientName: "John F. Kennedy",
-      patientImage: "https://placehold.co/150x150",
-      gender: "Male",
-      appointmentType: "Appointment type: By doctor",
-      status: "pending"
-    },
-    {
-      patientName: "John F. Kennedy",
-      patientImage: "https://placehold.co/150x150",
-      gender: "Male",
-      appointmentType: "Appointment type: By doctor",
-      status: "cancelled"
-    },
-    {
-      patientName: "John F. Kennedy",
-      patientImage: "https://placehold.co/150x150",
-      gender: "Male",
-      appointmentType: "Appointment type: By doctor",
-      status: "cancelled"
-    }
-  ]
-};
+const initialState: ScheduleState = sampleScheduleData;
 
 const scheduleSlice = createSlice({
   name: 'schedule',
@@ -58,8 +28,19 @@ const scheduleSlice = createSlice({
       action: PayloadAction<{ index: number; newStatus: StatusType }>
     ) {
       const { index, newStatus } = action.payload;
-      // Only allow status change if current status is not cancelled
-      if (state.appointments[index].status !== 'cancelled') {
+      const currentStatus = state.appointments[index].status;
+      
+      // Define valid status transitions
+      const validTransitions: Record<StatusType, StatusType[]> = {
+        'pending': ['check-in', 'cancelled'],
+        'check-in': ['completed', 'cancelled'],
+        'completed': [],
+        'cancelled': [],
+        'confirm': ['check-in', 'cancelled']
+      };
+
+      // Only update if the transition is valid
+      if (validTransitions[currentStatus]?.includes(newStatus)) {
         state.appointments[index].status = newStatus;
       }
     },
@@ -71,8 +52,11 @@ const scheduleSlice = createSlice({
       const index = state.appointments.findIndex(
         app => app.patientName === action.payload.patientName
       );
-      if (index !== -1 && state.appointments[index].status !== 'cancelled') {
+      
+      // Remove the status check here as well
+      if (index !== -1) {
         state.appointments[index].status = 'completed';
+        console.log("Status updated to completed for:", action.payload.patientName); // Debug log
       }
     },
 

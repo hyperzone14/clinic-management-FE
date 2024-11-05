@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Check, Clock, X } from 'lucide-react';
+import { Check, Clock, X, UserCheck, CheckCircle } from 'lucide-react';
 import { StatusType } from '../../redux/slices/scheduleSlice';
 
 interface StatusCircleProps {
@@ -17,6 +17,11 @@ const StatusCircle: React.FC<StatusCircleProps> = ({ status, onStatusChange }) =
           background: '#34A85A',
           icon: <Check className="w-5 h-5 text-white" />
         };
+      case 'check-in':
+        return {
+          background: '#4567b7',
+          icon: <UserCheck className="w-5 h-5 text-white" /> // Import UserCheck from lucide-react
+        };
       case 'pending':
         return {
           background: '#FFB800',
@@ -26,6 +31,11 @@ const StatusCircle: React.FC<StatusCircleProps> = ({ status, onStatusChange }) =
         return {
           background: '#FF4747',
           icon: <X className="w-5 h-5 text-white" />
+        };
+      case 'confirm':
+        return {
+          background: '#9333ea',
+          icon: <CheckCircle className="w-5 h-5 text-white" /> // Import CheckCircle from lucide-react
         };
     }
   };
