@@ -3,6 +3,7 @@ import bookingReducer from "./slices/bookingSlide";
 import infoListReducer from "./slices/infoListSlide";
 import profileReducer from "./slices/profileSlide";
 import predrugReducer from './slices/predrugSlide';
+import medicHistoryReducer from './slices/medicHistorySlide';
 
 const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ const store = configureStore({
     infoList: infoListReducer,
     profile: profileReducer,
     predrug: predrugReducer,
+    medicHistory: medicHistoryReducer,
   },
 });
 
