@@ -2,6 +2,7 @@ export interface Routes {
   id: number;
   path: string;
   location: string;
+  children?: Routes[];
 }
 
 export const headerRoutes: Routes[] = [
@@ -17,13 +18,13 @@ export const headerRoutes: Routes[] = [
   },
   {
     id: 3,
-    path: "/dashboard",
-    location: "Dashboard",
+    path: "/medical-history",
+    location: "MedicHistory",
   },
   {
     id: 4,
-    path: "/roll-call",
-    location: "Rollcall",
+    path: "/admin",
+    location: "Admin",
   },
 ];
 
@@ -72,11 +73,18 @@ export const pageRoutes: Routes[] = [
     id: 9,
     path: "/medical-history",
     location: "MedicHistory",
+    children: [
+      {
+        id: 91,
+        path: "/medical-detail",
+        location: "MedicDetail",
+      },
+    ],
   },
   {
     id: 10,
-    path: "/medical-detail",
-    location: "MedicDetail",
+    path: "/admin",
+    location: "Admin",
   },
 ];
 
@@ -131,5 +139,18 @@ export const prescriptionRoutes: Routes[] = [
     id: 2,
     path: "create-prescribe",
     location: "CreatePrescribe",
+  },
+];
+
+export const adminRoutes: Routes[] = [
+  {
+    id: 1,
+    path: "",
+    location: "Dashboard",
+  },
+  {
+    id: 2,
+    path: "user-management",
+    location: "UserManagement",
   },
 ];
