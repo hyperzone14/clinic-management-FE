@@ -12,11 +12,7 @@ import { BackToTop } from "./components/layout/BackToTop";
 import {
   pageRoutes,
   bookingRoutes,
-<<<<<<< HEAD
   // dashboardRoutes,
-=======
-  dashboardRoutes,
->>>>>>> main
   prescriptionRoutes,
   adminRoutes,
 } from "./utils/pageRoutes";
@@ -235,11 +231,7 @@ function App() {
               </Route>
 
               {/* Dashboard Routes */}
-<<<<<<< HEAD
               {/* <Route
-=======
-              <Route
->>>>>>> main
                 path="/dashboard"
                 element={<Dashboard steps={dashboardRoutes} />}
               >
@@ -272,11 +264,7 @@ function App() {
                     />
                   );
                 })}
-<<<<<<< HEAD
               </Route> */}
-=======
-              </Route>
->>>>>>> main
 
               {/* Prescription Routes */}
               <Route
