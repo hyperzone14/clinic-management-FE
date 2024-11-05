@@ -130,6 +130,54 @@ function App() {
             <Route element={<MainLayout />}>
               {/* Page Routes */}
               {pageRoutes.map((route) => {
+                if (route.children) {
+                  return (
+                    <Route key={route.id} path={route.path}>
+                      {/* Index route (list view) */}
+                      <Route
+                        index
+                        element={
+                          <Suspense fallback={<div>Loading...</div>}>
+                            {React.createElement(
+                              lazy(
+                                () =>
+                                  pageComponents[
+                                    `./pages/${route.location}.tsx`
+                                  ]() as Promise<{
+                                    default: React.ComponentType<unknown>;
+                                  }>
+                              )
+                            )}
+                          </Suspense>
+                        }
+                      />
+
+                      {/* Child routes (detail view) */}
+                      {route.children.map((child) => {
+                        const ChildComponent = lazy(
+                          () =>
+                            pageComponents[
+                              `./pages/${child.location}.tsx`
+                            ]() as Promise<{
+                              default: React.ComponentType<unknown>;
+                            }>
+                        );
+
+                        return (
+                          <Route
+                            key={child.id}
+                            path=":id"
+                            element={
+                              <Suspense fallback={<div>Loading...</div>}>
+                                <ChildComponent />
+                              </Suspense>
+                            }
+                          />
+                        );
+                      })}
+                    </Route>
+                  );
+                }
                 const Component = lazy(() => {
                   return pageComponents[
                     `./pages/${route.location}.tsx`
