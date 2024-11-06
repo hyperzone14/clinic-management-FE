@@ -12,14 +12,14 @@ import { BackToTop } from "./components/layout/BackToTop";
 import {
   pageRoutes,
   bookingRoutes,
-  dashboardRoutes,
+  // dashboardRoutes,
   prescriptionRoutes,
   adminRoutes,
 } from "./utils/pageRoutes";
 import React, { Suspense, lazy } from "react";
 import Booking from "./pages/Booking";
 import NotFound from "./pages/error/NotFound";
-import Dashboard from "./pages/Dashboard";
+// import Dashboard from "./pages/Dashboard";
 import { Provider } from "react-redux";
 import store from "./redux/store";
 import Prescription from "./pages/Prescription";
@@ -231,7 +231,7 @@ function App() {
               </Route>
 
               {/* Dashboard Routes */}
-              <Route
+              {/* <Route
                 path="/dashboard"
                 element={<Dashboard steps={dashboardRoutes} />}
               >
@@ -264,7 +264,7 @@ function App() {
                     />
                   );
                 })}
-              </Route>
+              </Route> */}
 
               {/* Prescription Routes */}
               <Route
