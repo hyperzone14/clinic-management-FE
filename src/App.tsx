@@ -12,14 +12,14 @@ import { BackToTop } from "./components/layout/BackToTop";
 import {
   pageRoutes,
   bookingRoutes,
-  dashboardRoutes,
+  // dashboardRoutes,
   prescriptionRoutes,
   adminRoutes,
 } from "./utils/pageRoutes";
 import React, { Suspense, lazy } from "react";
 import Booking from "./pages/Booking";
 import NotFound from "./pages/error/NotFound";
-import Dashboard from "./pages/Dashboard";
+// import Dashboard from "./pages/Dashboard";
 import { Provider } from "react-redux";
 import store from "./redux/store";
 import Prescription from "./pages/Prescription";
@@ -54,7 +54,7 @@ const AdminLayout: React.FC = () => {
   return (
     <div className="flex min-h-screen bg-[#f7f7f7]">
       <AdminSideBar />
-      <main className="w-4/5 p-4 mx-32 flex-grow">
+      <main className="w-4/5 py-4 mx-32 flex-grow">
         <Outlet />
       </main>
     </div>
@@ -231,7 +231,7 @@ function App() {
               </Route>
 
               {/* Dashboard Routes */}
-              <Route
+              {/* <Route
                 path="/dashboard"
                 element={<Dashboard steps={dashboardRoutes} />}
               >
@@ -264,7 +264,7 @@ function App() {
                     />
                   );
                 })}
-              </Route>
+              </Route> */}
 
               {/* Prescription Routes */}
               <Route
