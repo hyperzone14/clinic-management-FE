@@ -2,7 +2,7 @@ import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import bookingReducer from "./slices/bookingSlide";
 import infoListReducer from "./slices/infoListSlide";
 import profileReducer from "./slices/profileSlide";
-
+import scheduleReducer from "./slices/scheduleSlice";
 import predrugReducer from "./slices/predrugSlide";
 import userManageReducer from "./slices/userManageSlide";
 import tableReducer from "./slices/tableSlide";
@@ -17,6 +17,7 @@ const rootReducer = combineReducers({
   predrug: predrugReducer,
   medicHistory: medicHistoryReducer,
   userManage: userManageReducer,
+  schedule: scheduleReducer,
   table: tableReducer,
 });
 
