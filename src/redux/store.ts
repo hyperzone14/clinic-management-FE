@@ -2,6 +2,7 @@ import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import bookingReducer from "./slices/bookingSlide";
 import infoListReducer from "./slices/infoListSlide";
 import profileReducer from "./slices/profileSlide";
+import predrugReducer from './slices/predrugSlide';
 
 import predrugReducer from "./slices/predrugSlide";
 import userManageReducer from "./slices/userManageSlide";
@@ -32,3 +33,6 @@ export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 export default store;
+import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
+export const useAppDispatch = () => useDispatch<AppDispatch>();
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
