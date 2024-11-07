@@ -8,8 +8,8 @@ import {
   TextField,
   MenuItem,
 } from "@mui/material";
-import { useDispatch } from "react-redux";
-import { addUser } from "../../redux/slices/userManageSlide";
+import { useAppDispatch } from "../../../redux/store";
+import { addUserAsync } from "../../../redux/slices/userManageSlide";
 
 interface AddModalProps {
   openAdd: boolean;
@@ -17,6 +17,7 @@ interface AddModalProps {
 }
 
 function formatDateToDisplay(date: string) {
+  if (!date) return ""; // Return an empty string if the date is undefined or empty
   const [year, month, day] = date.split("-");
   return `${day}/${month}/${year}`;
 }
@@ -27,25 +28,26 @@ function formatDateToInput(date: string) {
 }
 
 const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const [newUser, setNewUser] = useState({
-    id: Date.now(),
-    name: "",
-    citizenID: "",
+    // id: Date.now(),
+    fullName: "",
+    citizenId: "",
     email: "",
     gender: "",
     address: "",
-    DoB: "",
-    role: "",
-    status: "",
+    birthDate: "",
+    role: "Patient",
+    status: "Inactive",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
     // For the 'DoB' field, convert from DD/MM/YYYY to YYYY-MM-DD for storing
-    const formattedValue = name === "DoB" ? formatDateToInput(value) : value;
+    const formattedValue =
+      name === "birthDate" ? formatDateToInput(value) : value;
 
     setNewUser((prev) => ({
       ...prev,
@@ -55,8 +57,14 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
 
   const handleSave = () => {
     // Validate required fields
-    if (!newUser.name || !newUser.citizenID || !newUser.email) {
+    if (!newUser.fullName || !newUser.citizenId || !newUser.email) {
       alert("Please fill in all required fields");
+      return;
+    }
+
+    // Validate Citizen ID to be exactly 10 digits
+    if (!/^\d{10}$/.test(newUser.citizenId)) {
+      alert("Citizen ID must be exactly 10 digits");
       return;
     }
 
@@ -67,17 +75,17 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
     };
 
     // Dispatch the action to add the user
-    dispatch(addUser(userToAdd));
+    dispatch(addUserAsync(userToAdd));
 
     // Reset form and close modal
     setNewUser({
-      id: Date.now(),
-      name: "",
-      citizenID: "",
+      // id: Date.now(),
+      fullName: "",
+      citizenId: "",
       email: "",
       gender: "",
       address: "",
-      DoB: "",
+      birthDate: "",
       role: "",
       status: "",
     });
@@ -91,21 +99,21 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
         <DialogContent>
           <TextField
             label="Name"
-            name="name"
+            name="fullName"
             variant="outlined"
             fullWidth
             margin="normal"
-            value={newUser.name}
+            value={newUser.fullName}
             onChange={handleChange}
             required
           />
           <TextField
             label="Citizen ID"
-            name="citizenID"
+            name="citizenId"
             variant="outlined"
             fullWidth
             margin="normal"
-            value={newUser.citizenID}
+            value={newUser.citizenId}
             onChange={handleChange}
             required
           />
@@ -131,9 +139,9 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
             onChange={handleChange}
             required
           >
-            <MenuItem value="Male">Male</MenuItem>
-            <MenuItem value="Female">Female</MenuItem>
-            <MenuItem value="Other">Other</MenuItem>
+            <MenuItem value="MALE">MALE</MenuItem>
+            <MenuItem value="FEMALE">FEMALE</MenuItem>
+            <MenuItem value="OTHER">OTHER</MenuItem>
           </TextField>
           <TextField
             label="Address"
@@ -147,12 +155,14 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
           />
           <TextField
             label="Date of Birth"
-            name="DoB"
+            name="birthDate"
             variant="outlined"
             fullWidth
             margin="normal"
             // Format value for display as DD/MM/YYYY
-            value={newUser.DoB ? formatDateToDisplay(newUser.DoB) : ""}
+            value={
+              newUser.birthDate ? formatDateToDisplay(newUser.birthDate) : ""
+            }
             onChange={handleChange}
             type="text" // Use "text" type to allow custom date format
             placeholder="DD/MM/YYYY" // Placeholder to show expected format
@@ -167,7 +177,7 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
             margin="normal"
             value={newUser.role}
             onChange={handleChange}
-            required
+            // required
           >
             <MenuItem value="Admin">Admin</MenuItem>
             <MenuItem value="Clinic Owner">Clinic Owner</MenuItem>
@@ -182,9 +192,9 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
             variant="outlined"
             fullWidth
             margin="normal"
-            value={newUser.status}
+            value={newUser.status || ""}
             onChange={handleChange}
-            required
+            // required
           >
             <MenuItem value="Active">Active</MenuItem>
             <MenuItem value="Inactive">Inactive</MenuItem>

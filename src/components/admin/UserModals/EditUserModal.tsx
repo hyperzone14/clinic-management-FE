@@ -12,19 +12,19 @@ import {
   MenuItem,
   SelectChangeEvent,
 } from "@mui/material";
-import { useDispatch } from "react-redux";
-import { updateUser } from "../../redux/slices/userManageSlide";
+import { useAppDispatch } from "../../../redux/store";
+import { updateUserAsync } from "../../../redux/slices/userManageSlide";
 
 interface Data {
   id: number;
-  name: string;
-  citizenID: string;
+  fullName: string;
+  citizenId: string;
   email: string;
   gender: string;
   address: string;
-  DoB: string;
-  role: string;
-  status: string;
+  birthDate: string;
+  role: string | null;
+  status: string | null;
 }
 
 interface EditModalProps {
@@ -38,7 +38,7 @@ const EditUserModal: React.FC<EditModalProps> = ({
   handleClose,
   user,
 }) => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [formData, setFormData] = useState<Data>(user);
 
   useEffect(() => {
@@ -53,13 +53,18 @@ const EditUserModal: React.FC<EditModalProps> = ({
     const { name, value } = e.target as { name: string; value: string };
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: value || null,
     }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch(updateUser(formData));
+    // Convert birthDate to format expected by API if necessary
+    const updatedData = {
+      ...formData,
+      birthDate: formData.birthDate.split("/").reverse().join("-"), // Convert back to "YYYY-MM-DD" format
+    };
+    dispatch(updateUserAsync(updatedData));
     handleClose();
   };
 
@@ -72,7 +77,7 @@ const EditUserModal: React.FC<EditModalProps> = ({
             <TextField
               name="name"
               label="Full Name"
-              value={formData.name}
+              value={formData.fullName}
               onChange={handleChange}
               fullWidth
             />
@@ -86,7 +91,7 @@ const EditUserModal: React.FC<EditModalProps> = ({
             <TextField
               name="citizenID"
               label="Citizen ID"
-              value={formData.citizenID}
+              value={formData.citizenId}
               onChange={handleChange}
               fullWidth
             />
@@ -98,8 +103,9 @@ const EditUserModal: React.FC<EditModalProps> = ({
                 onChange={handleChange}
                 label="Gender"
               >
-                <MenuItem value="Male">Male</MenuItem>
-                <MenuItem value="Female">Female</MenuItem>
+                <MenuItem value="MALE">MALE</MenuItem>
+                <MenuItem value="FEMALE">FEMALE</MenuItem>
+                <MenuItem value="OTHER">OTHER</MenuItem>
               </Select>
             </FormControl>
             <TextField
@@ -116,7 +122,7 @@ const EditUserModal: React.FC<EditModalProps> = ({
               fullWidth
               //   margin="normal"
               // Format value for display as DD/MM/YYYY
-              value={formData.DoB?.split("-").reverse().join("/")}
+              value={formData.birthDate?.split("-").reverse().join("/")}
               onChange={handleChange}
               type="text" // Use "text" type to allow custom date format
               placeholder="DD/MM/YYYY" // Placeholder to show expected format
@@ -126,7 +132,7 @@ const EditUserModal: React.FC<EditModalProps> = ({
               <InputLabel>Role</InputLabel>
               <Select
                 name="role"
-                value={formData.role}
+                value={formData.role || ""}
                 onChange={handleChange}
                 label="Role"
               >
@@ -141,12 +147,12 @@ const EditUserModal: React.FC<EditModalProps> = ({
               <InputLabel>Status</InputLabel>
               <Select
                 name="status"
-                value={formData.status}
+                value={formData.status || ""}
                 onChange={handleChange}
                 label="Status"
               >
-                <MenuItem value="Active">Active</MenuItem>
-                <MenuItem value="Inactive">Inactive</MenuItem>
+                <MenuItem value="ACTIVE">Active</MenuItem>
+                <MenuItem value="INACTIVE">Inactive</MenuItem>
               </Select>
             </FormControl>
           </div>

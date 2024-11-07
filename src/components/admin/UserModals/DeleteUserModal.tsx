@@ -8,14 +8,14 @@ import {
   Button,
 } from "@mui/material";
 import { useDispatch } from "react-redux";
-import { deleteUser } from "../../redux/slices/userManageSlide";
+import { deleteUser } from "../../../redux/slices/userManageSlide";
 
 interface DeleteModalProps {
   openDelete: boolean;
   handleClose: () => void;
   user: {
     id: number;
-    name: string;
+    fullName: string;
   };
 }
 
@@ -39,7 +39,7 @@ const DeleteUserModal: React.FC<DeleteModalProps> = ({
         </DialogTitle>
         <DialogContent>
           <DialogContentText className="text-gray-600">
-            Are you sure you want to delete user "{user.name}"? This action
+            Are you sure you want to delete user "{user.fullName}"? This action
             cannot be undone.
           </DialogContentText>
         </DialogContent>
