@@ -2,6 +2,7 @@ import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import bookingReducer from "./slices/bookingSlide";
 import infoListReducer from "./slices/infoListSlide";
 import profileReducer from "./slices/profileSlide";
+
 import predrugReducer from "./slices/predrugSlide";
 import userManageReducer from "./slices/userManageSlide";
 import tableReducer from "./slices/tableSlide";
