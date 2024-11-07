@@ -53,7 +53,6 @@ interface PaginatedResponse {
   code: number;
   message: string;
 }
-
 // Async thunk to fetch users from API
 export const fetchUsers = createAsyncThunk(
   "userManage/fetchUsers",
@@ -95,6 +94,7 @@ export const updateUserAsync = createAsyncThunk(
       userData
     );
     return response.result;
+
   }
 );
 
