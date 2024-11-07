@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { headerRoutes } from "../../utils/pageRoutes.ts";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Dropdown from "../common/Dropdown.tsx";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store.ts";
 import { PiUserCircleLight } from "react-icons/pi";
 
 export const Header = () => {
+  const navigate = useNavigate();
   const profile = useSelector((state: RootState) => state.profile);
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -82,14 +83,17 @@ export const Header = () => {
           </div>
 
           <div className="mx-8" ref={dropdownRef}>
-            {/* User icon for authorized users */}
+            {/* this will lead to the login page (for unauthorized users)*/}
             {/* <button
-              onClick={toggleDropdown}
-              className="bg-[#6B87C7] hover:bg-[#4567B7] text-white font-bold p-3 rounded-full transition duration-300 ease-in-out"
+              className="bg-[#6B87C7] hover:bg-[#4567B7] text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out w-28"
+              onClick={() => {
+                navigate("/login");
+              }}
             >
-              <PiUserCircleLight size={30} />
+              Log in
             </button> */}
 
+            {/* this will be for authorized users*/}
             {profile.imageURL ? (
               <img
                 src={profile.imageURL}
