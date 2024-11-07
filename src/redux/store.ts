@@ -6,7 +6,7 @@ import profileReducer from "./slices/profileSlide";
 import predrugReducer from "./slices/predrugSlide";
 import userManageReducer from "./slices/userManageSlide";
 import tableReducer from "./slices/tableSlide";
-import medicHistoryReducer from './slices/medicHistorySlide';
+import medicHistoryReducer from "./slices/medicHistorySlide";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { thunk } from "redux-thunk";
 
