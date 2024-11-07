@@ -7,6 +7,7 @@ import predrugReducer from "./slices/predrugSlide";
 import userManageReducer from "./slices/userManageSlide";
 import tableReducer from "./slices/tableSlide";
 import medicHistoryReducer from "./slices/medicHistorySlide";
+import treatmentReducer from "./slices/treatmentSlice";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { thunk } from "redux-thunk";
 
@@ -18,6 +19,7 @@ const rootReducer = combineReducers({
   medicHistory: medicHistoryReducer,
   userManage: userManageReducer,
   schedule: scheduleReducer,
+  treatment: treatmentReducer,
   table: tableReducer,
 });
 
