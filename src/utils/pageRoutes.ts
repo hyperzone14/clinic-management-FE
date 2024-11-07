@@ -23,8 +23,8 @@ export const headerRoutes: Routes[] = [
   },
   {
     id: 4,
-    path: "/admin",
-    location: "Admin",
+    path: "/schedule",
+    location: "Schedule",
   },
 ];
 
