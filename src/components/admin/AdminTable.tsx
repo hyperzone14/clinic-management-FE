@@ -126,11 +126,11 @@ const AdminTable = <T extends { id: number | string; role?: string }>({
             className="border rounded px-2 py-1"
           >
             <option value="All">All</option>
-            <option value="Admin">Admin</option>
-            <option value="Clinic Owner">Clinic Owner</option>
-            <option value="Doctor">Doctor</option>
-            <option value="Patient">Patient</option>
-            <option value="Receptionist">Receptionist</option>
+            <option value="ADMIN">Admin</option>
+            <option value="CLINIC_OWNER">Clinic Owner</option>
+            <option value="DOCTOR">Doctor</option>
+            <option value="PATIENT">Patient</option>
+            {/* <option value="Receptionist">Receptionist</option> */}
           </select>
         </div>
       )}
@@ -163,7 +163,7 @@ const AdminTable = <T extends { id: number | string; role?: string }>({
                     {statusField && column.id === statusField ? (
                       <span
                         className={`px-2 py-1 rounded-full text-sm ${
-                          String(row[statusField]).toLowerCase() === "active"
+                          row[statusField] === "ACTIVE"
                             ? "bg-green-100 text-green-800"
                             : "bg-red-100 text-red-800"
                         }`}

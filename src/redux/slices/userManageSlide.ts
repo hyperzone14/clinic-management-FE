@@ -94,7 +94,6 @@ export const updateUserAsync = createAsyncThunk(
       userData
     );
     return response.result;
-
   }
 );
 
