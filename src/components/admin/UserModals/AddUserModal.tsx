@@ -16,87 +16,111 @@ interface AddModalProps {
   handleClose: () => void;
 }
 
-function formatDateToDisplay(date: string) {
-  if (!date) return ""; // Return an empty string if the date is undefined or empty
-  const [year, month, day] = date.split("-");
-  return `${day}/${month}/${year}`;
-}
-
-function formatDateToInput(date: string) {
-  const [day, month, year] = date.split("/");
-  return `${year}-${month}-${day}`;
+interface UserData {
+  fullName: string;
+  citizenId: string;
+  email: string;
+  gender: string;
+  address: string;
+  birthDate: string;
+  role: "ADMIN" | "CLINIC_OWNER" | "DOCTOR" | "PATIENT" | "";
+  status: "ACTIVE" | "INACTIVE" | "";
 }
 
 const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
   const dispatch = useAppDispatch();
 
-  const [newUser, setNewUser] = useState({
-    // id: Date.now(),
+  const initialUserState: UserData = {
     fullName: "",
     citizenId: "",
     email: "",
     gender: "",
     address: "",
     birthDate: "",
-    role: "Patient",
-    status: "Inactive",
-  });
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-
-    // For the 'DoB' field, convert from DD/MM/YYYY to YYYY-MM-DD for storing
-    const formattedValue =
-      name === "birthDate" ? formatDateToInput(value) : value;
-
-    setNewUser((prev) => ({
-      ...prev,
-      [name]: formattedValue,
-    }));
+    role: "",
+    status: "",
   };
 
-  const handleSave = () => {
-    // Validate required fields
-    if (!newUser.fullName || !newUser.citizenId || !newUser.email) {
-      alert("Please fill in all required fields");
-      return;
-    }
+  const [newUser, setNewUser] = useState<UserData>(initialUserState);
+  const [errors, setErrors] = useState<Partial<Record<keyof UserData, string>>>(
+    {}
+  );
 
-    // Validate Citizen ID to be exactly 10 digits
+  const validateEmail = (email: string): boolean => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const { name, value } = e.target;
+
+    setErrors((prev) => ({ ...prev, [name]: "" }));
+    setNewUser((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: Partial<Record<keyof UserData, string>> = {};
+
+    if (!newUser.fullName) newErrors.fullName = "Name is required";
+    if (!newUser.citizenId) newErrors.citizenId = "Citizen ID is required";
+    if (!newUser.email) newErrors.email = "Email is required";
+    if (!newUser.gender) newErrors.gender = "Gender is required";
+    if (!newUser.address) newErrors.address = "Address is required";
+    if (!newUser.birthDate) newErrors.birthDate = "Date of Birth is required";
+    if (!newUser.role) newErrors.role = "Role is required";
+    if (!newUser.status) newErrors.status = "Status is required";
+
     if (!/^\d{10}$/.test(newUser.citizenId)) {
-      alert("Citizen ID must be exactly 10 digits");
-      return;
+      newErrors.citizenId = "Citizen ID must be exactly 10 digits";
     }
 
-    // Create a new user with a unique ID
+    if (!validateEmail(newUser.email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSave = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+
+    if (!validateForm()) return;
+
     const userToAdd = {
       ...newUser,
-      id: Date.now(), // Ensure unique ID
+      id: Date.now(),
     };
 
-    // Dispatch the action to add the user
     dispatch(addUserAsync(userToAdd));
-
-    // Reset form and close modal
-    setNewUser({
-      // id: Date.now(),
-      fullName: "",
-      citizenId: "",
-      email: "",
-      gender: "",
-      address: "",
-      birthDate: "",
-      role: "",
-      status: "",
-    });
+    setNewUser(initialUserState);
     handleClose();
   };
 
+  const handleModalClose = (e: React.MouseEvent) => {
+    e.preventDefault();
+    handleClose();
+  };
+
+  const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newDate = event.target.value;
+
+    // Update the newUser state directly with the date value
+    setNewUser((prev) => ({
+      ...prev,
+      birthDate: newDate, // Store as YYYY-MM-DD format internally
+    }));
+
+    // Clear any errors
+    setErrors((prev) => ({ ...prev, birthDate: "" }));
+  };
+
   return (
-    <>
-      <Dialog open={openAdd} onClose={handleClose} maxWidth="sm" fullWidth>
-        <DialogTitle>Add New User</DialogTitle>
-        <DialogContent>
+    <Dialog open={openAdd} onClose={handleModalClose} maxWidth="sm" fullWidth>
+      <DialogTitle>Add New User</DialogTitle>
+      <DialogContent>
+        <form onSubmit={(e) => e.preventDefault()}>
           <TextField
             label="Name"
             name="fullName"
@@ -105,6 +129,8 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
             margin="normal"
             value={newUser.fullName}
             onChange={handleChange}
+            error={!!errors.fullName}
+            helperText={errors.fullName}
             required
           />
           <TextField
@@ -115,6 +141,8 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
             margin="normal"
             value={newUser.citizenId}
             onChange={handleChange}
+            error={!!errors.citizenId}
+            helperText={errors.citizenId}
             required
           />
           <TextField
@@ -125,6 +153,8 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
             margin="normal"
             value={newUser.email}
             onChange={handleChange}
+            error={!!errors.email}
+            helperText={errors.email}
             type="email"
             required
           />
@@ -137,11 +167,13 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
             margin="normal"
             value={newUser.gender}
             onChange={handleChange}
+            error={!!errors.gender}
+            helperText={errors.gender}
             required
           >
-            <MenuItem value="MALE">MALE</MenuItem>
-            <MenuItem value="FEMALE">FEMALE</MenuItem>
-            <MenuItem value="OTHER">OTHER</MenuItem>
+            <MenuItem value="MALE">Male</MenuItem>
+            <MenuItem value="FEMALE">Female</MenuItem>
+            <MenuItem value="OTHER">Other</MenuItem>
           </TextField>
           <TextField
             label="Address"
@@ -151,6 +183,8 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
             margin="normal"
             value={newUser.address}
             onChange={handleChange}
+            error={!!errors.address}
+            helperText={errors.address}
             required
           />
           <TextField
@@ -159,14 +193,41 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
             variant="outlined"
             fullWidth
             margin="normal"
-            // Format value for display as DD/MM/YYYY
-            value={
-              newUser.birthDate ? formatDateToDisplay(newUser.birthDate) : ""
-            }
-            onChange={handleChange}
-            type="text" // Use "text" type to allow custom date format
-            placeholder="DD/MM/YYYY" // Placeholder to show expected format
+            type="date"
+            value={newUser.birthDate}
+            onChange={handleDateChange}
+            error={!!errors.birthDate}
+            helperText={errors.birthDate}
             required
+            sx={{
+              "& .MuiInputBase-root": {
+                borderRadius: "8px",
+              },
+              "& .MuiOutlinedInput-input": {
+                padding: "12px 14px",
+              },
+              "& .MuiInputLabel-root": {
+                transform: "translate(14px, -9px) scale(0.75)",
+                background: "white",
+                padding: "0 4px",
+              },
+              "& .MuiInputLabel-shrink": {
+                transform: "translate(14px, -9px) scale(0.75)",
+              },
+            }}
+            inputProps={{
+              placeholder: "dd/mm/yyyy",
+              min: "1900-01-01",
+              max: new Date().toISOString().split("T")[0],
+            }}
+            InputLabelProps={{
+              shrink: true,
+              sx: {
+                position: "absolute",
+                background: "white",
+                px: 1,
+              },
+            }}
           />
           <TextField
             select
@@ -177,13 +238,14 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
             margin="normal"
             value={newUser.role}
             onChange={handleChange}
-            // required
+            error={!!errors.role}
+            helperText={errors.role}
+            required
           >
-            <MenuItem value="Admin">Admin</MenuItem>
-            <MenuItem value="Clinic Owner">Clinic Owner</MenuItem>
-            <MenuItem value="Doctor">Doctor</MenuItem>
-            <MenuItem value="User">Patient</MenuItem>
-            <MenuItem value="Receptionist">Receptionist</MenuItem>
+            <MenuItem value="ADMIN">Admin</MenuItem>
+            <MenuItem value="CLINIC_OWNER">Clinic Owner</MenuItem>
+            <MenuItem value="DOCTOR">Doctor</MenuItem>
+            <MenuItem value="PATIENT">Patient</MenuItem>
           </TextField>
           <TextField
             select
@@ -192,24 +254,26 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
             variant="outlined"
             fullWidth
             margin="normal"
-            value={newUser.status || ""}
+            value={newUser.status}
             onChange={handleChange}
-            // required
+            error={!!errors.status}
+            helperText={errors.status}
+            required
           >
-            <MenuItem value="Active">Active</MenuItem>
-            <MenuItem value="Inactive">Inactive</MenuItem>
+            <MenuItem value="ACTIVE">Active</MenuItem>
+            <MenuItem value="INACTIVE">Inactive</MenuItem>
           </TextField>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="secondary">
-            Cancel
-          </Button>
-          <Button onClick={handleSave} color="primary" variant="contained">
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </>
+        </form>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleModalClose} color="secondary">
+          Cancel
+        </Button>
+        <Button onClick={handleSave} color="primary" variant="contained">
+          Save
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 

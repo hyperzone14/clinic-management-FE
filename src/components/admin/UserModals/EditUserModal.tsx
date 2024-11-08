@@ -15,6 +15,9 @@ import {
 import { useAppDispatch } from "../../../redux/store";
 import { updateUserAsync } from "../../../redux/slices/userManageSlide";
 
+const VALID_STATUSES = ["ACTIVE", "INACTIVE"];
+const VALID_ROLES = ["ADMIN", "CLINIC_OWNER", "DOCTOR", "PATIENT"];
+
 interface Data {
   id: number;
   fullName: string;
@@ -42,7 +45,9 @@ const EditUserModal: React.FC<EditModalProps> = ({
   const [formData, setFormData] = useState<Data>(user);
 
   useEffect(() => {
-    setFormData(user);
+    setFormData({
+      ...user,
+    });
   }, [user]);
 
   const handleChange = (
@@ -50,15 +55,20 @@ const EditUserModal: React.FC<EditModalProps> = ({
       | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
       | SelectChangeEvent<string>
   ) => {
+    // Remove e.preventDefault() as it might interfere with Material-UI's internal handling
     const { name, value } = e.target as { name: string; value: string };
     setFormData((prev) => ({
       ...prev,
-      [name]: value || null,
+      [name]: name === "status" ? toTitleCase(value) : value || null,
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const toTitleCase = (str: string) =>
+    str.charAt(0).toUpperCase() + str.slice(1);
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); // Keep this preventDefault as it's needed for form submission
+
     // Convert birthDate to format expected by API if necessary
     const updatedData = {
       ...formData,
@@ -68,14 +78,28 @@ const EditUserModal: React.FC<EditModalProps> = ({
     handleClose();
   };
 
+  const handleCancel = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    handleClose();
+  };
+
   return (
-    <Dialog open={openEdit} onClose={handleClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open={openEdit}
+      onClose={(_e, reason: string) => {
+        if (reason !== "backdropClick") {
+          handleClose();
+        }
+      }}
+      maxWidth="sm"
+      fullWidth
+    >
       <form onSubmit={handleSubmit}>
         <DialogTitle>Edit User</DialogTitle>
         <DialogContent>
           <div className="grid grid-cols-2 gap-4 mt-4">
             <TextField
-              name="name"
+              name="fullName" // Fixed: changed from "name" to "fullName" to match the data structure
               label="Full Name"
               value={formData.fullName}
               onChange={handleChange}
@@ -89,7 +113,7 @@ const EditUserModal: React.FC<EditModalProps> = ({
               fullWidth
             />
             <TextField
-              name="citizenID"
+              name="citizenId" // Fixed: changed from "citizenID" to "citizenId" to match the data structure
               label="Citizen ID"
               value={formData.citizenId}
               onChange={handleChange}
@@ -117,16 +141,13 @@ const EditUserModal: React.FC<EditModalProps> = ({
             />
             <TextField
               label="Date of Birth"
-              name="DoB"
+              name="birthDate" // Fixed: changed from "DoB" to "birthDate" to match the data structure
               variant="outlined"
               fullWidth
-              //   margin="normal"
-              // Format value for display as DD/MM/YYYY
               value={formData.birthDate?.split("-").reverse().join("/")}
               onChange={handleChange}
-              type="text" // Use "text" type to allow custom date format
-              placeholder="DD/MM/YYYY" // Placeholder to show expected format
-              //   required
+              type="text"
+              placeholder="DD/MM/YYYY"
             />
             <FormControl fullWidth>
               <InputLabel>Role</InputLabel>
@@ -136,11 +157,11 @@ const EditUserModal: React.FC<EditModalProps> = ({
                 onChange={handleChange}
                 label="Role"
               >
-                <MenuItem value="Admin">Admin</MenuItem>
-                <MenuItem value="Clinic Owner">Clinic Owner</MenuItem>
-                <MenuItem value="Clinic Owner">Doctor</MenuItem>
-                <MenuItem value="User">Patient</MenuItem>
-                <MenuItem value="Receptionist">Receptionist</MenuItem>
+                {VALID_ROLES.map((role) => (
+                  <MenuItem key={role} value={role}>
+                    {role}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
             <FormControl fullWidth>
@@ -151,14 +172,17 @@ const EditUserModal: React.FC<EditModalProps> = ({
                 onChange={handleChange}
                 label="Status"
               >
-                <MenuItem value="ACTIVE">Active</MenuItem>
-                <MenuItem value="INACTIVE">Inactive</MenuItem>
+                {VALID_STATUSES.map((status) => (
+                  <MenuItem key={status} value={status}>
+                    {status}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
           </div>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleCancel}>Cancel</Button>
           <Button type="submit" variant="contained" color="primary">
             Save Changes
           </Button>
