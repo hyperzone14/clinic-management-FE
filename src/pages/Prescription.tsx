@@ -7,11 +7,11 @@ interface Route {
   location: string;
 }
 
-interface DashboardFlowProps {
+interface PrescriptionFlowProps {
   steps: Route[];
 }
 
-const Dashboard: React.FC<DashboardFlowProps> = ({ steps }) => {
+const Prescription: React.FC<PrescriptionFlowProps> = ({ steps }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
@@ -52,4 +52,4 @@ const Dashboard: React.FC<DashboardFlowProps> = ({ steps }) => {
   );
 };
 
-export default Dashboard;
+export default Prescription;
