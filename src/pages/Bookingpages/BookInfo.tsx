@@ -5,10 +5,10 @@ import Title from "../../components/common/Title";
 import InformationList from "../../components/common/InformationList";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { setInfoList } from "../../redux/slices/infoListSlide";
+import { setInfoList } from "../../redux/slices/infoListSlice";
 import { useDispatch } from "react-redux";
 // import { RootState } from "../../redux/store";
-import { setBooking } from "../../redux/slices/bookingSlide";
+import { setBooking } from "../../redux/slices/bookingSlice";
 // import { formatDate } from "react-datepicker/dist/date_utils";
 
 interface BookingStepProps {

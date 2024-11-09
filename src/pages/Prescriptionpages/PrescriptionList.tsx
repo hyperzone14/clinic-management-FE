@@ -6,7 +6,7 @@ import {
   selectPrescribeDrug,
   clearSelectedDrug,
   deletePrescribeDrug,
-} from "../../redux/slices/predrugSlide";
+} from "../../redux/slices/predrugSlice";
 
 interface PrescriptionStepProps {
   goToNextStep: () => void;

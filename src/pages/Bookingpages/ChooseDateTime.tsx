@@ -6,8 +6,9 @@ import Calendar, { CalendarProps } from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "../../styles/global.css";
 import Title from "../../components/common/Title";
-import { useDispatch } from "react-redux";
-import { setInfoList } from "../../redux/slices/infoListSlide";
+import { useDispatch, useSelector } from "react-redux";
+import { setInfoList } from "../../redux/slices/infoListSlice";
+import { RootState } from "../../redux/store";
 
 interface BookingStepProps {
   goToNextStep: () => void;
@@ -16,9 +17,13 @@ interface BookingStepProps {
 
 const ChooseDateTime: React.FC = () => {
   const dispatch = useDispatch();
+  const infoList = useSelector((state: RootState) => state.infoList);
   const today = new Date();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [time, setTime] = useState<string>("");
+
+  const workingDays = (infoList.workingDays || []).map(Number);
+  console.log(workingDays);
 
   const timeset = [
     {
@@ -88,7 +93,12 @@ const ChooseDateTime: React.FC = () => {
                 minDetail="month"
                 prevLabel="Previous"
                 nextLabel="Next"
-                tileDisabled={({ date }) => date < today}
+                // tileDisabled={({ date }) => date < today}
+                tileDisabled={({ date }) => {
+                  // const today = new Date();
+                  const deleteDays = date.getDay();
+                  return date < today || workingDays.includes(deleteDays); // Disables dates before today and all Mondays
+                }}
               />
             </div>
             <div className="mt-5 grid grid-cols-3 gap-3 text-center">

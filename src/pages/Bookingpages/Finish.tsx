@@ -4,7 +4,7 @@ import ProgressBar from "../../components/common/ProgressBar";
 import Title from "../../components/common/Title";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
-import { setBooking } from "../../redux/slices/bookingSlide";
+import { setBooking } from "../../redux/slices/bookingSlice";
 
 interface BookingState {
   patientName: string | null;

@@ -2,7 +2,7 @@ import { RootState } from "../../redux/store";
 import React, { useEffect } from "react";
 import { IoNewspaperOutline } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
-import { setBooking } from "../../redux/slices/bookingSlide";
+import { setBooking } from "../../redux/slices/bookingSlice";
 
 const InformationList: React.FC = () => {
   const dispatch = useDispatch();
@@ -91,7 +91,7 @@ const InformationList: React.FC = () => {
             {infoList.service === "By doctor" ? (
               <dt className="font-semibold">Doctor:</dt>
             ) : (
-              <dt className="font-semibold">Specialty:</dt>
+              <dt className="font-semibold">Department:</dt>
             )}
             <dd>{infoList.type ?? "N/A"}</dd>
           </div>

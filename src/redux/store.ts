@@ -1,13 +1,15 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
-import bookingReducer from "./slices/bookingSlide";
-import infoListReducer from "./slices/infoListSlide";
-import profileReducer from "./slices/profileSlide";
+import bookingReducer from "./slices/bookingSlice";
+import infoListReducer from "./slices/infoListSlice";
+import profileReducer from "./slices/profileSlice";
 import scheduleReducer from "./slices/scheduleSlice";
-import predrugReducer from "./slices/predrugSlide";
-import userManageReducer from "./slices/userManageSlide";
-import tableReducer from "./slices/tableSlide";
-import medicHistoryReducer from "./slices/medicHistorySlide";
+import predrugReducer from "./slices/predrugSlice";
+import userManageReducer from "./slices/userManageSlice";
+import tableReducer from "./slices/tableSlice";
+import medicHistoryReducer from "./slices/medicHistorySlice";
 import treatmentReducer from "./slices/treatmentSlice";
+import doctorReducer from "./slices/doctorSlice";
+import departmentReducer from "./slices/departmentSlice";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { thunk } from "redux-thunk";
 
@@ -21,6 +23,8 @@ const rootReducer = combineReducers({
   schedule: scheduleReducer,
   treatment: treatmentReducer,
   table: tableReducer,
+  doctor: doctorReducer,
+  department: departmentReducer,
 });
 
 const store = configureStore({

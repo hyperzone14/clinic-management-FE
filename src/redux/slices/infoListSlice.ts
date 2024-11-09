@@ -7,6 +7,7 @@ interface InfoListState {
   date?: string | null;
   time?: string;
   price?: string;
+  workingDays?: string[] | null;
 }
 
 const initialState: InfoListState = {
@@ -16,6 +17,7 @@ const initialState: InfoListState = {
   date: null,
   time: "",
   price: "",
+  workingDays: null,
 };
 
 const infoListSlice = createSlice({

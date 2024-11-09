@@ -13,7 +13,7 @@ import {
   SelectChangeEvent,
 } from "@mui/material";
 import { useAppDispatch } from "../../../redux/store";
-import { updateUserAsync } from "../../../redux/slices/userManageSlide";
+import { updateUserAsync } from "../../../redux/slices/userManageSlice";
 
 const VALID_STATUSES = ["ACTIVE", "INACTIVE"];
 const VALID_ROLES = ["ADMIN", "CLINIC_OWNER", "DOCTOR", "PATIENT"];

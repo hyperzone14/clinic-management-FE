@@ -14,7 +14,6 @@ const steps = [
   { label: "Booking", dotPos: "left-[41.5rem]", wordPos: "ms-[13.5rem]" },
   { label: "Purchase", dotPos: "right-[41.5rem]", wordPos: "ms-[14.25rem]" },
   { label: "Finish", dotPos: "right-[19.75rem] ", wordPos: "ms-[15.75rem]" },
-
 ];
 
 const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep }) => {

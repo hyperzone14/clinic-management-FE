@@ -4,7 +4,7 @@ import { useAppDispatch, useAppSelector } from "../../redux/store";
 import {
   addPrescribeDrug,
   updatePrescribeDrug,
-} from "../../redux/slices/predrugSlide";
+} from "../../redux/slices/predrugSlice";
 import {
   Medicine,
   createEmptyMedicine,
