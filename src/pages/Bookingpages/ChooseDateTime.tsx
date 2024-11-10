@@ -9,6 +9,8 @@ import Title from "../../components/common/Title";
 import { useDispatch, useSelector } from "react-redux";
 import { setInfoList } from "../../redux/slices/infoListSlice";
 import { RootState } from "../../redux/store";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface BookingStepProps {
   goToNextStep: () => void;
@@ -20,10 +22,11 @@ const ChooseDateTime: React.FC = () => {
   const infoList = useSelector((state: RootState) => state.infoList);
   const today = new Date();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [time, setTime] = useState<string>("");
+  const [selectedTime, setSelectedTime] = useState<string>("");
+  const [disabledSlots, setDisabledSlots] = useState<number[]>([]);
 
   const workingDays = (infoList.workingDays || []).map(Number);
-  console.log(workingDays);
+  // console.log(workingDays);
 
   const timeset = [
     {
@@ -52,6 +55,35 @@ const ChooseDateTime: React.FC = () => {
     },
   ];
 
+  useEffect(() => {
+    const now = new Date();
+    now.setHours(now.getHours()); // Add 7 hours to the current time
+
+    const disableIds = timeset
+      .map((timeSlot) => {
+        const [end] = timeSlot.time.split("-");
+        // const startDate = parseTime(start, now);
+        const endDate = parseTime(end, now);
+
+        return now > endDate ? timeSlot.id : null;
+      })
+      .filter((id) => id !== null) as number[];
+
+    setDisabledSlots(disableIds);
+  }, []);
+
+  const parseTime = (time: string, baseDate: Date) => {
+    const [hour, period] = time.match(/(\d+)([AP]M)/)!.slice(1);
+    const date = new Date(baseDate);
+    date.setHours(
+      (parseInt(hour) % 12) + (period.toUpperCase() === "PM" ? 12 : 0),
+      0,
+      0,
+      0
+    );
+    return date;
+  };
+
   const { goToNextStep, goToPreviousStep } =
     useOutletContext<BookingStepProps>();
 
@@ -70,13 +102,14 @@ const ChooseDateTime: React.FC = () => {
     dispatch(
       setInfoList({
         date: selectedDate ? selectedDate.toUTCString() : null,
-        time: time,
+        time: selectedTime,
       })
     );
-  }, [dispatch, selectedDate, time]);
+  }, [dispatch, selectedDate, selectedTime]);
 
   return (
     <>
+      <ToastContainer />
       <div className="w-full">
         <div className="flex flex-col my-5 mx-10 justify-center items-center">
           <h1 className="text-4xl font-bold font-sans my-5">BOOKING CENTER</h1>
@@ -95,13 +128,17 @@ const ChooseDateTime: React.FC = () => {
                 nextLabel="Next"
                 // tileDisabled={({ date }) => date < today}
                 tileDisabled={({ date }) => {
-                  // const today = new Date();
-                  const deleteDays = date.getDay();
-                  return date < today || workingDays.includes(deleteDays); // Disables dates before today and all Mondays
+                  if (infoList.service === "By doctor") {
+                    const dayOfWeek = date.getDay();
+                    const isInWorkingDay = workingDays.includes(dayOfWeek);
+                    return date < today || !isInWorkingDay; // Disables dates before today and any non-working days
+                  } else {
+                    return date < today; // Disables dates before today for other services
+                  }
                 }}
               />
             </div>
-            <div className="mt-5 grid grid-cols-3 gap-3 text-center">
+            {/* <div className="mt-5 grid grid-cols-3 gap-3 text-center">
               {timeset.map((timeSlot) => (
                 <div
                   key={timeSlot.id}
@@ -110,6 +147,33 @@ const ChooseDateTime: React.FC = () => {
                   <div
                     className="my-3 w-fit h-fit p-3 rounded-lg bg-[#BAE3F3] hover:bg-[#87ceeb] transition duration-200 ease-in-out cursor-pointer text-[#1F3658] hover:text-[#fff] hover:shadow-lg"
                     onClick={() => setTime(timeSlot.time)}
+                  >
+                    <span className="font-bold">{timeSlot.time}</span>
+                  </div>
+                </div>
+              ))}
+            </div> */}
+            <div className="mt-5 grid grid-cols-3 gap-3 text-center">
+              {timeset.map((timeSlot) => (
+                <div
+                  key={timeSlot.id}
+                  className={`col-span-1 flex justify-center items-center ${
+                    disabledSlots.includes(timeSlot.id)
+                      ? "opacity-50 cursor-not-allowed"
+                      : ""
+                  }`}
+                >
+                  <div
+                    className={`my-3 w-fit h-fit p-3 rounded-lg ${
+                      disabledSlots.includes(timeSlot.id)
+                        ? "bg-gray-300 text-gray-500"
+                        : "bg-[#BAE3F3] hover:bg-[#87ceeb] cursor-pointer text-[#1F3658] hover:text-[#fff] hover:shadow-lg"
+                    } transition duration-200 ease-in-out`}
+                    onClick={() => {
+                      if (!disabledSlots.includes(timeSlot.id)) {
+                        setSelectedTime(timeSlot.time);
+                      }
+                    }}
                   >
                     <span className="font-bold">{timeSlot.time}</span>
                   </div>
@@ -132,10 +196,10 @@ const ChooseDateTime: React.FC = () => {
               <button
                 className="bg-[#4567b7] hover:bg-[#3E5CA3] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out"
                 onClick={() => {
-                  if (selectedDate && time) {
+                  if (selectedDate && selectedTime) {
                     goToNextStep();
                   } else {
-                    alert(
+                    toast.error(
                       "Please select the date and time for the reservation."
                     );
                   }
