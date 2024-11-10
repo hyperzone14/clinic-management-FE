@@ -7,7 +7,7 @@ import {
   StatusType,
   Appointment
 } from "../redux/slices/scheduleSlice";
-import { initializeTreatment } from "../redux/slices/treatmentSlice";
+import { initializeTreatment, initializeTreatmentAsync } from "../redux/slices/treatmentSlice";
 import AppointmentCard from "../components/common/AppointmentCard";
 
 const Schedule: React.FC = () => {
@@ -22,27 +22,39 @@ const Schedule: React.FC = () => {
     dispatch(fetchAppointments());
   }, [dispatch]);
 
-  const handlePatientClick = (appointment: Appointment, index: number) => {
-    // Check if the appointment is in a state that allows proceeding to medical service
+  const handlePatientClick = async (appointment: Appointment, index: number) => {
     if (appointment.status === 'checked-in') {
       try {
-        // Initialize treatment data
-        dispatch(
-          initializeTreatment({
+        // Log the appointment data to verify we have all fields
+        console.log('Appointment data:', appointment);
+  
+        // Make sure we have all required fields
+        if (!appointment.patientId || !appointment.doctorId) {
+          console.error('Missing required appointment data:', {
             patientId: appointment.patientId,
-            patientName: appointment.patientName,
-            doctorId: appointment.doctorId,
-            doctorName: appointment.doctorName,
-            appointmentId: appointment.id,
-            appointmentDate: appointment.appointmentDate,
-            gender: appointment.gender || 'Male' // Default to 'Male' if gender is not provided
-          })
-        );
-        // Navigate to medical service page
+            doctorId: appointment.doctorId
+          });
+          return;
+        }
+  
+        // Initialize treatment with explicit number conversion
+        await dispatch(initializeTreatmentAsync({
+          patientId: Number(appointment.patientId),
+          patientName: appointment.patientName,
+          doctorId: Number(appointment.doctorId),
+          doctorName: appointment.doctorName,
+          appointmentId: Number(appointment.id),
+          appointmentDate: appointment.appointmentDate,
+          gender: appointment.gender || 'Male'
+        })).unwrap();
+  
+        // Navigate only after successful initialization
         navigate('/schedule/medical-service');
       } catch (error) {
-        console.error("Error in handlePatientClick:", error);
+        console.error("Error initializing treatment:", error);
       }
+    } else {
+      console.log('Appointment not in checked-in status:', appointment.status);
     }
   };
 
@@ -117,12 +129,15 @@ const Schedule: React.FC = () => {
               key={appointment.id}
               appointment={{
                 id: appointment.id,
+                patientId: appointment.patientId, // Make sure this is included
+                doctorId: appointment.doctorId,   // Make sure this is included
                 patientName: appointment.patientName,
                 status: appointment.status,
                 doctorName: appointment.doctorName,
                 timeSlot: appointment.timeSlot,
                 appointmentDate: appointment.appointmentDate,
-                appointmentType: appointment.appointmentType
+                appointmentType: appointment.appointmentType,
+                gender: appointment.gender
               }}
               index={index}
               onPatientClick={handlePatientClick}

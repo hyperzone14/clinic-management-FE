@@ -1,6 +1,7 @@
 // redux/slices/treatmentSlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { apiService } from "../../utils/axios-config";
+import { updateAppointmentStatus } from './scheduleSlice';
 
 // Interfaces
 export interface Drug {
@@ -95,29 +96,27 @@ interface TreatmentResponse {
   message: string;
 }
 
-// Fetch drugs async thunk
 export const fetchDrugs = createAsyncThunk(
   'treatment/fetchDrugs',
   async (_, { rejectWithValue }) => {
     try {
-      console.log('Fetching drugs...'); // Debug log
+      console.log('Fetching drugs...');
       const response = await apiService.get<DrugResponse>('/drug');
-      console.log('Drugs response:', response); // Debug log
+      console.log('Drugs response:', response);
       if (!response.result) {
         throw new Error('No drug data received');
       }
       return response.result;
     } catch (error) {
-      console.error('Drug fetch error:', error); // Debug log
+      console.error('Drug fetch error:', error);
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch drugs');
     }
   }
 );
 
-// Submit treatment async thunk
 export const submitTreatment = createAsyncThunk(
   'treatment/submit',
-  async (_, { getState, rejectWithValue }) => {
+  async (_, { getState, dispatch, rejectWithValue }) => {
     try {
       const state = getState() as { treatment: TreatmentState };
       const treatmentData: MedicalBillRequest = {
@@ -130,18 +129,28 @@ export const submitTreatment = createAsyncThunk(
         examinationDetailRequestDTOS: state.treatment.examinationDetailRequestDTOS,
       };
 
-      console.log('Submitting treatment:', treatmentData); // Debug log
+      console.log('Submitting treatment:', treatmentData);
       const response = await apiService.post<TreatmentResponse>('/medical-bills', treatmentData);
-      console.log('Treatment response:', response); // Debug log
+      console.log('Treatment response:', response);
+
+      // If medical bill submission is successful, update appointment status
+      if (response.result) {
+        console.log('Updating appointment status for ID:', state.treatment.appointmentId);
+        await dispatch(updateAppointmentStatus({ 
+          id: state.treatment.appointmentId,
+          status: 'success'
+        })).unwrap();
+        console.log('Appointment status updated successfully');
+      }
+
       return response.result;
     } catch (error) {
-      console.error('Treatment submission error:', error); // Debug log
+      console.error('Treatment submission error:', error);
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to submit treatment');
     }
   }
 );
 
-// Initialize treatment async thunk
 export const initializeTreatmentAsync = createAsyncThunk(
   'treatment/initializeAsync',
   async (data: {
@@ -154,14 +163,12 @@ export const initializeTreatmentAsync = createAsyncThunk(
     gender: 'Male' | 'Female';
   }, { dispatch }) => {
     try {
-      console.log('Initializing treatment with:', data); // Debug log
-      // First initialize the treatment data
+      console.log('Initializing treatment with:', data);
       dispatch(initializeTreatment(data));
-      // Then fetch the drugs
       await dispatch(fetchDrugs()).unwrap();
       return data;
     } catch (error) {
-      console.error('Treatment initialization error:', error); // Debug log
+      console.error('Treatment initialization error:', error);
       throw error;
     }
   }
@@ -171,6 +178,10 @@ const treatmentSlice = createSlice({
   name: 'treatment',
   initialState,
   reducers: {
+    setLoading: (state, action: PayloadAction<boolean>) => {
+      state.loading = action.payload;
+    },
+
     initializeTreatment: (state, action: PayloadAction<{
       patientId: number;
       patientName: string;
@@ -180,7 +191,7 @@ const treatmentSlice = createSlice({
       appointmentDate: string;
       gender: 'Male' | 'Female';
     }>) => {
-      console.log('Setting treatment state:', action.payload); // Debug log
+      console.log('Setting treatment state:', action.payload);
       const { patientId, patientName, doctorId, doctorName, appointmentId, appointmentDate, gender } = action.payload;
       state.patientInfo = {
         patientId,
@@ -254,7 +265,6 @@ const treatmentSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Fetch drugs cases
       .addCase(fetchDrugs.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -262,19 +272,18 @@ const treatmentSlice = createSlice({
       .addCase(fetchDrugs.fulfilled, (state, action) => {
         state.loading = false;
         state.availableDrugs = action.payload;
-        console.log('Updated available drugs:', state.availableDrugs); // Debug log
+        console.log('Updated available drugs:', state.availableDrugs);
       })
       .addCase(fetchDrugs.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
-      // Submit treatment cases
       .addCase(submitTreatment.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(submitTreatment.fulfilled, (state) => {
-        console.log('Treatment submitted successfully'); // Debug log
+        console.log('Treatment submitted successfully');
         return initialState;
       })
       .addCase(submitTreatment.rejected, (state, action) => {
@@ -284,7 +293,6 @@ const treatmentSlice = createSlice({
   }
 });
 
-// Selector
 export const selectTreatment = (state: { treatment: TreatmentState }) => state.treatment;
 
 export const {
@@ -297,7 +305,8 @@ export const {
   addExamination,
   updateExamination,
   removeExamination,
-  resetTreatment
+  resetTreatment,
+  setLoading
 } = treatmentSlice.actions;
 
 export default treatmentSlice.reducer;

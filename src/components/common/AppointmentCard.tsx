@@ -4,12 +4,15 @@ import StatusCircle from "./StatusCircle";
 interface AppointmentCardProps {
   appointment: {
     id: number;
+    patientId: number;
+    doctorId: number;
     patientName: string;
     status: StatusType;
     doctorName: string;
     timeSlot: string;
     appointmentDate: string;
     appointmentType: string;
+    gender?: 'Male' | 'Female';
   };
   index: number;
   onPatientClick: (appointment: any, index: number) => void;
