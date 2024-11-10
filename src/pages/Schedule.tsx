@@ -5,12 +5,13 @@ import {
   fetchAppointments,
   updateAppointmentStatus,
   StatusType,
+  Appointment
 } from "../redux/slices/scheduleSlice";
-import { setPatientInfo } from "../redux/slices/treatmentSlice";
+import { initializeTreatment } from "../redux/slices/treatmentSlice";
 import AppointmentCard from "../components/common/AppointmentCard";
 
 const Schedule: React.FC = () => {
-  const dispatch = useAppDispatch(); // Use typed dispatch
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   
   const { appointments, loading, error, currentDoctor } = useAppSelector(
@@ -21,17 +22,23 @@ const Schedule: React.FC = () => {
     dispatch(fetchAppointments());
   }, [dispatch]);
 
-  const handlePatientClick = (appointment: any, index: number) => {
-    // Update this condition to check for 'checked-in' status
+  const handlePatientClick = (appointment: Appointment, index: number) => {
+    // Check if the appointment is in a state that allows proceeding to medical service
     if (appointment.status === 'checked-in') {
       try {
+        // Initialize treatment data
         dispatch(
-          setPatientInfo({
-            name: appointment.patientName,
-            dateOfBirth: '',
-            gender: appointment.gender as "Male" | "Female",
+          initializeTreatment({
+            patientId: appointment.patientId,
+            patientName: appointment.patientName,
+            doctorId: appointment.doctorId,
+            doctorName: appointment.doctorName,
+            appointmentId: appointment.id,
+            appointmentDate: appointment.appointmentDate,
+            gender: appointment.gender || 'Male' // Default to 'Male' if gender is not provided
           })
         );
+        // Navigate to medical service page
         navigate('/schedule/medical-service');
       } catch (error) {
         console.error("Error in handlePatientClick:", error);
@@ -46,11 +53,25 @@ const Schedule: React.FC = () => {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-xl font-semibold">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-xl text-red-600">Error: {error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full">
+      {/* Header */}
       <div className="flex flex-col my-5 mx-10 justify-center items-center">
         <h1 className="text-4xl font-bold font-sans my-5">SCHEDULE</h1>
         <div className="mb-4">
@@ -84,17 +105,41 @@ const Schedule: React.FC = () => {
         </div>
       </div>
 
+      {/* Appointments List */}
       <div className="space-y-4 mt-6 mb-20 mx-10">
-        {appointments.map((appointment, index) => (
-          <AppointmentCard
-            key={appointment.id}
-            appointment={appointment}
-            index={index}
-            onPatientClick={handlePatientClick}
-            onStatusChange={handleStatusChange}
-          />
-        ))}
+        {appointments.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            No appointments found
+          </div>
+        ) : (
+          appointments.map((appointment, index) => (
+            <AppointmentCard
+              key={appointment.id}
+              appointment={{
+                id: appointment.id,
+                patientName: appointment.patientName,
+                status: appointment.status,
+                doctorName: appointment.doctorName,
+                timeSlot: appointment.timeSlot,
+                appointmentDate: appointment.appointmentDate,
+                appointmentType: appointment.appointmentType
+              }}
+              index={index}
+              onPatientClick={handlePatientClick}
+              onStatusChange={handleStatusChange}
+            />
+          ))
+        )}
       </div>
+
+      {/* Back to Top Button */}
+      <button
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        className="fixed bottom-8 right-8 bg-blue-500 text-white p-3 rounded-full shadow-lg hover:bg-blue-600 transition-colors"
+        style={{ display: window.pageYOffset > 300 ? 'block' : 'none' }}
+      >
+        ↑
+      </button>
     </div>
   );
 };

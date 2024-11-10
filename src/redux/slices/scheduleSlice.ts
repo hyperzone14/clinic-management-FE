@@ -14,15 +14,17 @@ export enum AppointmentStatus {
 
 export interface Appointment {
   id: number;
+  patientId: number;
+  doctorId: number;
   appointmentDate: string;
   doctorName: string;
   patientName: string;
   appointmentStatus: string;
   timeSlot: string;
   payId: number | null;
-  // Frontend specific fields
   appointmentType: string;
   status: StatusType;
+  gender?: 'Male' | 'Female';
 }
 
 interface ScheduleState {
@@ -40,15 +42,7 @@ interface Sort {
 
 interface AppointmentResponse {
   result: {
-    content: Array<{
-      id: number;
-      appointmentDate: string;
-      doctorName: string;
-      patientName: string;
-      appointmentStatus: string;
-      timeSlot: string;
-      payId: number | null;
-    }>;
+    content: Array<Omit<Appointment, 'appointmentType' | 'status'>>;
     pageable: {
       pageNumber: number;
       pageSize: number;
@@ -57,7 +51,6 @@ interface AppointmentResponse {
       paged: boolean;
       unpaged: boolean;
     };
-    last: boolean;
     totalElements: number;
     totalPages: number;
     size: number;
@@ -89,9 +82,8 @@ const mapStatus = (backendStatus: string): StatusType => {
   };
   const normalizedStatus = backendStatus?.toUpperCase() || 'PENDING';
   return statusMap[normalizedStatus] || 'pending';
-}
+};
 
-// Helper function to transform appointment data
 const transformAppointmentData = (apt: AppointmentResponse['result']['content'][0]): Appointment => ({
   ...apt,
   appointmentType: apt.timeSlot,
@@ -113,18 +105,15 @@ export const fetchAppointments = createAsyncThunk(
   }
 );
 
-// Async thunk to update appointment status
 export const updateAppointmentStatus = createAsyncThunk(
   "schedule/updateStatus",
   async ({ id, status }: { id: number; status: StatusType }, { rejectWithValue }) => {
     try {
       const backendStatus = status.toUpperCase().replace('-', '_');
-      
       const response = await apiService.put<{ result: Appointment }>(
         `/appointment/status/${id}`,
         { appointmentStatus: backendStatus }
       );
-      
       return transformAppointmentData(response.result);
     } catch (error) {
       if (error instanceof Error) {
@@ -152,7 +141,6 @@ const scheduleSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Fetch appointments
       .addCase(fetchAppointments.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -164,27 +152,23 @@ const scheduleSlice = createSlice({
       })
       .addCase(fetchAppointments.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string || "Failed to fetch appointments";
+        state.error = action.payload as string;
         state.appointments = [];
       })
-      // Update appointment status
       .addCase(updateAppointmentStatus.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(updateAppointmentStatus.fulfilled, (state, action) => {
         state.loading = false;
-        state.error = null;
-        const index = state.appointments.findIndex(
-          (apt) => apt.id === action.payload.id
-        );
+        const index = state.appointments.findIndex(apt => apt.id === action.payload.id);
         if (index !== -1) {
           state.appointments[index] = action.payload;
         }
       })
       .addCase(updateAppointmentStatus.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string || "Failed to update appointment status";
+        state.error = action.payload as string;
       });
   },
 });
