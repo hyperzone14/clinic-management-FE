@@ -14,6 +14,7 @@ import { RootState, AppDispatch } from "../../redux/store";
 import { fetchDepartments } from "../../redux/slices/departmentSlice";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+// import { set } from "react-datepicker/dist/date_utils";
 // import { fetchDepartments } from "../../redux/slices/departmentSlice";
 
 interface DoctorInfo {
@@ -81,16 +82,16 @@ const SearchBar: React.FC<{
 
 const DoctorCard: React.FC<{
   doctor: DoctorWithDepartment;
-  onClick: () => void;
+  onClick: (doctorId: number, doctorName: string) => void;
   handleWorkingDaysChange: (workingDays: string[]) => void;
 }> = ({ doctor, onClick, handleWorkingDaysChange }) => {
   const handleClick = () => {
     handleWorkingDaysChange(doctor.doctor.workingDays);
-    onClick();
+    onClick(doctor.doctor.id, doctor.doctor.fullName);
   };
+
   return (
     <div
-      key={doctor.doctor.id}
       className="bg-[#fff] w-full h-fit rounded-lg flex shadow-sm hover:shadow-md transition-shadow cursor-pointer"
       onClick={handleClick}
     >
@@ -124,12 +125,11 @@ const DoctorCard: React.FC<{
 
 const DepartmentCard: React.FC<{
   department: Department;
-  onClick: () => void;
+  onClick: (departmentId: number, departmentName: string) => void;
 }> = ({ department, onClick }) => (
   <div
-    key={department.id}
     className="bg-[#fff] w-full h-fit rounded-lg flex shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-    onClick={onClick}
+    onClick={() => onClick(department.id, department.name)}
   >
     <img
       src="https://via.placeholder.com/150"
@@ -181,7 +181,9 @@ const Service: React.FC = () => {
     department.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleWorkingDaysChange = (days: string[]) => {
+  const handleWorkingDaysChange = (
+    days: string[]
+  ): string[] | null | undefined => {
     const dayMapping: { [key: string]: string } = {
       MONDAY: "1",
       TUESDAY: "2",
@@ -191,37 +193,76 @@ const Service: React.FC = () => {
     };
 
     if (serviceType === "By doctor" && days.length > 0) {
-      const convertedDays = days.map(
-        (day) => dayMapping[day.trim().toUpperCase()]
-      );
-      setWorkingDays(convertedDays);
+      return days.map((day) => dayMapping[day.trim().toUpperCase()]);
     } else {
-      setWorkingDays([]);
+      return [];
     }
+  };
+
+  const handleServiceTypeSelect = (newServiceType: string) => {
+    setServiceType(newServiceType);
+    setType("");
+    setWorkingDays([]);
+    // Reset the info list when changing service type
+    dispatch(
+      setInfoList({
+        service: newServiceType,
+        type: "",
+        workingDays: null,
+        doctorId: null,
+        departmentId: null,
+      })
+    );
+  };
+
+  const handleDoctorSelect = (doctorId: number, doctorName: string) => {
+    const doctor = doctorsWithDepartments.find((d) => d.doctor.id === doctorId);
+    if (doctor) {
+      const newWorkingDays = handleWorkingDaysChange(doctor.doctor.workingDays);
+      setType(doctorName);
+      dispatch(
+        setInfoList({
+          service: serviceType,
+          type: doctorName,
+          workingDays: newWorkingDays, // Use the newly converted working days
+          doctorId: doctorId,
+          departmentId: null,
+        })
+      );
+    }
+  };
+
+  const handleDepartmentSelect = (
+    departmentId: number,
+    departmentName: string
+  ) => {
+    setType(departmentName);
+    setWorkingDays([]); // Reset working days when selecting department
+    dispatch(
+      setInfoList({
+        service: serviceType,
+        type: departmentName,
+        workingDays: null, // Ensure working days is null for department selection
+        departmentId: departmentId,
+        doctorId: null,
+      })
+    );
   };
 
   const noResultsFound =
     (serviceType === "By doctor" && filterByDoctors.length === 0) ||
     (serviceType !== "By doctor" && filterByDepartments.length === 0);
 
-  useEffect(() => {
-    dispatch(
-      setInfoList({
-        service: serviceType,
-        type: type,
-        workingDays: workingDays,
-      })
-    );
-  }, [dispatch, serviceType, type, workingDays]);
-
   const handleNext = () => {
     if (serviceType && type) {
       goToNextStep();
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
-      toast.error("Please select the service type that you want to book");
+      toast.error("Please select the service type and make a selection");
     }
   };
+
+  console.log(workingDays);
 
   return (
     <>
@@ -239,56 +280,49 @@ const Service: React.FC = () => {
                 <ServiceOption
                   icon={<FaRegCalendarAlt className="w-full h-full" />}
                   label="Book by date"
-                  onClick={() => {
-                    setServiceType("By date");
-                    setType("");
-                  }}
+                  onClick={() => handleServiceTypeSelect("By date")}
                 />
                 <ServiceOption
                   icon={<FaUserDoctor className="w-full h-full" />}
                   label="Book by doctor"
-                  onClick={() => {
-                    setServiceType("By doctor");
-                    setType("");
-                  }}
+                  onClick={() => handleServiceTypeSelect("By doctor")}
                 />
               </div>
             </div>
-            <div>
-              <Title id={serviceType === "By doctor" ? 2 : 7} />
-              <div className="my-12">
-                <SearchBar onChange={setSearchTerm} />
-                <div className="flex flex-col items-center justify-center w-full">
-                  <div className="w-9/12 space-y-4 max-h-[80vh] overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-500">
-                    {noResultsFound ? (
-                      <p className="text-xl text-gray-500 text-center">
-                        No results found
-                      </p>
-                    ) : serviceType === "By doctor" ? (
-                      filterByDoctors.map((doctorWithDept) => (
-                        <DoctorCard
-                          key={doctorWithDept.doctor.id}
-                          doctor={doctorWithDept}
-                          // department={department}
-                          onClick={() =>
-                            setType(doctorWithDept.doctor.fullName)
-                          }
-                          handleWorkingDaysChange={handleWorkingDaysChange}
-                        />
-                      ))
-                    ) : (
-                      filterByDepartments.map((department) => (
-                        <DepartmentCard
-                          key={department.id}
-                          department={department}
-                          onClick={() => setType(department.name)}
-                        />
-                      ))
-                    )}
+            {serviceType && (
+              <div>
+                <Title id={serviceType === "By doctor" ? 2 : 7} />
+                <div className="my-12">
+                  <SearchBar onChange={setSearchTerm} />
+                  <div className="flex flex-col items-center justify-center w-full">
+                    <div className="w-9/12 space-y-4 max-h-[80vh] overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-500">
+                      {noResultsFound ? (
+                        <p className="text-xl text-gray-500 text-center">
+                          No results found
+                        </p>
+                      ) : serviceType === "By doctor" ? (
+                        filterByDoctors.map((doctorWithDept) => (
+                          <DoctorCard
+                            key={doctorWithDept.doctor.id}
+                            doctor={doctorWithDept}
+                            onClick={handleDoctorSelect}
+                            handleWorkingDaysChange={handleWorkingDaysChange}
+                          />
+                        ))
+                      ) : (
+                        filterByDepartments.map((department) => (
+                          <DepartmentCard
+                            key={department.id}
+                            department={department}
+                            onClick={handleDepartmentSelect}
+                          />
+                        ))
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
             <div className="my-12 flex justify-center items-center gap-3">
               <button
                 className="bg-[#4567b7] hover:bg-[#3E5CA3] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out"
@@ -298,7 +332,7 @@ const Service: React.FC = () => {
               </button>
             </div>
           </div>
-          <div className="col-span-1">
+          <div className="col-span-1 mb-10">
             <InformationList />
           </div>
         </div>

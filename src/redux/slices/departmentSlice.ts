@@ -32,33 +32,6 @@ const initialState: DepartmentState = {
   loading: false,
   error: null,
 };
-
-// interface Sort {
-//   empty: boolean;
-//   sorted: boolean;
-//   unsorted: boolean;
-// }
-
-// interface PaginatedResponse {
-//   result: {
-//     content: Department[];
-//     empty: boolean;
-//     first: boolean;
-//     last: boolean;
-//     number: number;
-//     numberOfElements: number;
-//     pageable: {
-//       pageNumber: number;
-//       pageSize: number;
-//       sort: Sort;
-//       offset: number;
-//       paged: boolean;
-//     };
-//     totalElements: number;
-//     totalPages: number;
-//   };
-// }
-
 interface ApiResponse {
   code: number;
   message: string;

@@ -1,6 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface InfoListState {
+  patientId?: number;
+  doctorId?: number | null;
+  appointmentId?: number | null;
+  departmentId?: number | null;
   name?: string;
   service?: string;
   type?: string;
@@ -8,9 +12,15 @@ interface InfoListState {
   time?: string;
   price?: string;
   workingDays?: string[] | null;
+  timeSlot?: number;
+  note?: string;
 }
 
 const initialState: InfoListState = {
+  patientId: 1,
+  doctorId: null,
+  appointmentId: null,
+  departmentId: null,
   name: "",
   service: "",
   type: "",
@@ -18,6 +28,8 @@ const initialState: InfoListState = {
   time: "",
   price: "",
   workingDays: null,
+  timeSlot: 0,
+  note: "",
 };
 
 const infoListSlice = createSlice({
