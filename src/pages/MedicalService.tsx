@@ -18,6 +18,7 @@ import {
   selectTreatment
 } from "../redux/slices/treatmentSlice";
 
+
 const MedicalService: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -41,25 +42,25 @@ const MedicalService: React.FC = () => {
   }, [patientInfo.patientId, navigate, dispatch]);
 
   const handleSubmit = async () => {
-    if (syndrome.trim() === '') {
-      alert('Please enter a syndrome.');
+    if (!syndrome.trim()) {
+      alert('Please enter syndrome');
       return;
     }
-
-    const hasMissingDrug = prescribedDrugRequestDTOS.some(
-      (drug) => drug.drugId === 0 || drug.dosage <= 0 || drug.duration <= 0 || drug.frequency.trim() === ''
-    );
-
-    if (hasMissingDrug) {
-      alert('Please fill in all the required fields for the prescribed drugs.');
+  
+    if (prescribedDrugRequestDTOS.length === 0) {
+      alert('Please add at least one prescribed drug');
       return;
     }
-
+  
     try {
       await dispatch(submitTreatment()).unwrap();
-      navigate("/schedule");
+      alert('Medical bill created successfully');
+      
+      // Navigate back to schedule page
+      navigate('/schedule');
     } catch (error) {
-      console.error("Error submitting treatment:", error);
+      console.error('Error:', error);
+      alert('Failed to create medical bill. Please try again.');
     }
   };
 

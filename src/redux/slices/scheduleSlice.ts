@@ -119,25 +119,18 @@ export const updateAppointmentStatus = createAsyncThunk(
   "schedule/updateStatus",
   async ({ id, status }: { id: number; status: StatusType }, { rejectWithValue }) => {
     try {
-      // Convert frontend status to backend format
-      // Ensure proper enum format matching your backend
-      const backendStatus = status.toUpperCase().replace('-', '_') as AppointmentStatus;
+      // Convert the status to backend format
+      const backendStatus = status.toUpperCase().replace('-', '_');
       
-      const response = await apiService.put<{ result: Appointment }>(
-        `/appointment/status/${id}`, // Changed URL format to match your backend
-        { appointmentStatus: backendStatus } // Changed request body format
+      // Fix URL format to match your backend endpoint
+      const response = await apiService.put<{ result: Appointment }, string>(
+        `/appointment/${id}/status`,  // Changed URL format
+        `"${backendStatus}"`
       );
-      
-      return {
-        ...response.result, 
-        appointmentType: response.result.timeSlot,
-        status: mapStatus(response.result.appointmentStatus),
-      };
+
+      return transformAppointmentData(response.result);
     } catch (error) {
-      if (error instanceof Error) {
-        return rejectWithValue(error.message);
-      }
-      return rejectWithValue('An error occurred while updating appointment status');
+      return rejectWithValue(error instanceof Error ? error.message : 'Failed to update status');
     }
   }
 );
