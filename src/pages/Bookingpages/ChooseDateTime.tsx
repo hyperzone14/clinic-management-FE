@@ -38,11 +38,6 @@ const ChooseDateTime: React.FC = () => {
   // const today = new Date();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string>("");
-  // const [disabledSlots, setDisabledSlots] = useState<number[]>([]);
-
-  // const workingDays = (infoList.workingDays || [])
-  //   .map((day) => (typeof day === "string" ? parseInt(day, 10) : day))
-  //   .filter((day): day is number => !isNaN(day));
 
   const { goToNextStep, goToPreviousStep } =
     useOutletContext<BookingStepProps>();
@@ -88,7 +83,6 @@ const ChooseDateTime: React.FC = () => {
       return;
     }
 
-    // Get the time slot number
     const timeSlotObj = TIME_SLOTS.find(
       (timeSlot) => timeSlot.time === selectedTime
     );
@@ -98,63 +92,57 @@ const ChooseDateTime: React.FC = () => {
     }
 
     const formattedDate = formatDateForApi(selectedDate);
-
-    // Build base appointment data
     const appointmentData = {
       patientId: infoList.patientId ?? 1,
-      appointmentDate: formattedDate, // Format as YYYY-MM-DD
+      appointmentDate: formattedDate,
       timeSlot: timeSlotObj.slot,
-      status: "PENDING", // Add status if your backend requires it
+      status: "PENDING",
     };
 
-    let result;
+    try {
+      let result;
 
-    // For doctor appointment
-    if (infoList.service === "By doctor" && infoList.doctorId) {
-      // Explicitly type and include doctorId
-      const doctorAppointment = {
-        ...appointmentData,
-        doctorId: infoList.doctorId,
-        departmentId: undefined, // Ensure this is not sent for doctor appointments
-      };
+      if (infoList.service === "By doctor" && infoList.doctorId) {
+        const doctorAppointment = {
+          ...appointmentData,
+          doctorId: infoList.doctorId,
+        };
+        result = await dispatch(
+          addAppointmentByDoctor(doctorAppointment)
+        ).unwrap();
+      } else if (infoList.service === "By date" && infoList.departmentId) {
+        const departmentAppointment = {
+          ...appointmentData,
+          departmentId: infoList.departmentId,
+        };
+        result = await dispatch(
+          addAppointmentByDepartment(departmentAppointment)
+        ).unwrap();
+      } else {
+        toast.error("Invalid service type or missing doctor/department ID");
+        return;
+      }
 
-      console.log("Sending doctor appointment:", doctorAppointment); // Debug log
-      result = await dispatch(
-        addAppointmentByDoctor(doctorAppointment)
-      ).unwrap();
-    }
-    // For department appointment
-    else if (infoList.service === "By date" && infoList.departmentId) {
-      // Explicitly type and include departmentId
-      const departmentAppointment = {
-        ...appointmentData,
-        departmentId: infoList.departmentId,
-        doctorId: undefined, // Ensure this is not sent for department appointments
-      };
-
-      console.log("Sending department appointment:", departmentAppointment); // Debug log
-      result = await dispatch(
-        addAppointmentByDepartment(departmentAppointment)
-      ).unwrap();
-    } else {
-      toast.error("Invalid service type or missing doctor/department ID");
-      return;
-    }
-
-    // Handle successful response
-    if (result) {
-      dispatch(
-        setInfoList({
-          ...infoList,
-          appointmentId: result.id,
-        })
-      );
-      toast.success("Appointment created successfully!");
-      goToNextStep();
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth",
-      });
+      if (result) {
+        // Update only the date-related info in infoList
+        dispatch(
+          setInfoList({
+            ...infoList,
+            date: selectedDate.toISOString(),
+            time: selectedTime,
+            timeSlot: timeSlotObj.slot,
+          })
+        );
+        toast.success("Appointment created successfully!");
+        goToNextStep();
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      }
+    } catch (error) {
+      console.error("Appointment creation error:", error);
+      toast.error("Failed to create appointment. Please try again.");
     }
   };
 

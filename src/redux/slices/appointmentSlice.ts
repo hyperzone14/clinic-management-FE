@@ -48,28 +48,23 @@ export const fetchAppointments = createAsyncThunk(
 );
 
 // Add appointment by doctor
-// Add appointment by doctor
 export const addAppointmentByDoctor = createAsyncThunk(
   "appointment/addByDoctor",
   async (appointmentData: Omit<Appointment, "id" | "departmentId">) => {
-    // try {
     const response = await apiService.post<ApiResponse>(
       "/appointment/doctor",
       appointmentData
     );
 
-    // Debug log
     console.log("API Response:", response);
 
     if (!response.result) {
       throw new Error("No result in API response");
     }
 
-    return response.result as Appointment;
-    // } catch (error: any) {
-    //   console.error('API Error:', error.response || error);
-    //   throw error;
-    // }
+    const result = response.result as Appointment;
+
+    return result;
   }
 );
 
@@ -77,24 +72,20 @@ export const addAppointmentByDoctor = createAsyncThunk(
 export const addAppointmentByDepartment = createAsyncThunk(
   "appointment/addByDepartment",
   async (appointmentData: Omit<Appointment, "id" | "doctorId">) => {
-    // try {
     const response = await apiService.post<ApiResponse>(
       "/appointment/department",
       appointmentData
     );
 
-    // Debug log
     console.log("API Response:", response);
 
     if (!response.result) {
       throw new Error("No result in API response");
     }
 
-    return response.result as Appointment;
-    // } catch (error: any) {
-    //   console.error('API Error:', error.response || error);
-    //   throw error;
-    // }
+    const result = response.result as Appointment;
+
+    return result;
   }
 );
 
@@ -131,10 +122,16 @@ const appointmentSlice = createSlice({
     setCurrentAppointment: (state, action: PayloadAction<Appointment>) => {
       state.currentAppointment = action.payload;
     },
+    clearCurrentAppointment: (state) => {
+      state.currentAppointment = null;
+    },
     deleteAppointment: (state, action: PayloadAction<number>) => {
       state.appointments = state.appointments.filter(
         (appointment) => appointment.id !== action.payload
       );
+      if (state.currentAppointment?.id === action.payload) {
+        state.currentAppointment = null;
+      }
     },
   },
   extraReducers: (builder) => {
@@ -166,6 +163,7 @@ const appointmentSlice = createSlice({
         (state, action: PayloadAction<Appointment>) => {
           state.loading = false;
           state.appointments.push(action.payload);
+          state.currentAppointment = action.payload;
         }
       )
       .addCase(addAppointmentByDoctor.rejected, (state, action) => {
@@ -183,6 +181,7 @@ const appointmentSlice = createSlice({
         (state, action: PayloadAction<Appointment>) => {
           state.loading = false;
           state.appointments.push(action.payload);
+          state.currentAppointment = action.payload;
         }
       )
       .addCase(addAppointmentByDepartment.rejected, (state, action) => {
@@ -213,26 +212,6 @@ const appointmentSlice = createSlice({
           action.error.message || "Failed to update appointment status";
       })
 
-      // Get appointments by doctor and date
-      // .addCase(getAppointmentsByDoctorAndDate.pending, (state) => {
-      //   state.loading = true;
-      //   state.error = null;
-      // })
-      // .addCase(
-      //   getAppointmentsByDoctorAndDate.fulfilled,
-      //   (state, action: PayloadAction<Appointment[]>) => {
-      //     state.loading = false;
-      //     state.appointments = action.payload;
-      //   }
-      // )
-      // .addCase(getAppointmentsByDoctorAndDate.rejected, (state, action) => {
-      //   state.loading = false;
-      //   state.error =
-      //     action.error.message ||
-      //     "Failed to fetch appointments by doctor and date";
-      // })
-
-      // Add appointment
       .addCase(getAppointmentsByDoctorAndDate.pending, (state) => {
         state.loading = true;
         state.error = null;

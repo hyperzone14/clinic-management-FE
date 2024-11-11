@@ -3,7 +3,6 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 interface InfoListState {
   patientId?: number;
   doctorId?: number | null;
-  appointmentId?: number | null;
   departmentId?: number | null;
   name?: string;
   service?: string;
@@ -19,7 +18,6 @@ interface InfoListState {
 const initialState: InfoListState = {
   patientId: 1,
   doctorId: null,
-  appointmentId: null,
   departmentId: null,
   name: "",
   service: "",
