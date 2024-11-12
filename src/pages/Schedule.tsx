@@ -127,8 +127,8 @@ const Schedule: React.FC = () => {
               key={appointment.id}
               appointment={{
                 id: appointment.id,
-                patientId: appointment.patientId, // Make sure this is included
-                doctorId: appointment.doctorId,   // Make sure this is included
+                patientId: appointment.patientId, 
+                doctorId: appointment.doctorId,   
                 patientName: appointment.patientName,
                 status: appointment.status,
                 doctorName: appointment.doctorName,
