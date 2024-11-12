@@ -79,7 +79,7 @@ const ChooseDateTime: React.FC = () => {
 
   const handleSubmit = async () => {
     if (!selectedDate || !selectedTime) {
-      toast.error("Please select the date and time for the reservation.");
+      toast.error("Please select the date and  time for the reservation.");
       return;
     }
 
