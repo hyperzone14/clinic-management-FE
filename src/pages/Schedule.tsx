@@ -33,6 +33,8 @@ const Schedule: React.FC = () => {
           return;
         }
   
+        console.log('Full appointment data:', appointment);
+  
         await dispatch(initializeTreatmentAsync({
           patientId: Number(appointment.patientId),
           patientName: appointment.patientName,
@@ -40,7 +42,8 @@ const Schedule: React.FC = () => {
           doctorName: appointment.doctorName,
           appointmentId: Number(appointment.id),
           appointmentDate: appointment.appointmentDate,
-          gender: appointment.gender  // Pass the gender directly
+          gender: appointment.gender,
+          birthDate: appointment.birthDate 
         })).unwrap();
   
         navigate('/schedule/medical-service');
@@ -51,6 +54,7 @@ const Schedule: React.FC = () => {
       console.log('Appointment not in checked-in status:', appointment.status);
     }
   };
+
 
   const handleStatusChange = (index: number, newStatus: StatusType) => {
     const appointment = appointments[index];
@@ -131,7 +135,8 @@ const Schedule: React.FC = () => {
                 timeSlot: appointment.timeSlot,
                 appointmentDate: appointment.appointmentDate,
                 appointmentType: appointment.appointmentType,
-                gender: appointment.gender
+                gender: appointment.gender,
+                birthDate: appointment.patientResponseDTO?.birthDate || '' 
               }}
               index={index}
               onPatientClick={handlePatientClick}

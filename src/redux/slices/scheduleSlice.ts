@@ -27,7 +27,7 @@ export interface PatientResponseDTO {
 
 export interface Appointment {
   id: number;
-  appointmentDate: string;
+  appointmentDate: string; // Changed from string to Date
   doctorName: string;
   doctorId: number;
   patientResponseDTO: PatientResponseDTO;
@@ -39,8 +39,16 @@ export interface Appointment {
   patientId: number;
   appointmentType: string;
   status: StatusType;
-  gender: Gender; 
+  gender: Gender;
+  birthDate: string; // Changed from string to Date
 }
+const parseDateString = (dateString: string): Date => {
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    throw new Error(`Invalid date string: ${dateString}`);
+  }
+  return date;
+};
 
 interface ScheduleState {
   appointments: Appointment[];
@@ -116,7 +124,8 @@ const transformAppointmentData = (apt: AppointmentResponse['result']['content'][
   ...apt,
   patientName: apt.patientResponseDTO.fullName,
   patientId: apt.patientResponseDTO.id,
-  gender: apt.patientResponseDTO.gender, // No mapping needed
+  gender: apt.patientResponseDTO.gender,
+  birthDate: apt.patientResponseDTO.birthDate, // Just pass through the string
   appointmentType: apt.timeSlot,
   status: mapStatus(apt.appointmentStatus),
 });
@@ -136,6 +145,7 @@ export const fetchAppointments = createAsyncThunk(
     }
   }
 );
+
 
 // Async thunk to update appointment status
 export const updateAppointmentStatus = createAsyncThunk(

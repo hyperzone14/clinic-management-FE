@@ -13,6 +13,7 @@ interface AppointmentCardProps {
     appointmentDate: string;
     appointmentType: string;
     gender?: Gender;
+    birthDate: string;
   };
   index: number;
   onPatientClick: (appointment: any, index: number) => void;

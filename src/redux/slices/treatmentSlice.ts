@@ -154,29 +154,30 @@
     }
   );
   
-  export const initializeTreatmentAsync = createAsyncThunk(
-    'treatment/initializeAsync',
-    async (data: {
-      patientId: number;
-      patientName: string;
-      doctorId: number;
-      doctorName: string;
-      appointmentId: number;
-      appointmentDate: string;
-      gender: Gender;
-
-    }, { dispatch }) => {
-      try {
-        console.log('Initializing treatment with:', data);
-        dispatch(initializeTreatment(data));
-        await dispatch(fetchDrugs()).unwrap();
-        return data;
-      } catch (error) {
-        console.error('Treatment initialization error:', error);
-        throw error;
-      }
+ 
+export const initializeTreatmentAsync = createAsyncThunk(
+  'treatment/initializeAsync',
+  async (data: {
+    patientId: number;
+    patientName: string;
+    doctorId: number;
+    doctorName: string;
+    appointmentId: number;
+    appointmentDate: string;
+    gender: Gender;
+    birthDate: string; 
+  }, { dispatch }) => {
+    try {
+      console.log('Initializing treatment with:', data);
+      dispatch(initializeTreatment(data));
+      await dispatch(fetchDrugs()).unwrap();
+      return data;
+    } catch (error) {
+      console.error('Treatment initialization error:', error);
+      throw error;
     }
-  );
+  }
+);
 
   const treatmentSlice = createSlice({
     name: 'treatment',
@@ -194,13 +195,14 @@
         appointmentId: number;
         appointmentDate: string;
         gender: Gender;
+        birthDate: string;
       }>) => {
         console.log('Setting treatment state:', action.payload);
-        const { patientId, patientName, doctorId, doctorName, appointmentId, appointmentDate, gender } = action.payload;
+        const { patientId, patientName, doctorId, doctorName, appointmentId, appointmentDate, gender, birthDate } = action.payload;
         state.patientInfo = {
           patientId,
           patientName,
-          dateOfBirth: '', 
+          dateOfBirth: birthDate, 
           gender,
         };
         state.doctorInfo = {
@@ -213,6 +215,7 @@
         state.note = '';
         state.prescribedDrugRequestDTOS = [];
         state.examinationDetailRequestDTOS = [];
+        console.log('Updated patient info:', state.patientInfo); 
       },
 
       setSyndrome: (state, action: PayloadAction<string>) => {
