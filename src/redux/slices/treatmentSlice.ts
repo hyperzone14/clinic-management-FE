@@ -2,6 +2,7 @@
   import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
   import { apiService } from "../../utils/axios-config";
   import { updateAppointmentStatus, fetchAppointments } from './scheduleSlice';
+  import { Gender } from './scheduleSlice';
 
   // Interfaces
   export interface Drug {
@@ -30,7 +31,7 @@
     patientId: number;
     patientName: string;
     dateOfBirth: string;
-    gender: "Male" | "Female";
+    gender: Gender;
   }
 
   export interface DoctorInfo {
@@ -162,7 +163,8 @@
       doctorName: string;
       appointmentId: number;
       appointmentDate: string;
-      gender: 'Male' | 'Female';
+      gender: Gender;
+
     }, { dispatch }) => {
       try {
         console.log('Initializing treatment with:', data);
@@ -191,7 +193,7 @@
         doctorName: string;
         appointmentId: number;
         appointmentDate: string;
-        gender: 'Male' | 'Female';
+        gender: Gender;
       }>) => {
         console.log('Setting treatment state:', action.payload);
         const { patientId, patientName, doctorId, doctorName, appointmentId, appointmentDate, gender } = action.payload;

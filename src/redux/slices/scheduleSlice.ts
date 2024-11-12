@@ -1,8 +1,9 @@
-// redux/slices/scheduleSlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { apiService } from "../../utils/axios-config";
 
 export type StatusType = 'pending' | 'confirmed' | 'checked-in' | 'cancelled' | 'success';
+
+export type Gender = 'Male' | 'Female' |'Other';
 
 export enum AppointmentStatus {
   PENDING = 'PENDING',
@@ -12,17 +13,33 @@ export enum AppointmentStatus {
   SUCCESS = 'SUCCESS'
 }
 
+export interface PatientResponseDTO {
+  id: number;
+  fullName: string;
+  citizenId: string;
+  email: string;
+  gender: Gender;  
+  address: string;
+  birthDate: string;
+  role: string | null;
+  status: string | null;
+}
+
 export interface Appointment {
   id: number;
   appointmentDate: string;
   doctorName: string;
-  patientName: string;
+  doctorId: number;
+  patientResponseDTO: PatientResponseDTO;
   appointmentStatus: string;
   timeSlot: string;
   payId: number | null;
-  // Frontend specific fields
+
+  patientName: string;
+  patientId: number;
   appointmentType: string;
   status: StatusType;
+  gender: Gender; 
 }
 
 interface ScheduleState {
@@ -44,7 +61,8 @@ interface AppointmentResponse {
       id: number;
       appointmentDate: string;
       doctorName: string;
-      patientName: string;
+      doctorId: number;
+      patientResponseDTO: PatientResponseDTO;
       appointmentStatus: string;
       timeSlot: string;
       payId: number | null;
@@ -77,7 +95,10 @@ const initialState: ScheduleState = {
   error: null,
   currentDoctor: "",
 };
-
+const mapGender = (backendGender: string): Gender => {
+  const normalizedGender = backendGender?.toUpperCase() || 'MALE';
+  return normalizedGender === 'MALE' ? 'Male' : 'Female';
+};
 // Helper function to map backend status to frontend status
 const mapStatus = (backendStatus: string): StatusType => {
   const statusMap: Record<string, StatusType> = {
@@ -91,9 +112,11 @@ const mapStatus = (backendStatus: string): StatusType => {
   return statusMap[normalizedStatus] || 'pending';
 };
 
-// Helper function to transform appointment data
 const transformAppointmentData = (apt: AppointmentResponse['result']['content'][0]): Appointment => ({
   ...apt,
+  patientName: apt.patientResponseDTO.fullName,
+  patientId: apt.patientResponseDTO.id,
+  gender: apt.patientResponseDTO.gender, // No mapping needed
   appointmentType: apt.timeSlot,
   status: mapStatus(apt.appointmentStatus),
 });
@@ -122,9 +145,8 @@ export const updateAppointmentStatus = createAsyncThunk(
       // Convert the status to backend format
       const backendStatus = status.toUpperCase().replace('-', '_');
       
-      // Fix URL format to match your backend endpoint
-      const response = await apiService.put<{ result: Appointment }, string>(
-        `/appointment/${id}/status`,  // Changed URL format
+      const response = await apiService.put<{ result: AppointmentResponse['result']['content'][0] }>(
+        `/appointment/${id}/status`,
         `"${backendStatus}"`
       );
 

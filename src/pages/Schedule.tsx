@@ -25,10 +25,6 @@ const Schedule: React.FC = () => {
   const handlePatientClick = async (appointment: Appointment, index: number) => {
     if (appointment.status === 'checked-in') {
       try {
-        // Log the appointment data to verify we have all fields
-        console.log('Appointment data:', appointment);
-  
-        // Make sure we have all required fields
         if (!appointment.patientId || !appointment.doctorId) {
           console.error('Missing required appointment data:', {
             patientId: appointment.patientId,
@@ -37,7 +33,6 @@ const Schedule: React.FC = () => {
           return;
         }
   
-        // Initialize treatment with explicit number conversion
         await dispatch(initializeTreatmentAsync({
           patientId: Number(appointment.patientId),
           patientName: appointment.patientName,
@@ -45,10 +40,9 @@ const Schedule: React.FC = () => {
           doctorName: appointment.doctorName,
           appointmentId: Number(appointment.id),
           appointmentDate: appointment.appointmentDate,
-          gender: appointment.gender || 'Male'
+          gender: appointment.gender  // Pass the gender directly
         })).unwrap();
   
-        // Navigate only after successful initialization
         navigate('/schedule/medical-service');
       } catch (error) {
         console.error("Error initializing treatment:", error);

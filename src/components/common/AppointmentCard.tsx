@@ -1,5 +1,5 @@
 import React from "react";
-import { StatusType } from "../../redux/slices/scheduleSlice";
+import { StatusType,Gender } from "../../redux/slices/scheduleSlice";
 import StatusCircle from "./StatusCircle";
 interface AppointmentCardProps {
   appointment: {
@@ -12,7 +12,7 @@ interface AppointmentCardProps {
     timeSlot: string;
     appointmentDate: string;
     appointmentType: string;
-    gender?: 'Male' | 'Female';
+    gender?: Gender;
   };
   index: number;
   onPatientClick: (appointment: any, index: number) => void;
