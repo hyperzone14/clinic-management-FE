@@ -5,7 +5,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import UserImage from "../components/common/UserImage";
 import { useDispatch } from "react-redux";
-import { setProfile } from "../redux/slices/profileSlide";
+import { setProfile } from "../redux/slices/profileSlice";
 
 interface PatientProfile {
   name: string;

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { PiUserCircleLight } from "react-icons/pi";
 import { useDispatch } from "react-redux";
-import { setProfile } from "../../redux/slices/profileSlide";
+import { setProfile } from "../../redux/slices/profileSlice";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 

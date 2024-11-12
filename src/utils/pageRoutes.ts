@@ -121,16 +121,11 @@ export const bookingRoutes: Routes[] = [
   },
   {
     id: 3,
-    path: "bookinfo",
-    location: "BookInfo",
-  },
-  {
-    id: 4,
     path: "payment",
     location: "Payment",
   },
   {
-    id: 5,
+    id: 4,
     path: "finish",
     location: "Finish",
   },

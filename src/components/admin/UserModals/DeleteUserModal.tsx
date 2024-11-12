@@ -8,7 +8,7 @@ import {
   Button,
 } from "@mui/material";
 import { useDispatch } from "react-redux";
-import { deleteUser } from "../../../redux/slices/userManageSlide";
+import { deleteUser } from "../../../redux/slices/userManageSlice";
 
 interface DeleteModalProps {
   openDelete: boolean;

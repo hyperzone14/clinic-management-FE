@@ -17,7 +17,7 @@ import {
   setCurrentPage,
   setRowsPerPage,
   setRoleFilter,
-} from "../../redux/slices/tableSlide";
+} from "../../redux/slices/tableSlice";
 
 // Define a generic column configuration type
 export interface Column<T> {

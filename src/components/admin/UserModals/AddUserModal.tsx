@@ -9,7 +9,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import { useAppDispatch } from "../../../redux/store";
-import { addUserAsync } from "../../../redux/slices/userManageSlide";
+import { addUserAsync } from "../../../redux/slices/userManageSlice";
 
 interface AddModalProps {
   openAdd: boolean;

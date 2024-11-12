@@ -1,26 +1,53 @@
 import { RootState } from "../../redux/store";
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { IoNewspaperOutline } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
-import { setBooking } from "../../redux/slices/bookingSlide";
+import { AppDispatch } from "../../redux/store";
+import { setInfoList } from "../../redux/slices/infoListSlice";
+import { fetchUsers } from "../../redux/slices/userManageSlice";
+// import { setAppointments } from "../../redux/slices/scheduleSlice";
 
 const InformationList: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const infoList = useSelector((state: RootState) => state.infoList);
+  const users = useSelector((state: RootState) => state.userManage.users);
+
+  useEffect(() => {
+    dispatch(fetchUsers());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (!infoList.patientId) {
+      return;
+    }
+
+    if (!Array.isArray(users) || users.length === 0) {
+      return;
+    }
+
+    const patient = users.find(
+      (user) => Number(user?.id) === Number(infoList.patientId)
+    );
+    if (patient?.fullName && patient.fullName !== infoList.name) {
+      dispatch(
+        setInfoList({
+          ...infoList,
+          name: patient.fullName,
+        })
+      );
+    }
+  }, [infoList.patientId, users, dispatch, infoList.name]);
 
   // Format price with dots for thousands
   const formatPrice = (price: string | undefined): string => {
     if (!price || price === "N/A") return "N/A";
-    // Remove any existing dots and spaces
     const cleanPrice = price.replace(/[.,\s]/g, "");
-    // Format with dots
     return cleanPrice.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
 
   const formatDate = (date: null | Date | string): string => {
     if (!date) return "N/A";
 
-    // If it's already a Date object
     if (date instanceof Date) {
       const day = String(date.getDate()).padStart(2, "0");
       const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -28,7 +55,6 @@ const InformationList: React.FC = () => {
       return `${day}/${month}/${year}`;
     }
 
-    // If it's a string, parse it first
     if (typeof date === "string") {
       const parsedDate = new Date(date);
       if (!isNaN(parsedDate.getTime())) {
@@ -42,7 +68,7 @@ const InformationList: React.FC = () => {
     return "N/A";
   };
 
-  const generateNote = () => {
+  const generateNote = useCallback(() => {
     return [
       infoList.name,
       infoList.service,
@@ -53,21 +79,27 @@ const InformationList: React.FC = () => {
     ]
       .filter((item) => item && item !== "N/A")
       .join(", ");
-  };
+  }, [
+    infoList.name,
+    infoList.service,
+    infoList.type,
+    infoList.date,
+    infoList.time,
+    infoList.price,
+  ]);
 
+  // Separate effect for note updates
   useEffect(() => {
-    const note = generateNote();
-    dispatch(
-      setBooking({
-        service: infoList.service,
-        type: infoList.type,
-        date: infoList.date ? infoList.date.toString() : null,
-        time: infoList.time,
-        price: formatPrice(infoList.price),
-        note: note,
-      })
-    );
-  }, [infoList, dispatch]);
+    const newNote = generateNote();
+    if (newNote !== infoList.note) {
+      dispatch(
+        setInfoList({
+          ...infoList,
+          note: newNote,
+        })
+      );
+    }
+  }, [generateNote, infoList.note]);
 
   return (
     <div className="w-[430px] h-fit bg-gray-50 rounded-md shadow-md">
@@ -91,7 +123,7 @@ const InformationList: React.FC = () => {
             {infoList.service === "By doctor" ? (
               <dt className="font-semibold">Doctor:</dt>
             ) : (
-              <dt className="font-semibold">Specialty:</dt>
+              <dt className="font-semibold">Department:</dt>
             )}
             <dd>{infoList.type ?? "N/A"}</dd>
           </div>

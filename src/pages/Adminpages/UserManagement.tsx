@@ -6,7 +6,7 @@ import AddUserModal from "../../components/admin/UserModals/AddUserModal";
 import DeleteUserModal from "../../components/admin/UserModals/DeleteUserModal";
 import AdminTable, { Column } from "../../components/admin/AdminTable";
 import EditUserModal from "../../components/admin/UserModals/EditUserModal";
-import { fetchUsers } from "../../redux/slices/userManageSlide";
+import { fetchUsers } from "../../redux/slices/userManageSlice";
 
 interface User {
   id: number;

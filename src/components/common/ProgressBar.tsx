@@ -11,10 +11,13 @@ const steps = [
     dotPos: "left-[20rem]",
     wordPos: "ms-[-4.25rem]",
   },
-  { label: "Booking", dotPos: "left-[41.5rem]", wordPos: "ms-[13.5rem]" },
-  { label: "Purchase", dotPos: "right-[41.5rem]", wordPos: "ms-[14.25rem]" },
-  { label: "Finish", dotPos: "right-[19.75rem] ", wordPos: "ms-[15.75rem]" },
-
+  {
+    label: "Pick Date & Time",
+    dotPos: "left-[41.5rem]",
+    wordPos: "ms-[10rem]",
+  },
+  { label: "Purchase", dotPos: "right-[41.5rem]", wordPos: "ms-[11rem]" },
+  { label: "Finish", dotPos: "right-[19.75rem] ", wordPos: "ms-[16.25rem]" },
 ];
 
 const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep }) => {

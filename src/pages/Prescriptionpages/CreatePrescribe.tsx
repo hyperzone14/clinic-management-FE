@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
-import { addPrescribeDrug, updatePrescribeDrug } from "../../redux/slices/predrugSlide";
-import { Medicine, createEmptyMedicine, generatePrescriptionId } from "../../utils/predrugData";
+import {
+  addPrescribeDrug,
+  updatePrescribeDrug,
+} from "../../redux/slices/predrugSlice";
+import {
+  Medicine,
+  createEmptyMedicine,
+  generatePrescriptionId,
+} from "../../utils/predrugData";
 import { Trash2 } from "lucide-react";
 
 interface PrescriptionStepProps {
@@ -12,8 +19,9 @@ interface PrescriptionStepProps {
 
 const CreatePrescribe: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { goToNextStep, goToPreviousStep } = useOutletContext<PrescriptionStepProps>();
-  
+  const { goToNextStep, goToPreviousStep } =
+    useOutletContext<PrescriptionStepProps>();
+
   // Get selected drug from Redux store
   const selectedDrug = useAppSelector((state) => state.predrug.selectedDrug);
 
@@ -39,28 +47,32 @@ const CreatePrescribe: React.FC = () => {
   }, [selectedDrug]);
 
   const handleAddMedicine = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      medicines: [...prev.medicines, createEmptyMedicine()]
+      medicines: [...prev.medicines, createEmptyMedicine()],
     }));
   };
 
-  const handleMedicineChange = (index: number, field: keyof Medicine, value: string | number) => {
+  const handleMedicineChange = (
+    index: number,
+    field: keyof Medicine,
+    value: string | number
+  ) => {
     const updatedMedicines = [...formData.medicines];
     updatedMedicines[index] = {
       ...updatedMedicines[index],
-      [field]: value
+      [field]: value,
     };
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      medicines: updatedMedicines
+      medicines: updatedMedicines,
     }));
   };
 
   const handleRemoveMedicine = (index: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      medicines: prev.medicines.filter((_, i) => i !== index)
+      medicines: prev.medicines.filter((_, i) => i !== index),
     }));
   };
 
@@ -69,34 +81,33 @@ const CreatePrescribe: React.FC = () => {
   };
 
   const handleSave = () => {
-    console.log('Save button clicked');
-    console.log('Form data:', formData);
+    console.log("Save button clicked");
+    console.log("Form data:", formData);
 
     // Basic validation
     if (!formData.symptom.trim()) {
-      alert('Please enter symptoms');
+      alert("Please enter symptoms");
       return;
     }
 
     if (!formData.syndrome.trim()) {
-      alert('Please enter syndrome');
+      alert("Please enter syndrome");
       return;
     }
 
     if (formData.medicines.length === 0) {
-      alert('Please add at least one medicine');
+      alert("Please add at least one medicine");
       return;
     }
 
     // Validate medicines
-    const isValidMedicines = formData.medicines.every(medicine => 
-      medicine.name && 
-      medicine.quantity > 0 
+    const isValidMedicines = formData.medicines.every(
+      (medicine) => medicine.name && medicine.quantity > 0
       // medicine.price > 0
     );
 
     if (!isValidMedicines) {
-      alert('Please fill in all medicine details correctly');
+      alert("Please fill in all medicine details correctly");
       return;
     }
 
@@ -105,33 +116,33 @@ const CreatePrescribe: React.FC = () => {
       symptoms: formData.symptom,
       syndrome: formData.syndrome,
       medicines: formData.medicines,
-      totalPrice: calculateTotal()
+      totalPrice: calculateTotal(),
     };
-    
+
     try {
       if (selectedDrug) {
         dispatch(updatePrescribeDrug(prescriptionData));
       } else {
         dispatch(addPrescribeDrug(prescriptionData));
       }
-      console.log('Save successful');
+      console.log("Save successful");
       goToPreviousStep(); // Changed from goToNextStep to goToPreviousStep
     } catch (error) {
-      console.error('Error saving prescription:', error);
-      alert('Error saving prescription. Please try again.');
+      console.error("Error saving prescription:", error);
+      alert("Error saving prescription. Please try again.");
     }
-};
+  };
   const handleDiscard = () => {
     goToPreviousStep();
   };
 
   return (
     <>
-     <div className="min-h-screen flex flex-col pb-24">
+      <div className="min-h-screen flex flex-col pb-24">
         <div className="flex-grow w-full">
           <div className="flex flex-col my-5 mx-10 justify-center items-center">
             <h1 className="text-4xl font-bold font-sans my-5">
-              {selectedDrug ? 'Edit Prescription' : 'Create Prescription'}
+              {selectedDrug ? "Edit Prescription" : "Create Prescription"}
             </h1>
           </div>
           <div className="bg-white rounded-lg shadow p-6 space-y-6">
@@ -144,7 +155,9 @@ const CreatePrescribe: React.FC = () => {
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 rows={3}
                 value={formData.symptom}
-                onChange={(e) => setFormData(prev => ({ ...prev, symptom: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, symptom: e.target.value }))
+                }
                 placeholder="Enter symptoms..."
               />
             </div>
@@ -158,7 +171,9 @@ const CreatePrescribe: React.FC = () => {
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 rows={3}
                 value={formData.syndrome}
-                onChange={(e) => setFormData(prev => ({ ...prev, syndrome: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, syndrome: e.target.value }))
+                }
                 placeholder="Enter syndrome..."
               />
             </div>
@@ -166,7 +181,9 @@ const CreatePrescribe: React.FC = () => {
             {/* Medicines Section */}
             <div>
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">Medicine List</h2>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Medicine List
+                </h2>
                 <button
                   onClick={handleAddMedicine}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -180,22 +197,39 @@ const CreatePrescribe: React.FC = () => {
                   {/* Table head remains the same */}
                   <thead>
                     <tr className="bg-gray-50">
-                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Medicine name</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Quantity</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Note</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                        Medicine name
+                      </th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                        Quantity
+                      </th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                        Note
+                      </th>
                       {/* <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Price</th> */}
-                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Action</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                        Action
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {formData.medicines.map((medicine, index) => (
-                      <tr key={medicine.id} className="border-t border-gray-200">
+                      <tr
+                        key={medicine.id}
+                        className="border-t border-gray-200"
+                      >
                         <td className="px-4 py-3">
                           <input
                             type="text"
                             className="w-full p-2 border border-gray-300 rounded"
                             value={medicine.name}
-                            onChange={(e) => handleMedicineChange(index, 'name', e.target.value)}
+                            onChange={(e) =>
+                              handleMedicineChange(
+                                index,
+                                "name",
+                                e.target.value
+                              )
+                            }
                           />
                         </td>
                         <td className="px-4 py-3">
@@ -203,7 +237,13 @@ const CreatePrescribe: React.FC = () => {
                             type="number"
                             className="w-full p-2 border border-gray-300 rounded"
                             value={medicine.quantity}
-                            onChange={(e) => handleMedicineChange(index, 'quantity', parseInt(e.target.value))}
+                            onChange={(e) =>
+                              handleMedicineChange(
+                                index,
+                                "quantity",
+                                parseInt(e.target.value)
+                              )
+                            }
                           />
                         </td>
                         <td className="px-4 py-3">
@@ -211,7 +251,13 @@ const CreatePrescribe: React.FC = () => {
                             type="text"
                             className="w-full p-2 border border-gray-300 rounded"
                             value={medicine.note}
-                            onChange={(e) => handleMedicineChange(index, 'note', e.target.value)}
+                            onChange={(e) =>
+                              handleMedicineChange(
+                                index,
+                                "note",
+                                e.target.value
+                              )
+                            }
                           />
                         </td>
                         {/* <td className="px-4 py-3">
@@ -260,7 +306,6 @@ const CreatePrescribe: React.FC = () => {
           </div>
         </div>
       </div>
-      
     </>
   );
 };

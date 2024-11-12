@@ -1,8 +1,8 @@
 // components/common/Pagination.tsx
-import React, { ReactNode } from 'react';
-import { useAppDispatch, useAppSelector } from '../../redux/store';
-import { setCurrentPage } from '../../redux/slices/medicHistorySlide';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { ReactNode } from "react";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
+import { setCurrentPage } from "../../redux/slices/medicHistorySlice";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface PaginationButtonProps {
   children: ReactNode;
@@ -14,26 +14,26 @@ interface PaginationButtonProps {
 const Pagination = () => {
   const dispatch = useAppDispatch();
   const { currentPage, filteredRecords, itemsPerPage } = useAppSelector(
-    state => state.medicHistory
+    (state) => state.medicHistory
   );
 
   const totalPages = Math.ceil(filteredRecords.length / itemsPerPage);
 
-  const PaginationButton = ({ 
-    children, 
-    active = false, 
-    disabled = false, 
-    onClick 
+  const PaginationButton = ({
+    children,
+    active = false,
+    disabled = false,
+    onClick,
   }: PaginationButtonProps) => (
     <button
       className={`
         px-4 py-2 rounded-md transition-colors duration-200
-        ${active 
-          ? 'bg-blue-500 text-white' 
-          : 'bg-white text-gray-700 hover:bg-gray-50'}
-        ${disabled 
-          ? 'opacity-50 cursor-not-allowed' 
-          : 'hover:bg-blue-50'}
+        ${
+          active
+            ? "bg-blue-500 text-white"
+            : "bg-white text-gray-700 hover:bg-gray-50"
+        }
+        ${disabled ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-50"}
         border border-gray-200
       `}
       disabled={disabled}

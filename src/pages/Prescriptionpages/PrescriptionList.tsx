@@ -2,7 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../../redux/store";
 import { Search, Plus, Trash2 } from "lucide-react";
-import { selectPrescribeDrug, clearSelectedDrug, deletePrescribeDrug } from "../../redux/slices/predrugSlide";
+import {
+  selectPrescribeDrug,
+  clearSelectedDrug,
+  deletePrescribeDrug,
+} from "../../redux/slices/predrugSlice";
 
 interface PrescriptionStepProps {
   goToNextStep: () => void;
@@ -10,11 +14,14 @@ interface PrescriptionStepProps {
 }
 
 const PrescriptionList: React.FC = () => {
-  const { goToNextStep, goToPreviousStep } = useOutletContext<PrescriptionStepProps>();
+  const { goToNextStep, goToPreviousStep } =
+    useOutletContext<PrescriptionStepProps>();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const prescribeDrugs = useAppSelector((state) => state.predrug.prescribeDrugs);
-  
+  const prescribeDrugs = useAppSelector(
+    (state) => state.predrug.prescribeDrugs
+  );
+
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -38,7 +45,10 @@ const PrescriptionList: React.FC = () => {
   }, [filteredDrugs.length, totalPages]);
 
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const displayedDrugs = filteredDrugs.slice(startIndex, startIndex + itemsPerPage);
+  const displayedDrugs = filteredDrugs.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
   const handlePrescriptionClick = (id: string) => {
     dispatch(selectPrescribeDrug(id));
@@ -59,15 +69,17 @@ const PrescriptionList: React.FC = () => {
   const handleDeleteConfirm = () => {
     if (deleteId) {
       dispatch(deletePrescribeDrug(deleteId));
-      
+
       // Calculate new total pages after deletion
-      const newTotalPages = Math.ceil((filteredDrugs.length - 1) / itemsPerPage);
-      
+      const newTotalPages = Math.ceil(
+        (filteredDrugs.length - 1) / itemsPerPage
+      );
+
       // If current page would be empty after deletion, go to previous page
       if (currentPage > newTotalPages) {
         setCurrentPage(Math.max(1, newTotalPages));
       }
-      
+
       setShowDeleteConfirm(false);
       setDeleteId(null);
     }
@@ -85,13 +97,16 @@ const PrescriptionList: React.FC = () => {
           <h1 className="text-4xl font-bold font-sans my-5">
             Prescription List
           </h1>
-          
+
           <div className="w-full flex justify-between items-center mb-6 gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={24} />
+              <Search
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={24}
+              />
               <input
                 type="text"
-                placeholder="Search symptoms..."  // Updated placeholder
+                placeholder="Search symptoms..." // Updated placeholder
                 className="pl-12 pr-4 py-3 rounded-lg bg-white border border-gray-300 w-full text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -118,7 +133,11 @@ const PrescriptionList: React.FC = () => {
                     <div className="flex items-start gap-6">
                       <div className="w-16 h-16 bg-red-100 rounded-lg flex items-center justify-center">
                         <img
-                          src={drug.symptoms.toLowerCase() === 'cough' ? '/cough-icon.png' : '/fever-icon.png'}
+                          src={
+                            drug.symptoms.toLowerCase() === "cough"
+                              ? "/cough-icon.png"
+                              : "/fever-icon.png"
+                          }
                           alt={drug.symptoms}
                           className="w-12 h-12 object-contain"
                         />
@@ -144,9 +163,11 @@ const PrescriptionList: React.FC = () => {
                 <div className="text-gray-400 text-6xl mb-4">
                   <Search className="mx-auto" size={64} />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-700 mb-2">No symptoms found</h3>
+                <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                  No symptoms found
+                </h3>
                 <p className="text-gray-500">
-                  {searchQuery 
+                  {searchQuery
                     ? `No symptoms match "${searchQuery}"`
                     : "No prescriptions available"}
                 </p>
@@ -163,21 +184,23 @@ const PrescriptionList: React.FC = () => {
               >
                 Previous
               </button>
-              
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`px-4 py-2 rounded-lg ${
-                    currentPage === page
-                      ? "bg-blue-600 text-white"
-                      : "bg-white border border-gray-300"
-                  }`}
-                >
-                  {page}
-                </button>
-              ))}
-              
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-4 py-2 rounded-lg ${
+                      currentPage === page
+                        ? "bg-blue-600 text-white"
+                        : "bg-white border border-gray-300"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                )
+              )}
+
               <button
                 className="px-4 py-2 rounded-lg bg-white border border-gray-300 disabled:opacity-50"
                 onClick={() => setCurrentPage(currentPage + 1)}
@@ -195,7 +218,8 @@ const PrescriptionList: React.FC = () => {
           <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
             <h2 className="text-xl font-bold mb-4">Confirm Delete</h2>
             <p className="text-gray-600 mb-6">
-              Are you sure you want to delete this prescription? This action cannot be undone.
+              Are you sure you want to delete this prescription? This action
+              cannot be undone.
             </p>
             <div className="flex justify-end gap-4">
               <button

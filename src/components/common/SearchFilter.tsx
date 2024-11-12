@@ -1,13 +1,20 @@
-import React, { useRef, useState } from 'react';
-import { useAppDispatch, useAppSelector } from '../../redux/store';
-import { setSearchTerm, setFilterDoctor, setFilterDate, clearFilters } from '../../redux/slices/medicHistorySlide';
-import { doctorsList } from '../../utils/medicHistoryData';
-import { Search, Calendar, X } from 'lucide-react';
+import React, { useRef, useState } from "react";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
+import {
+  setSearchTerm,
+  setFilterDoctor,
+  setFilterDate,
+  clearFilters,
+} from "../../redux/slices/medicHistorySlice";
+import { doctorsList } from "../../utils/medicHistoryData";
+import { Search, Calendar, X } from "lucide-react";
 
 const SearchFilter = () => {
   const dispatch = useAppDispatch();
-  const { searchTerm, filterDoctor, filterDate } = useAppSelector(state => state.medicHistory);
-  const [displayDate, setDisplayDate] = useState('');
+  const { searchTerm, filterDoctor, filterDate } = useAppSelector(
+    (state) => state.medicHistory
+  );
+  const [displayDate, setDisplayDate] = useState("");
   const dateInputRef = useRef<HTMLInputElement>(null);
 
   const handleCalendarClick = () => {
@@ -19,22 +26,22 @@ const SearchFilter = () => {
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const date = e.target.value;
     if (date) {
-      const formattedDate = new Date(date).toLocaleDateString('en-US', {
-        month: '2-digit',
-        day: '2-digit',
-        year: 'numeric'
+      const formattedDate = new Date(date).toLocaleDateString("en-US", {
+        month: "2-digit",
+        day: "2-digit",
+        year: "numeric",
       });
       setDisplayDate(formattedDate);
       dispatch(setFilterDate(date));
     } else {
-      setDisplayDate('');
-      dispatch(setFilterDate(''));
+      setDisplayDate("");
+      dispatch(setFilterDate(""));
     }
   };
 
   const handleClearFilters = () => {
     dispatch(clearFilters());
-    setDisplayDate('');
+    setDisplayDate("");
   };
 
   const isFiltersActive = searchTerm || filterDoctor || filterDate;
@@ -43,7 +50,10 @@ const SearchFilter = () => {
     <div className="space-y-6 mb-8">
       {/* Search Bar */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+        <Search
+          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+          size={20}
+        />
         <input
           type="text"
           placeholder="Search by symptoms..."
@@ -73,8 +83,18 @@ const SearchFilter = () => {
                 ))}
               </select>
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                <svg
+                  className="w-4 h-4 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 9l-7 7-7-7"
+                  />
                 </svg>
               </div>
             </div>
@@ -88,13 +108,13 @@ const SearchFilter = () => {
                 value={displayDate}
                 className="w-48 px-4 py-2 rounded-lg border border-gray-200 focus:outline-none cursor-pointer bg-white"
               />
-              <Calendar 
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 cursor-pointer z-10" 
+              <Calendar
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 cursor-pointer z-10"
                 onClick={handleCalendarClick}
               />
-              <input 
+              <input
                 ref={dateInputRef}
-                type="date" 
+                type="date"
                 className="absolute inset-0 opacity-0"
                 onChange={handleDateChange}
                 value={filterDate}
