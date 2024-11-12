@@ -19,17 +19,10 @@ const HistoryCard: React.FC<HistoryCardProps> = ({ record }) => {
 
   return (
     <div className="flex items-center p-4 mb-4 bg-white rounded-lg shadow hover:shadow-md transition-all duration-300 cursor-pointer border border-gray-100">
-      <div className="flex-shrink-0">
-        <img
-          src={record.image}
-          alt={record.symptoms}
-          className="w-32 h-32 object-cover rounded-lg shadow-sm"
-        />
-      </div>
 
       <div className="flex-1 ml-6">
         <h3 className="text-xl font-semibold mb-3 text-gray-800">
-          {record.symptoms}
+          {record.syndrome}
         </h3>
         <div className="space-y-2">
           <div className="flex items-center text-gray-600">
