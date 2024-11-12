@@ -24,7 +24,7 @@ const initialState: InfoListState = {
   type: "",
   date: null,
   time: "",
-  price: "",
+  price: "70000",
   workingDays: null,
   timeSlot: 0,
   note: "",
@@ -37,8 +37,11 @@ const infoListSlice = createSlice({
     setInfoList(state, action: PayloadAction<InfoListState>) {
       return { ...state, ...action.payload };
     },
+    resetInfoList() {
+      return initialState;
+    },
   },
 });
 
-export const { setInfoList } = infoListSlice.actions;
+export const { setInfoList, resetInfoList } = infoListSlice.actions;
 export default infoListSlice.reducer;

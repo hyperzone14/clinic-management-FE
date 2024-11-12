@@ -9,7 +9,7 @@ import { BsGenderAmbiguous } from "react-icons/bs";
 // import { doctorInfo, specialtiesInfo } from "../../utils/Information";
 import InformationList from "../../components/common/InformationList";
 import { useDispatch, useSelector } from "react-redux";
-import { setInfoList } from "../../redux/slices/infoListSlice";
+import { resetInfoList, setInfoList } from "../../redux/slices/infoListSlice";
 import { RootState, AppDispatch } from "../../redux/store";
 import { fetchDepartments } from "../../redux/slices/departmentSlice";
 import { toast, ToastContainer } from "react-toastify";
@@ -160,6 +160,10 @@ const Service: React.FC = () => {
   const [type, setType] = React.useState<string>("");
   const [searchTerm, setSearchTerm] = React.useState<string>("");
   const { goToNextStep } = useOutletContext<BookingStepProps>();
+
+  useEffect(() => {
+    dispatch(resetInfoList());
+  }, []);
 
   useEffect(() => {
     dispatch(fetchDepartments());

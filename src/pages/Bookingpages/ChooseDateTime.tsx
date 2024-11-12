@@ -157,12 +157,15 @@ const ChooseDateTime: React.FC = () => {
     const isBeforeToday = compareDate < todayDate;
     const dayOfWeek = date.getDay();
 
+    // Check for weekends (Saturday and Sunday)
+    const isWeekend = dayOfWeek === 6 || dayOfWeek === 0;
+
     if (infoList.service === "By doctor") {
       const workingDays = (infoList.workingDays || [])
         .map((day) => (typeof day === "string" ? parseInt(day, 10) : day))
         .filter((day): day is number => !isNaN(day));
 
-      return isBeforeToday || !workingDays.includes(dayOfWeek);
+      return isBeforeToday || !workingDays.includes(dayOfWeek) || isWeekend;
     }
 
     return isBeforeToday;

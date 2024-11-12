@@ -8,23 +8,36 @@ import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-interface BookingStepProps {
-  goToNextStep: () => void;
-  goToPreviousStep: () => void;
-}
-
 interface PaymentResponse {
   status: string;
   message: string;
   url: string;
 }
 
+interface AppointmentResponse {
+  result: {
+    id: number;
+    appointmentStatus: string;
+    appointmentDate: string;
+    doctorId: number;
+    patientId: number;
+    timeSlot: number;
+  };
+}
+
+interface BookingContext {
+  goToNextStep: () => void;
+  goToPreviousStep: () => void;
+}
+
 const Payment: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { goToNextStep, goToPreviousStep } =
-    useOutletContext<BookingStepProps>();
-
   const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentWindow, setPaymentWindow] = useState<Window | null>(null);
+  const [isPaymentConfirmed, setIsPaymentConfirmed] = useState(false);
+
+  // Get goToNextStep from outlet context
+  const { goToNextStep } = useOutletContext<BookingContext>();
 
   const currentAppointment = useSelector(
     (state: RootState) => state.appointment.currentAppointment
@@ -38,18 +51,21 @@ const Payment: React.FC = () => {
 
     try {
       setIsProcessing(true);
-      // Using the exact endpoint from your API
       const response = await axios.get<PaymentResponse>(
         `http://localhost:8080/api/payment/create_payment/${currentAppointment.id}`
       );
 
       if (response.data?.url) {
-        // Redirect to VNPay payment URL
-        window.location.href = response.data.url;
+        const newWindow = window.open(
+          response.data.url,
+          "VNPayWindow",
+          "width=1000,height=800"
+        );
+        setPaymentWindow(newWindow);
       } else {
         toast.error("Invalid payment URL received");
-        setIsProcessing(false);
       }
+      setIsProcessing(false);
     } catch (error) {
       console.error("Failed to initiate payment:", error);
       toast.error("Failed to create payment. Please try again.");
@@ -57,56 +73,52 @@ const Payment: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const responseCode = params.get("vnp_ResponseCode");
-    const txnRef = params.get("vnp_TxnRef");
-
-    // Check if we're returning from payment
-    if (responseCode && txnRef) {
-      const verifyPayment = async () => {
-        try {
-          // The verification URL includes all query parameters
-          const verificationResponse = await axios.get(
-            `/api/payment/payment_info${window.location.search}`
-          );
-
-          if (
-            responseCode === "00" &&
-            verificationResponse.data?.status === "OK"
-          ) {
-            // Update appointment status to CONFIRMED
-            if (currentAppointment?.id) {
-              await dispatch(
-                updateAppointmentStatus({
-                  id: currentAppointment.id,
-                  status: "CONFIRMED",
-                })
-              );
-            }
-
-            toast.success("Payment successful!");
-            // Clear the URL parameters
-            window.history.replaceState(
-              {},
-              document.title,
-              window.location.pathname
-            );
-            goToNextStep();
-          } else {
-            toast.error("Payment was not successful. Please try again.");
-            setIsProcessing(false);
-          }
-        } catch (error) {
-          console.error("Error verifying payment:", error);
-          toast.error("Error verifying payment. Please contact support.");
-          setIsProcessing(false);
-        }
-      };
-
-      verifyPayment();
+  const checkPaymentStatus = async () => {
+    if (!currentAppointment?.id) {
+      toast.error("No appointment selected");
+      return;
     }
-  }, [currentAppointment?.id, goToNextStep, dispatch]);
+
+    try {
+      setIsProcessing(true);
+
+      // Direct API call to get appointment by ID
+      const response = await axios.get<AppointmentResponse>(
+        `http://localhost:8080/api/appointment/${currentAppointment.id}`
+      );
+
+      const appointment = response.data.result;
+
+      if (appointment && appointment.appointmentStatus === "CONFIRMED") {
+        setIsPaymentConfirmed(true);
+        await dispatch(
+          updateAppointmentStatus({
+            id: currentAppointment.id,
+            status: "CONFIRMED",
+          })
+        );
+        // Use goToNextStep instead of navigate
+        goToNextStep();
+      } else {
+        toast.info(
+          "Payment not yet confirmed. Please complete the payment process."
+        );
+      }
+    } catch (error) {
+      console.error("Error checking appointment status:", error);
+      toast.error("Error checking payment status. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (paymentWindow) {
+        paymentWindow.close();
+      }
+    };
+  }, [paymentWindow]);
 
   return (
     <>
@@ -156,35 +168,21 @@ const Payment: React.FC = () => {
                 </div>
               </div>
             </div>
+            <div className="flex justify-center my-3">
+              <button
+                onClick={checkPaymentStatus}
+                disabled={isProcessing}
+                className={`px-6 py-3 rounded-lg text-white text-lg font-semibold transition duration-300 ease-in-out
+                  ${
+                    isProcessing
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-500 hover:bg-blue-600"
+                  }`}
+              >
+                {isProcessing ? "Checking..." : "Finish"}
+              </button>
+            </div>
           </div>
-        </div>
-        <div className="mt-16 mb-20 flex justify-center items-center gap-3">
-          <button
-            className="bg-[#34a85a] hover:bg-[#2e8b57] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out disabled:opacity-50"
-            onClick={() => {
-              goToPreviousStep();
-              window.scrollTo({ top: 0, behavior: "smooth" });
-            }}
-            disabled={isProcessing}
-          >
-            Previous
-          </button>
-          <button
-            className="bg-[#4567b7] hover:bg-[#3E5CA3] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out disabled:opacity-50"
-            onClick={() => {
-              if (currentAppointment?.status === "CONFIRMED") {
-                goToNextStep();
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              } else {
-                toast.warning("Please complete payment before proceeding");
-              }
-            }}
-            disabled={
-              isProcessing || currentAppointment?.status !== "CONFIRMED"
-            }
-          >
-            Next
-          </button>
         </div>
       </div>
     </>

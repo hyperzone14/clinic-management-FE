@@ -11,44 +11,24 @@ const InformationList: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const infoList = useSelector((state: RootState) => state.infoList);
   const users = useSelector((state: RootState) => state.userManage.users);
-  // const appointment = useSelector(
-  //   (state: RootState) => state.appointment
-  // )
 
-  // useEffect(() => {
-  //   dispatch(fetchAppointment(
-
-  //     ...appointment,
-  //     patientId
-  //   ));
-  // }, [dispatch]);
-
-  // Fetch users when component mounts
   useEffect(() => {
     dispatch(fetchUsers());
   }, [dispatch]);
 
-  // Name synchronization effect with fixed comparison
   useEffect(() => {
     if (!infoList.patientId) {
-      // console.log("No patientId found");
       return;
     }
 
     if (!Array.isArray(users) || users.length === 0) {
-      // console.log("Users array is empty or invalid");
       return;
     }
 
-    // Convert both IDs to numbers for comparison
     const patient = users.find(
       (user) => Number(user?.id) === Number(infoList.patientId)
     );
-
-    console.log("Found patient:", patient);
-
     if (patient?.fullName && patient.fullName !== infoList.name) {
-      // console.log("Updating name from", infoList.name, "to", patient.fullName);
       dispatch(
         setInfoList({
           ...infoList,
