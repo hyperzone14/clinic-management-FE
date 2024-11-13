@@ -1,14 +1,29 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import apiService from "../../utils/axios-config";
 
+interface PatientResponseDTO {
+  id: number;
+  fullName: string;
+  citizenId: string;
+  email: string;
+  gender: string;
+  address: string;
+  birthDate: string;
+  role: null;
+  status: null;
+}
+
 interface Appointment {
   id?: number;
-  patientId: number;
-  doctorId?: number;
-  departmentId?: number;
   appointmentDate: string;
+  doctorName?: string; // Make optional
+  doctorId?: number; // Make optional
+  departmentId?: number; // Add departmentId
+  patientId: number; // Add patientId
+  patientResponseDTO?: PatientResponseDTO; // Make optional
+  appointmentStatus: string;
   timeSlot: number;
-  status?: string;
+  payId?: number;
 }
 
 interface AppointmentState {
@@ -35,57 +50,59 @@ interface ApiResponse {
 export const fetchAppointments = createAsyncThunk(
   "appointment/fetchAppointments",
   async () => {
-    try {
-      const response = await apiService.get<ApiResponse>("/appointment/getall");
-      return Array.isArray(response.result)
-        ? response.result
-        : [response.result];
-    } catch (error) {
-      console.error("Error in fetchAppointments:", error);
-      throw error;
-    }
+    const response = await apiService.get<ApiResponse>("/appointment/getall");
+    return response.result as Appointment[];
   }
 );
 
 // Add appointment by doctor
 export const addAppointmentByDoctor = createAsyncThunk(
   "appointment/addByDoctor",
-  async (appointmentData: Omit<Appointment, "id" | "departmentId">) => {
+  async (appointmentData: {
+    patientId: number;
+    doctorId: number;
+    appointmentDate: string;
+    timeSlot: number;
+    status: string;
+  }) => {
     const response = await apiService.post<ApiResponse>(
       "/appointment/doctor",
       appointmentData
     );
 
-    console.log("API Response:", response);
-
     if (!response.result) {
       throw new Error("No result in API response");
     }
 
-    const result = response.result as Appointment;
-
-    return result;
+    return response.result as Appointment;
   }
 );
 
 // Add appointment by department
 export const addAppointmentByDepartment = createAsyncThunk(
   "appointment/addByDepartment",
-  async (appointmentData: Omit<Appointment, "id" | "doctorId">) => {
+  async (appointmentData: {
+    patientId: number;
+    departmentId: number;
+    appointmentDate: string;
+    timeSlot: number;
+    status: string;
+  }) => {
     const response = await apiService.post<ApiResponse>(
       "/appointment/department",
       appointmentData
     );
 
-    console.log("API Response:", response);
-
     if (!response.result) {
       throw new Error("No result in API response");
     }
 
-    const result = response.result as Appointment;
-
-    return result;
+    // Ensure departmentId is included in the returned appointment
+    const appointment = response.result as Appointment;
+    return {
+      ...appointment,
+      departmentId: appointmentData.departmentId, // Explicitly include departmentId
+    };
   }
 );
 
@@ -93,9 +110,9 @@ export const addAppointmentByDepartment = createAsyncThunk(
 export const updateAppointmentStatus = createAsyncThunk(
   "appointment/updateStatus",
   async ({ id, status }: { id: number; status: string }) => {
-    const response = await apiService.put<ApiResponse>(
-      `/appointment/updateStatus/${id}`,
-      { status }
+    const response = await apiService.put<ApiResponse, string>(
+      `/appointment/${id}/status`,
+      status
     );
     return response.result as Appointment;
   }
@@ -106,9 +123,9 @@ export const getAppointmentsByDoctorAndDate = createAsyncThunk(
   "appointment/getByDoctorAndDate",
   async ({ doctorId, date }: { doctorId: number; date: string }) => {
     const response = await apiService.get<ApiResponse>(
-      `/appointment/getByDoctorAndDate?doctorId=${doctorId}&date=${date}`
+      `/appointment/doctor/${doctorId}/date/${date}`
     );
-    return Array.isArray(response.result) ? response.result : [response.result];
+    return response.result as Appointment[];
   }
 );
 
@@ -194,18 +211,19 @@ const appointmentSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(
-        updateAppointmentStatus.fulfilled,
-        (state, action: PayloadAction<Appointment>) => {
-          state.loading = false;
-          const index = state.appointments.findIndex(
-            (appointment) => appointment.id === action.payload.id
-          );
-          if (index !== -1) {
-            state.appointments[index] = action.payload;
-          }
+      .addCase(updateAppointmentStatus.fulfilled, (state, action) => {
+        state.loading = false;
+        const updatedAppointment = action.payload;
+        const index = state.appointments.findIndex(
+          (appointment) => appointment.id === updatedAppointment.id
+        );
+        if (index !== -1) {
+          state.appointments[index] = updatedAppointment;
         }
-      )
+        if (state.currentAppointment?.id === updatedAppointment.id) {
+          state.currentAppointment = updatedAppointment;
+        }
+      })
       .addCase(updateAppointmentStatus.rejected, (state, action) => {
         state.loading = false;
         state.error =

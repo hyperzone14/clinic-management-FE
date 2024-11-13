@@ -25,9 +25,8 @@ interface AppointmentResponse {
   };
 }
 
-interface BookingContext {
+interface BookingStepProps {
   goToNextStep: () => void;
-  goToPreviousStep: () => void;
 }
 
 const Payment: React.FC = () => {
@@ -37,7 +36,7 @@ const Payment: React.FC = () => {
   const [isPaymentConfirmed, setIsPaymentConfirmed] = useState(false);
 
   // Get goToNextStep from outlet context
-  const { goToNextStep } = useOutletContext<BookingContext>();
+  const { goToNextStep } = useOutletContext<BookingStepProps>();
 
   const currentAppointment = useSelector(
     (state: RootState) => state.appointment.currentAppointment
@@ -73,33 +72,79 @@ const Payment: React.FC = () => {
     }
   };
 
+  // const checkPaymentStatus = async () => {
+  //   if (!currentAppointment?.id) {
+  //     toast.error("No appointment selected");
+  //     return;
+  //   }
+
+  //   try {
+  //     setIsProcessing(true);
+
+  //     // Direct API call to get appointment by ID
+  //     const response = await axios.get<AppointmentResponse>(
+  //       `http://localhost:8080/api/appointment/${currentAppointment.id}`
+  //     );
+
+  //     const appointment = response.data.result;
+
+  //     if (appointment && appointment.appointmentStatus === "CONFIRMED") {
+  //       setIsPaymentConfirmed(true);
+  //       await dispatch(
+  //         updateAppointmentStatus({
+  //           id: currentAppointment.id,
+  //           status: "CONFIRMED",
+  //         })
+  //       );
+  //       // Use goToNextStep instead of navigate
+  //       goToNextStep();
+  //     } else {
+  //       toast.info(
+  //         "Payment not yet confirmed. Please complete the payment process."
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.error("Error checking appointment status:", error);
+  //     toast.error("Error checking payment status. Please try again.");
+  //   } finally {
+  //     setIsProcessing(false);
+  //   }
+  // };
+
   const checkPaymentStatus = async () => {
+    console.log("Starting payment status check");
     if (!currentAppointment?.id) {
+      console.log("No appointment found");
       toast.error("No appointment selected");
       return;
     }
 
     try {
       setIsProcessing(true);
+      console.log("Fetching appointment status");
 
-      // Direct API call to get appointment by ID
       const response = await axios.get<AppointmentResponse>(
         `http://localhost:8080/api/appointment/${currentAppointment.id}`
       );
 
+      console.log("Received response:", response.data);
       const appointment = response.data.result;
 
       if (appointment && appointment.appointmentStatus === "CONFIRMED") {
+        console.log("Payment confirmed, updating state");
         setIsPaymentConfirmed(true);
+
         await dispatch(
           updateAppointmentStatus({
             id: currentAppointment.id,
             status: "CONFIRMED",
           })
-        );
-        // Use goToNextStep instead of navigate
+        ).unwrap();
+
+        console.log("State updated, navigating to next step");
         goToNextStep();
       } else {
+        console.log("Payment not confirmed yet");
         toast.info(
           "Payment not yet confirmed. Please complete the payment process."
         );
