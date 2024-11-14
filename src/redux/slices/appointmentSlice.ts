@@ -22,8 +22,13 @@ interface Appointment {
   patientId: number; // Add patientId
   patientResponseDTO?: PatientResponseDTO; // Make optional
   appointmentStatus: string;
-  timeSlot: number;
+  timeSlot: string;
   payId?: number;
+}
+
+interface Pagination {
+  currentPage: number;
+  totalPages: number;
 }
 
 interface AppointmentState {
@@ -31,6 +36,7 @@ interface AppointmentState {
   currentAppointment: Appointment | null;
   loading: boolean;
   error: string | null;
+  pagination: Pagination;
 }
 
 const initialState: AppointmentState = {
@@ -38,6 +44,7 @@ const initialState: AppointmentState = {
   currentAppointment: null,
   loading: false,
   error: null,
+  pagination: { currentPage: 0, totalPages: 1 },
 };
 
 interface ApiResponse {
@@ -46,12 +53,34 @@ interface ApiResponse {
   result: Appointment[] | Appointment;
 }
 
+interface ApiResponsePagination {
+  code: number;
+  message: string;
+  result: {
+    content: Appointment[];
+    totalPages: number;
+    // Add other fields if necessary
+  };
+}
+
 // Fetch all appointments
 export const fetchAppointments = createAsyncThunk(
   "appointment/fetchAppointments",
   async () => {
-    const response = await apiService.get<ApiResponse>("/appointment/getall");
+    const response = await apiService.get<ApiResponse>("/appointment");
     return response.result as Appointment[];
+  }
+);
+
+export const fetchAppointmentPagination = createAsyncThunk(
+  "appointment/fetchAppointmentPagination",
+  async (page: number) => {
+    const response = await apiService.get<ApiResponsePagination>(`/appointment?page=${page}&size=5`);
+    return {
+      appointments: response.result.content, // Extract content here
+      page,
+      totalPages: response.result.totalPages
+    };
   }
 );
 
@@ -243,6 +272,22 @@ const appointmentSlice = createSlice({
         state.error =
           action.error.message ||
           "Failed to fetch appointments by doctor and date";
+      })
+
+      // Fetch paginated appointments
+      .addCase(fetchAppointmentPagination.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchAppointmentPagination.fulfilled, (state, action) => {
+        state.loading = false;
+        state.appointments = action.payload.appointments;
+        state.pagination.currentPage = action.payload.page;
+        state.pagination.totalPages = action.payload.totalPages; // Set totalPages
+      })
+      .addCase(fetchAppointmentPagination.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || "Failed to fetch paginated appointments";
       });
   },
 });
