@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { apiService } from "../../utils/axios-config";
+import { toast } from "react-toastify";
 
 export type StatusType = 'pending' | 'confirmed' | 'checked-in' | 'cancelled' | 'success';
 
@@ -27,34 +28,19 @@ export interface PatientResponseDTO {
 
 export interface Appointment {
   id: number;
-  appointmentDate: string; // Changed from string to Date
+  appointmentDate: string;
   doctorName: string;
   doctorId: number;
   patientResponseDTO: PatientResponseDTO;
   appointmentStatus: string;
   timeSlot: string;
   payId: number | null;
-
   patientName: string;
   patientId: number;
   appointmentType: string;
   status: StatusType;
   gender: Gender;
-  birthDate: string; // Changed from string to Date
-}
-const parseDateString = (dateString: string): Date => {
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) {
-    throw new Error(`Invalid date string: ${dateString}`);
-  }
-  return date;
-};
-
-interface ScheduleState {
-  appointments: Appointment[];
-  loading: boolean;
-  error: string | null;
-  currentDoctor: string;
+  birthDate: string;
 }
 
 interface Sort {
@@ -97,17 +83,42 @@ interface AppointmentResponse {
   message: string;
 }
 
+interface ScheduleState {
+  appointments: Appointment[];
+  loading: boolean;
+  error: string | null;
+  currentDoctor: string;
+  totalPages: number;
+  totalElements: number;
+  currentPage: number;
+  pageSize: number;
+}
+
 const initialState: ScheduleState = {
   appointments: [],
   loading: false,
   error: null,
   currentDoctor: "",
+  totalPages: 0,
+  totalElements: 0,
+  currentPage: 0,
+  pageSize: 5,
 };
+
 const mapGender = (backendGender: string): Gender => {
   const normalizedGender = backendGender?.toUpperCase() || 'MALE';
   return normalizedGender === 'MALE' ? 'Male' : 'Female';
 };
-// Helper function to map backend status to frontend status
+
+const handleError = (error: any): string => {
+  if (error?.response?.data?.message) {
+    return error.response.data.message;
+  } else if (error instanceof Error) {
+    return error.message;
+  }
+  return 'An unexpected error occurred';
+};
+
 const mapStatus = (backendStatus: string): StatusType => {
   const statusMap: Record<string, StatusType> = {
     'PENDING': 'pending',
@@ -125,12 +136,12 @@ const transformAppointmentData = (apt: AppointmentResponse['result']['content'][
   patientName: apt.patientResponseDTO.fullName,
   patientId: apt.patientResponseDTO.id,
   gender: apt.patientResponseDTO.gender,
-  birthDate: apt.patientResponseDTO.birthDate, // Just pass through the string
+  birthDate: apt.patientResponseDTO.birthDate,
   appointmentType: apt.timeSlot,
   status: mapStatus(apt.appointmentStatus),
 });
 
-// Async thunk to fetch appointments
+// Async thunk to fetch all appointments (without pagination)
 export const fetchAppointments = createAsyncThunk(
   "schedule/fetchAppointments",
   async (_, { rejectWithValue }) => {
@@ -138,21 +149,40 @@ export const fetchAppointments = createAsyncThunk(
       const response = await apiService.get<AppointmentResponse>("/appointment");
       return response.result.content.map(transformAppointmentData);
     } catch (error) {
-      if (error instanceof Error) {
-        return rejectWithValue(error.message);
-      }
-      return rejectWithValue('An error occurred while fetching appointments');
+      const errorMessage = handleError(error);
+      toast.error(errorMessage);
+      return rejectWithValue(errorMessage);
     }
   }
 );
 
+// Update the fetchAppointmentsWithPagination thunk with toast
+export const fetchAppointmentsWithPagination = createAsyncThunk(
+  "schedule/fetchAppointmentsWithPagination",
+  async ({ page, size }: { page: number; size: number }, { rejectWithValue }) => {
+    try {
+      const response = await apiService.get<AppointmentResponse>(
+        `/appointment?page=${page}&size=${size}`
+      );
+      return {
+        appointments: response.result.content.map(transformAppointmentData),
+        totalPages: response.result.totalPages,
+        totalElements: response.result.totalElements,
+        currentPage: page,
+      };
+    } catch (error) {
+      const errorMessage = handleError(error);
+      toast.error(`Failed to fetch appointments: ${errorMessage}`);
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
 
-// Async thunk to update appointment status
+// Update the updateAppointmentStatus thunk with toast
 export const updateAppointmentStatus = createAsyncThunk(
   "schedule/updateStatus",
   async ({ id, status }: { id: number; status: StatusType }, { rejectWithValue }) => {
     try {
-      // Convert the status to backend format
       const backendStatus = status.toUpperCase().replace('-', '_');
       
       const response = await apiService.put<{ result: AppointmentResponse['result']['content'][0] }>(
@@ -160,9 +190,12 @@ export const updateAppointmentStatus = createAsyncThunk(
         `"${backendStatus}"`
       );
 
+      toast.success(`Appointment status updated to ${status}`);
       return transformAppointmentData(response.result);
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Failed to update status');
+      const errorMessage = handleError(error);
+      toast.error(`Failed to update status: ${errorMessage}`);
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -181,10 +214,17 @@ const scheduleSlice = createSlice({
         state.appointments[index].appointmentStatus = action.payload.status.toUpperCase().replace('-', '_');
       }
     },
+    setPageSize(state, action: PayloadAction<number>) {
+      state.pageSize = action.payload;
+      state.currentPage = 0; // Reset to first page when changing page size
+    },
+    setCurrentPage(state, action: PayloadAction<number>) {
+      state.currentPage = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
-      // Fetch appointments
+      // Fetch all appointments
       .addCase(fetchAppointments.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -200,7 +240,33 @@ const scheduleSlice = createSlice({
       .addCase(fetchAppointments.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string || "Failed to fetch appointments";
-        state.appointments = []; // Clear appointments on error
+        state.appointments = [];
+      })
+      // Fetch appointments with pagination
+      .addCase(fetchAppointmentsWithPagination.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        fetchAppointmentsWithPagination.fulfilled,
+        (state, action: PayloadAction<{
+          appointments: Appointment[];
+          totalPages: number;
+          totalElements: number;
+          currentPage: number;
+        }>) => {
+          state.loading = false;
+          state.appointments = action.payload.appointments;
+          state.totalPages = action.payload.totalPages;
+          state.totalElements = action.payload.totalElements;
+          state.currentPage = action.payload.currentPage;
+          state.error = null;
+        }
+      )
+      .addCase(fetchAppointmentsWithPagination.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string || "Failed to fetch appointments";
+        state.appointments = [];
       })
       // Update appointment status
       .addCase(updateAppointmentStatus.pending, (state) => {
@@ -227,5 +293,11 @@ const scheduleSlice = createSlice({
   },
 });
 
-export const { setCurrentDoctor, setAppointmentStatus } = scheduleSlice.actions;
+export const { 
+  setCurrentDoctor, 
+  setAppointmentStatus, 
+  setPageSize, 
+  setCurrentPage 
+} = scheduleSlice.actions;
+
 export default scheduleSlice.reducer;
