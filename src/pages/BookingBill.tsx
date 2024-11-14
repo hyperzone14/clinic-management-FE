@@ -55,13 +55,14 @@ const AppointmentList = () => {
 
   const filteredAppointments = Array.isArray(appointments)
     ? appointments.filter((appointment) => {
+      const hasPatientId = appointment?.id?.toString().includes(searchTerm);
       const hasPatientName = appointment?.patientResponseDTO?.fullName
         ?.toLowerCase()
         .includes(searchTerm.toLowerCase());
       const hasDoctorName = appointment?.doctorName
         ?.toLowerCase()
         .includes(searchTerm.toLowerCase());
-      return hasPatientName || hasDoctorName;
+      return hasPatientId || hasPatientName || hasDoctorName;
     })
     : [];
 

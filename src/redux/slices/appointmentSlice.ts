@@ -158,6 +158,14 @@ export const getAppointmentsByDoctorAndDate = createAsyncThunk(
   }
 );
 
+export const getAppointmentById = createAsyncThunk(
+  "appointment/getById",
+  async (id: number) => {
+    const response = await apiService.get<ApiResponse>(`/appointment/${id}`);
+    return response.result as Appointment;
+  }
+)
+
 const appointmentSlice = createSlice({
   name: "appointment",
   initialState,
@@ -288,6 +296,27 @@ const appointmentSlice = createSlice({
       .addCase(fetchAppointmentPagination.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Failed to fetch paginated appointments";
+      })
+
+      // Get appointment by ID
+      .addCase(getAppointmentById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getAppointmentById.fulfilled, (state, action) => {
+        state.loading = false;
+        state.currentAppointment = action.payload;
+        // Update the appointment in the list if it exists
+        const index = state.appointments.findIndex(
+          (appointment) => appointment.id === action.payload.id
+        );
+        if (index !== -1) {
+          state.appointments[index] = action.payload;
+        }
+      })
+      .addCase(getAppointmentById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || "Failed to fetch appointment by ID";
       });
   },
 });
