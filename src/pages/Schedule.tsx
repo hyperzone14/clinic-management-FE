@@ -33,6 +33,7 @@ const Schedule: React.FC = () => {
           return;
         }
 
+
         await dispatch(initializeTreatmentAsync({
           patientId: Number(appointment.patientId),
           patientName: appointment.patientName,
@@ -49,6 +50,8 @@ const Schedule: React.FC = () => {
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
         toast.error(`Error initializing treatment: ${errorMessage}`);
       }
+    } else {
+      console.log('Appointment not in checked-in status:', appointment.status);
     }
   };
 
@@ -167,6 +170,7 @@ const Schedule: React.FC = () => {
           <span className="text-sm text-gray-600">Completed</span>
         </div>
         <div className="flex items-center">
+
           <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
           <span className="text-sm text-gray-600">Cancelled</span>
         </div>

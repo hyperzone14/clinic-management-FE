@@ -82,6 +82,13 @@ interface AppointmentResponse {
   code: number;
   message: string;
 }
+const parseDateString = (dateString: string): Date => {
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    throw new Error(`Invalid date string: ${dateString}`);
+  }
+  return date;
+};
 
 interface ScheduleState {
   appointments: Appointment[];
@@ -105,6 +112,7 @@ const initialState: ScheduleState = {
   pageSize: 5,
 };
 
+
 const mapGender = (backendGender: string): Gender => {
   const normalizedGender = backendGender?.toUpperCase() || 'MALE';
   return normalizedGender === 'MALE' ? 'Male' : 'Female';
@@ -118,6 +126,7 @@ const handleError = (error: any): string => {
   }
   return 'An unexpected error occurred';
 };
+
 
 const mapStatus = (backendStatus: string): StatusType => {
   const statusMap: Record<string, StatusType> = {
@@ -179,6 +188,7 @@ export const fetchAppointmentsWithPagination = createAsyncThunk(
 );
 
 // Update the updateAppointmentStatus thunk with toast
+
 export const updateAppointmentStatus = createAsyncThunk(
   "schedule/updateStatus",
   async ({ id, status }: { id: number; status: StatusType }, { rejectWithValue }) => {
@@ -196,6 +206,7 @@ export const updateAppointmentStatus = createAsyncThunk(
       const errorMessage = handleError(error);
       toast.error(`Failed to update status: ${errorMessage}`);
       return rejectWithValue(errorMessage);
+
     }
   }
 );
@@ -299,5 +310,6 @@ export const {
   setPageSize, 
   setCurrentPage 
 } = scheduleSlice.actions;
+
 
 export default scheduleSlice.reducer;

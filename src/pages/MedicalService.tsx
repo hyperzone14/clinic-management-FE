@@ -66,6 +66,7 @@ const MedicalService: React.FC = () => {
   };
 
 
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -288,6 +289,7 @@ const MedicalService: React.FC = () => {
                         </div>
                       )}
                     </div>
+
                   </div>
                 </div>
               ))}
