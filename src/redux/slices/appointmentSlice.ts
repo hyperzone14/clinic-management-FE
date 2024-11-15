@@ -102,6 +102,7 @@ export const fetchAppointments = createAsyncThunk(
   }
 );
 
+
 // export const fetchAppointmentPagination = createAsyncThunk(
 //   "appointment/fetchAppointmentPagination",
 //   async (page: number) => {

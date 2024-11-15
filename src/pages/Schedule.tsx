@@ -1,40 +1,39 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../redux/store";
 import {
-  fetchAppointments,
+  fetchAppointmentsWithPagination,
   updateAppointmentStatus,
   StatusType,
-  Appointment
+  Appointment,
 } from "../redux/slices/scheduleSlice";
-import { initializeTreatment, initializeTreatmentAsync } from "../redux/slices/treatmentSlice";
+import { initializeTreatmentAsync } from "../redux/slices/treatmentSlice";
 import AppointmentCard from "../components/common/AppointmentCard";
+import { toast } from "react-toastify";
 
 const Schedule: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  
-  const { appointments, loading, error, currentDoctor } = useAppSelector(
+  const [currentPage, setCurrentPage] = useState(0);
+  const pageSize = 5;
+
+  const { appointments, loading, error, currentDoctor, totalPages, totalElements } = useAppSelector(
     (state) => state.schedule
   );
 
   useEffect(() => {
-    dispatch(fetchAppointments());
-  }, [dispatch]);
+    dispatch(fetchAppointmentsWithPagination({ page: currentPage, size: pageSize }));
+  }, [dispatch, currentPage, pageSize]);
 
   const handlePatientClick = async (appointment: Appointment, index: number) => {
     if (appointment.status === 'checked-in') {
       try {
         if (!appointment.patientId || !appointment.doctorId) {
-          console.error('Missing required appointment data:', {
-            patientId: appointment.patientId,
-            doctorId: appointment.doctorId
-          });
+          toast.error('Missing required appointment data');
           return;
         }
-  
-        console.log('Full appointment data:', appointment);
-  
+
+
         await dispatch(initializeTreatmentAsync({
           patientId: Number(appointment.patientId),
           patientName: appointment.patientName,
@@ -45,16 +44,16 @@ const Schedule: React.FC = () => {
           gender: appointment.gender,
           birthDate: appointment.birthDate 
         })).unwrap();
-  
+
         navigate('/schedule/medical-service');
-      } catch (error) {
-        console.error("Error initializing treatment:", error);
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+        toast.error(`Error initializing treatment: ${errorMessage}`);
       }
     } else {
       console.log('Appointment not in checked-in status:', appointment.status);
     }
   };
-
 
   const handleStatusChange = (index: number, newStatus: StatusType) => {
     const appointment = appointments[index];
@@ -63,7 +62,74 @@ const Schedule: React.FC = () => {
     }
   };
 
-  if (loading) {
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const renderPagination = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    let startPage = Math.max(0, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages - 1, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(0, endPage - maxVisiblePages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <button
+          key={i}
+          onClick={() => handlePageChange(i)}
+          className={`px-3 py-1 mx-1 rounded ${
+            currentPage === i
+              ? "bg-blue-500 text-white"
+              : "bg-gray-200 hover:bg-gray-300"
+          }`}
+        >
+          {i + 1}
+        </button>
+      );
+    }
+    
+
+    return (
+      <div className="flex items-center justify-center mt-6 mb-8">
+        <button
+          onClick={() => handlePageChange(0)}
+          disabled={currentPage === 0}
+          className="px-3 py-1 mx-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+        >
+          {"<<"}
+        </button>
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 0}
+          className="px-3 py-1 mx-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+        >
+          {"<"}
+        </button>
+        {pages}
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages - 1}
+          className="px-3 py-1 mx-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+        >
+          {">"}
+        </button>
+        <button
+          onClick={() => handlePageChange(totalPages - 1)}
+          disabled={currentPage === totalPages - 1}
+          className="px-3 py-1 mx-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+        >
+          {">>"}
+        </button>
+      </div>
+    );
+  };
+
+  if (loading && appointments.length === 0) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="text-xl font-semibold">Loading...</div>
@@ -72,26 +138,24 @@ const Schedule: React.FC = () => {
   }
 
   if (error) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-xl text-red-600">Error: {error}</div>
-      </div>
-    );
+    toast.error(`Error: ${error}`);
+    return null;
   }
 
   return (
     <div className="w-full">
-      {/* Header */}
       <div className="flex flex-col my-5 mx-10 justify-center items-center">
         <h1 className="text-4xl font-bold font-sans my-5">SCHEDULE</h1>
         <div className="mb-4">
           <p className="text-gray-600 text-3xl">
             {currentDoctor ? `${currentDoctor}'s today schedule` : "Today's schedule"}
           </p>
+          <p className="text-sm text-gray-500 text-center mt-2">
+            Showing {appointments.length} appointments (Page {currentPage + 1} of {totalPages})
+          </p>
         </div>
       </div>
 
-      {/* Status Legend */}
       <div className="flex gap-4 mx-10 mb-4">
         <div className="flex items-center">
           <div className="w-3 h-3 rounded-full bg-yellow-400 mr-2"></div>
@@ -106,6 +170,7 @@ const Schedule: React.FC = () => {
           <span className="text-sm text-gray-600">Completed</span>
         </div>
         <div className="flex items-center">
+
           <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
           <span className="text-sm text-gray-600">Cancelled</span>
         </div>
@@ -115,8 +180,7 @@ const Schedule: React.FC = () => {
         </div>
       </div>
 
-      {/* Appointments List */}
-      <div className="space-y-4 mt-6 mb-20 mx-10">
+      <div className="space-y-4 mt-6 mx-10">
         {appointments.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             No appointments found
@@ -127,8 +191,8 @@ const Schedule: React.FC = () => {
               key={appointment.id}
               appointment={{
                 id: appointment.id,
-                patientId: appointment.patientId, 
-                doctorId: appointment.doctorId,   
+                patientId: appointment.patientId,
+                doctorId: appointment.doctorId,
                 patientName: appointment.patientName,
                 status: appointment.status,
                 doctorName: appointment.doctorName,
@@ -136,7 +200,7 @@ const Schedule: React.FC = () => {
                 appointmentDate: appointment.appointmentDate,
                 appointmentType: appointment.appointmentType,
                 gender: appointment.gender,
-                birthDate: appointment.patientResponseDTO?.birthDate || '' 
+                birthDate: appointment.patientResponseDTO?.birthDate || ''
               }}
               index={index}
               onPatientClick={handlePatientClick}
@@ -146,14 +210,15 @@ const Schedule: React.FC = () => {
         )}
       </div>
 
-      {/* Back to Top Button */}
-      <button
+      {renderPagination()}
+
+      {/* <button
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         className="fixed bottom-8 right-8 bg-blue-500 text-white p-3 rounded-full shadow-lg hover:bg-blue-600 transition-colors"
         style={{ display: window.pageYOffset > 300 ? 'block' : 'none' }}
       >
         ↑
-      </button>
+      </button> */}
     </div>
   );
 };

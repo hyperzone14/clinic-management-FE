@@ -105,6 +105,18 @@ export const pageRoutes: Routes[] = [
       }
     ]
   },
+  {
+    id: 12,
+    path: "/treatment-history",
+    location: "TreatmentHistory",
+    children: [
+      {
+        id: 121,
+        path: "/medical-detail",
+        location: "MedicDetail",
+      }
+    ]
+  },
 ];
 
 export const bookingRoutes: Routes[] = [

@@ -188,6 +188,7 @@ const AppointmentList = () => {
               <div className="flex justify-center space-x-4 my-4">
                 <button
                   className="px-4 py-2 bg-[#34a85a] text-white rounded-lg disabled:opacity-50 hover:bg-[#2e8b46] transition duration-300 ease-in-out"
+
                   onClick={() => {
                     handlePageChange(pagination.currentPage - 1);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
