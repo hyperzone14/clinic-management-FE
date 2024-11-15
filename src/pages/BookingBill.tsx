@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../redux/store";
-import { fetchAppointmentPagination } from "../redux/slices/appointmentSlice";
+import { fetchAppointmentPagination, setSearchTerm } from "../redux/slices/appointmentSlice";
 import { BsClockHistory } from "react-icons/bs";
 import { FaRegCalendarAlt } from "react-icons/fa";
 import { FaUserDoctor } from "react-icons/fa6";
@@ -39,18 +39,38 @@ const AppointmentList = () => {
     pagination,
     loading,
     error,
+    searchTerm
   } = useSelector((state: RootState) => state.appointment);
+  // const showPagination = !searchTerm;
 
-  const [searchTerm, setSearchTerm] = useState("");
+  // const [searchTerm, setSearchTerm] = useState("");
 
+  // useEffect(() => {
+  //   dispatch(fetchAppointmentPagination(pagination.currentPage));
+  // }, [dispatch, pagination.currentPage]);
   useEffect(() => {
-    dispatch(fetchAppointmentPagination(pagination.currentPage));
-  }, [dispatch, pagination.currentPage]);
+    dispatch(fetchAppointmentPagination({
+      page: pagination.currentPage,
+      searchTerm
+    }));
+  }, [dispatch, pagination.currentPage, searchTerm]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 0 && newPage < pagination.totalPages) {
-      dispatch(fetchAppointmentPagination(newPage));
+      dispatch(fetchAppointmentPagination({
+        page: newPage,
+        searchTerm: searchTerm // Pass the current searchTerm to maintain the search while changing pages
+      }));
     }
+  };
+
+
+  // const handleSearch = (value: string) => {
+  //   dispatch(setSearchTerm(value));
+  // };
+
+  const handleSearch = (value: string) => {
+    dispatch(setSearchTerm(value)); // This sets searchTerm and resets pagination.currentPage
   };
 
   const filteredAppointments = Array.isArray(appointments)
@@ -101,7 +121,7 @@ const AppointmentList = () => {
         </div>
 
         <div className="my-12">
-          <SearchBar value={searchTerm} onChange={setSearchTerm} />
+          <SearchBar value={searchTerm} onChange={handleSearch} />
 
           {loading ? (
             <div className="flex justify-center items-center h-64">
@@ -168,7 +188,10 @@ const AppointmentList = () => {
               <div className="flex justify-center space-x-4 my-4">
                 <button
                   className="px-4 py-2 bg-[#34a85a] text-white rounded-lg disabled:opacity-50 hover:bg-[#2e8b46] transition duration-300 ease-in-out"
-                  onClick={() => handlePageChange(pagination.currentPage - 1)}
+                  onClick={() => {
+                    handlePageChange(pagination.currentPage - 1);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
                   disabled={pagination.currentPage === 0}
                 >
                   Previous
@@ -178,7 +201,10 @@ const AppointmentList = () => {
                 </span>
                 <button
                   className="px-4 py-2 bg-[#6B87C7] text-[#fff] rounded-lg disabled:opacity-50 hover:bg-[#4567B7] transition duration-300 ease-in-out"
-                  onClick={() => handlePageChange(pagination.currentPage + 1)}
+                  onClick={() => {
+                    handlePageChange(pagination.currentPage + 1);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
                   disabled={
                     pagination.currentPage === pagination.totalPages - 1
                   }

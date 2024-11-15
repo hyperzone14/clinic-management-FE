@@ -26,25 +26,53 @@ interface Appointment {
   payId?: number;
 }
 
-interface Pagination {
-  currentPage: number;
-  totalPages: number;
-}
+// interface Pagination {
+//   currentPage: number;
+//   totalPages: number;
+// }
+
+// interface AppointmentState {
+//   appointments: Appointment[];
+//   currentAppointment: Appointment | null;
+//   loading: boolean;
+//   error: string | null;
+//   pagination: Pagination;
+// }
 
 interface AppointmentState {
   appointments: Appointment[];
   currentAppointment: Appointment | null;
   loading: boolean;
   error: string | null;
-  pagination: Pagination;
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalElements: number;
+    pageSize: number;
+  };
+  searchTerm: string;
 }
+
+// const initialState: AppointmentState = {
+//   appointments: [],
+//   currentAppointment: null,
+//   loading: false,
+//   error: null,
+//   pagination: { currentPage: 0, totalPages: 1 },
+// };
 
 const initialState: AppointmentState = {
   appointments: [],
   currentAppointment: null,
   loading: false,
   error: null,
-  pagination: { currentPage: 0, totalPages: 1 },
+  pagination: {
+    currentPage: 0,
+    totalPages: 1,
+    totalElements: 0,
+    pageSize: 10
+  },
+  searchTerm: ""
 };
 
 interface ApiResponse {
@@ -59,6 +87,8 @@ interface ApiResponsePagination {
   result: {
     content: Appointment[];
     totalPages: number;
+    totalElements: number;
+    size: number;
     // Add other fields if necessary
   };
 }
@@ -72,14 +102,42 @@ export const fetchAppointments = createAsyncThunk(
   }
 );
 
+// export const fetchAppointmentPagination = createAsyncThunk(
+//   "appointment/fetchAppointmentPagination",
+//   async (page: number) => {
+//     const response = await apiService.get<ApiResponsePagination>(`/appointment?page=${page}&size=5`);
+//     return {
+//       appointments: response.result.content, // Extract content here
+//       page,
+//       totalPages: response.result.totalPages
+//     };
+//   }
+// );
+
 export const fetchAppointmentPagination = createAsyncThunk(
   "appointment/fetchAppointmentPagination",
-  async (page: number) => {
-    const response = await apiService.get<ApiResponsePagination>(`/appointment?page=${page}&size=5`);
+  async ({ page, searchTerm }: { page: number; searchTerm?: string }) => {
+    let url = `/appointment?page=${page}`;
+
+    // When searching, set a large page size to effectively get all results
+    if (searchTerm) {
+      url += `&size=${Number.MAX_SAFE_INTEGER}`; // Large number to get all results
+    } else {
+      url += `&size=10`; // Default page size for normal viewing
+    }
+
+    if (searchTerm) {
+      url += `&search=${encodeURIComponent(searchTerm)}`;
+    }
+
+    const response = await apiService.get<ApiResponsePagination>(url);
+
     return {
-      appointments: response.result.content, // Extract content here
+      appointments: response.result.content,
       page,
-      totalPages: response.result.totalPages
+      totalPages: response.result.totalPages,
+      totalElements: response.result.totalElements,
+      pageSize: response.result.size
     };
   }
 );
@@ -178,6 +236,15 @@ const appointmentSlice = createSlice({
     },
     clearCurrentAppointment: (state) => {
       state.currentAppointment = null;
+    },
+    setSearchTerm: (state, action: PayloadAction<string>) => {
+      state.searchTerm = action.payload;
+      // Reset to first page when search term changes
+      state.pagination.currentPage = 0;
+    },
+    clearSearch: (state) => {
+      state.searchTerm = "";
+      state.pagination.currentPage = 0;
     },
     deleteAppointment: (state, action: PayloadAction<number>) => {
       state.appointments = state.appointments.filter(
@@ -290,13 +357,32 @@ const appointmentSlice = createSlice({
       .addCase(fetchAppointmentPagination.fulfilled, (state, action) => {
         state.loading = false;
         state.appointments = action.payload.appointments;
-        state.pagination.currentPage = action.payload.page;
-        state.pagination.totalPages = action.payload.totalPages; // Set totalPages
+        state.pagination = {
+          currentPage: action.payload.page,
+          totalPages: action.payload.totalPages,
+          totalElements: action.payload.totalElements,
+          pageSize: action.payload.pageSize
+        };
       })
       .addCase(fetchAppointmentPagination.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Failed to fetch paginated appointments";
       })
+      // .addCase(fetchAppointmentPagination.pending, (state) => {
+      //   state.loading = true;
+      //   state.error = null;
+      // })
+      // .addCase(fetchAppointmentPagination.fulfilled, (state, action) => {
+      //   state.loading = false;
+      //   state.appointments = action.payload.appointments;
+      //   state.pagination.currentPage = action.payload.page;
+      //   state.pagination.totalPages = action.payload.totalPages; // Set totalPages
+      // })
+      // .addCase(fetchAppointmentPagination.rejected, (state, action) => {
+      //   state.loading = false;
+      //   state.error = action.error.message || "Failed to fetch paginated appointments";
+      // })
+
 
       // Get appointment by ID
       .addCase(getAppointmentById.pending, (state) => {
@@ -321,6 +407,6 @@ const appointmentSlice = createSlice({
   },
 });
 
-export const { setAppointments, deleteAppointment, setCurrentAppointment } =
+export const { setAppointments, deleteAppointment, setCurrentAppointment, setSearchTerm, clearSearch } =
   appointmentSlice.actions;
 export default appointmentSlice.reducer;

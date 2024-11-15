@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
+// import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AppDispatch, RootState } from "../redux/store"; // Add RootState
 import { useDispatch, useSelector } from "react-redux"; // Add useSelector
@@ -58,7 +58,7 @@ const BookingDetail = () => {
 
   return (
     <>
-      <ToastContainer />
+      {/* <ToastContainer /> */}
       <div className="w-full">
 
         <div className="mt-16">
@@ -152,7 +152,7 @@ const BookingDetail = () => {
             <div className="my-10 mx-16">
               <Title id={6} />
               <div className="mt-10 mx-16 px-3">
-                <div className="flex grid grid-cols-2 justify-between">
+                <div className="grid grid-cols-2 justify-between">
                   <div className="col-span-1 flex">
                     <p className="font-bold text-2xl">Appointment ID: </p>
                     <span className="ms-12 text-2xl text-[#A9A9A9]">{currentAppointment.id}</span>
