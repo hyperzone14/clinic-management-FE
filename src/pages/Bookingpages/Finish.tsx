@@ -1,172 +1,69 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
 import ProgressBar from "../../components/common/ProgressBar";
 import Title from "../../components/common/Title";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../../redux/store";
-import { fetchUsers } from "../../redux/slices/userManageSlice";
-import { fetchDepartments } from "../../redux/slices/departmentSlice";
-
-interface Patient {
-  id: number;
-  fullName: string;
-  citizenId: string;
-  email: string;
-  gender: string;
-  address: string;
-  birthDate: string;
-  role: string | null;
-  status: string | null;
-}
 
 const Finish: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [matchedUser, setMatchedUser] = useState<Patient | null>(null);
-  const infoList = useSelector((state: RootState) => state.infoList);
-  const users = useSelector((state: RootState) => state.userManage.users);
-  const appointment = useSelector(
-    (state: RootState) => state.appointment.currentAppointment
+  const { currentAppointment } = useSelector(
+    (state: RootState) => state.appointment
   );
+  const infoList = useSelector((state: RootState) => state.infoList);
   const departments = useSelector(
     (state: RootState) => state.department.departments
   );
   const [departmentInfo, setDepartmentInfo] = useState({
     departmentName: null as string | null,
-    doctorName: null as string | null,
   });
 
+  useEffect(() => {
+    if (!currentAppointment) {
+      navigate("/");
+    }
+  }, [currentAppointment, navigate]);
+
+  const formatPrice = (price: string | undefined): string => {
+    if (!price || price === "N/A") return "N/A";
+    const cleanPrice = price.replace(/[.,\s]/g, "");
+    return cleanPrice.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
+
   const formatDate = (date: string): string => {
-    if (!date) return "N/A";
     try {
       const dateObj = new Date(date);
-      if (isNaN(dateObj.getTime())) throw new Error("Invalid date");
-      return dateObj.toLocaleDateString("en-GB");
+      if (isNaN(dateObj.getTime())) return "Invalid Date";
+      return dateObj.toLocaleDateString("en-GB"); // DD/MM/YYYY format
     } catch {
-      return "N/A";
+      return "Invalid Date";
     }
   };
 
   useEffect(() => {
-    const initializeData = async () => {
-      setIsLoading(true);
-
-      await Promise.all([
-        dispatch(fetchUsers()).unwrap(),
-        dispatch(fetchDepartments()).unwrap(),
-      ]);
-
-      setIsLoading(false);
-    };
-
-    initializeData();
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (!isLoading && users.length > 0 && appointment?.patientId) {
-      const foundUser = users.find((user) => user.id === appointment.patientId);
-
-      if (foundUser) {
-        setMatchedUser(foundUser);
-      } else {
-        setError("Patient information not found.");
-        navigate("/booking", { replace: true });
-      }
-    } else if (!isLoading && (!appointment || !appointment.patientId)) {
-      setError("No booking information found.");
-      navigate("/booking", { replace: true });
-    }
-  }, [users, appointment, isLoading, navigate]);
-
-  useEffect(() => {
-    // Don't proceed if data isn't ready
-    if (isLoading || !appointment || departments.length === 0) return;
-
-    // Initialize default state
+    if (!currentAppointment || departments.length === 0) return;
     let departmentName = null;
-    let doctorName = null;
 
-    // Find the department if we have a departmentId
-    const department = departments.find(
-      (dept) => dept.id === appointment.departmentId
+    // Find department by searching through all departments and their doctors
+    const department = departments.find((dept) =>
+      dept.doctors.some((doctor) => doctor.id === currentAppointment.doctorId)
     );
 
-    // If we found the department, set its name
     if (department) {
       departmentName = department.name;
-
-      // First try to find doctor in the matched department
-      const doctorInDept = department.doctors.find(
-        (doctor) => doctor.id === appointment.doctorId
-      );
-      if (doctorInDept) {
-        doctorName = doctorInDept.fullName;
-      }
-    }
-
-    // If we haven't found the doctor yet but have a doctorId,
-    // search across all departments
-    if (!doctorName && appointment.doctorId) {
-      for (const dept of departments) {
-        const doctorInfo = dept.doctors.find(
-          (doctor) => doctor.id === appointment.doctorId
-        );
-        if (doctorInfo) {
-          doctorName = doctorInfo.fullName;
-          // If we didn't find a department earlier, use this doctor's department
-          if (!departmentName) {
-            departmentName = dept.name;
-          }
-          break;
-        }
-      }
     }
 
     setDepartmentInfo({
       departmentName,
-      doctorName,
     });
-  }, [departments, appointment, isLoading]);
+  }, [departments, currentAppointment]);
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
+  if (!currentAppointment) {
+    return null;
   }
 
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <div className="text-red-600 text-xl mb-4">{error}</div>
-        <button
-          className="bg-[#4567b7] hover:bg-[#3E5CA3] text-white px-5 py-3 rounded-lg"
-          onClick={() => navigate("/booking")}
-        >
-          Return to Booking
-        </button>
-      </div>
-    );
-  }
-
-  if (!matchedUser || !appointment) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <div className="text-red-600 text-xl mb-4">
-          Booking information is incomplete.
-        </div>
-        <button
-          className="bg-[#4567b7] hover:bg-[#3E5CA3] text-white px-5 py-3 rounded-lg"
-          onClick={() => navigate("/booking")}
-        >
-          Return to Booking
-        </button>
-      </div>
-    );
-  }
+  const { patientResponseDTO, appointmentDate, timeSlot, doctorName, id } =
+    currentAppointment;
 
   return (
     <>
@@ -181,90 +78,94 @@ const Finish: React.FC = () => {
             YOUR BOOKING BILL
           </h1>
           <div>
-            <div className="mt-10">
+            <div className="mt-10 mx-16">
               <Title id={5} />
               <div className="mt-10 mx-16 px-3">
-                <div className="flex">
-                  <p className="font-bold text-2xl">Full Name: </p>
-                  <span className="ms-12 text-2xl text-[#A9A9A9]">
-                    {matchedUser.fullName}
-                  </span>
-                </div>
-                <div className="mt-7 grid grid-cols-2 justify-between">
-                  <div className="col-span-1 flex">
-                    <p className="font-bold text-2xl">Date of birth: </p>
-                    <span className="ms-4 text-2xl text-[#A9A9A9]">
-                      {formatDate(matchedUser.birthDate)}
-                    </span>
-                  </div>
-                  <div className="col-span-1 flex">
-                    <p className="font-bold text-2xl">Gender: </p>
-                    <div className="ms-5 flex">
-                      <label className="flex items-center text-2xl">
-                        <input
-                          type="radio"
-                          name="gender"
-                          value="Male"
-                          checked={matchedUser.gender === "MALE"}
-                          // onChange={handleChange}
-                          className="mr-2 cursor-pointer w-[1.5rem] h-[1.5rem]"
-                          disabled
-                        />
-                        Male
-                      </label>
-
-                      <label className=" ms-5 flex items-center text-2xl">
-                        <input
-                          type="radio"
-                          name="gender"
-                          value="Female"
-                          checked={matchedUser.gender === "FEMALE"}
-                          // onChange={handleChange}
-                          className="mr-2 cursor-pointer w-[1.5rem] h-[1.5rem]"
-                          disabled
-                        />
-                        Female
-                      </label>
-
-                      <label className="ms-5 flex items-center text-2xl">
-                        <input
-                          type="radio"
-                          name="gender"
-                          value="Other"
-                          checked={matchedUser.gender === "OTHER"}
-                          // onChange={handleChange}
-                          className="mr-2 cursor-pointer w-[1.5rem] h-[1.5rem]"
-                          disabled
-                        />
-                        Other
-                      </label>
+                {patientResponseDTO && (
+                  <>
+                    <div className="flex">
+                      <p className="font-bold text-2xl">Full Name: </p>
+                      <span className="ms-12 text-2xl text-[#A9A9A9]">
+                        {patientResponseDTO.fullName}
+                      </span>
                     </div>
-                  </div>
-                </div>
-                <div className="mt-7 grid grid-cols-2 justify-between">
-                  <div className="col-span-1 flex">
-                    <p className="font-bold text-2xl">Citizen ID: </p>
-                    <span className="ms-12 text-2xl text-[#A9A9A9]">
-                      {matchedUser.citizenId}
-                    </span>
-                  </div>
-                  <div className="col-span-1 flex">
-                    <p className="font-bold text-2xl">Email: </p>
-                    <span className="ms-12 text-2xl text-[#A9A9A9]">
-                      {matchedUser.email}
-                    </span>
-                  </div>
-                </div>
-                <div className="mt-7 flex">
-                  <p className="font-bold text-2xl">Address: </p>
-                  <span className="ms-16 text-2xl text-[#A9A9A9]">
-                    {matchedUser.address}
-                  </span>
-                </div>
+                    <div className="mt-7 grid grid-cols-2 justify-between">
+                      <div className="col-span-1 flex">
+                        <p className="font-bold text-2xl">Date of birth: </p>
+                        <span className="ms-4 text-2xl text-[#A9A9A9]">
+                          {formatDate(patientResponseDTO.birthDate)}
+                        </span>
+                      </div>
+                      <div className="col-span-1 flex">
+                        <p className="font-bold text-2xl">Gender: </p>
+                        <div className="ms-5 flex">
+                          <label className="flex items-center text-2xl">
+                            <input
+                              type="radio"
+                              name="gender"
+                              value="Male"
+                              checked={patientResponseDTO.gender === "MALE"}
+                              // onChange={handleChange}
+                              className="mr-2 cursor-pointer w-[1.5rem] h-[1.5rem]"
+                              disabled
+                            />
+                            Male
+                          </label>
+
+                          <label className=" ms-5 flex items-center text-2xl">
+                            <input
+                              type="radio"
+                              name="gender"
+                              value="Female"
+                              checked={patientResponseDTO.gender === "FEMALE"}
+                              // onChange={handleChange}
+                              className="mr-2 cursor-pointer w-[1.5rem] h-[1.5rem]"
+                              disabled
+                            />
+                            Female
+                          </label>
+
+                          <label className="ms-5 flex items-center text-2xl">
+                            <input
+                              type="radio"
+                              name="gender"
+                              value="Other"
+                              checked={patientResponseDTO.gender === "OTHER"}
+                              // onChange={handleChange}
+                              className="mr-2 cursor-pointer w-[1.5rem] h-[1.5rem]"
+                              disabled
+                            />
+                            Other
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-7 grid grid-cols-2 justify-between">
+                      <div className="col-span-1 flex">
+                        <p className="font-bold text-2xl">Citizen ID: </p>
+                        <span className="ms-12 text-2xl text-[#A9A9A9]">
+                          {patientResponseDTO.citizenId}
+                        </span>
+                      </div>
+                      <div className="col-span-1 flex">
+                        <p className="font-bold text-2xl">Email: </p>
+                        <span className="ms-12 text-2xl text-[#A9A9A9]">
+                          {patientResponseDTO.email}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="mt-7 flex">
+                      <p className="font-bold text-2xl">Address: </p>
+                      <span className="ms-16 text-2xl text-[#A9A9A9]">
+                        {patientResponseDTO.address}
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
-            <div className="my-10">
+            <div className="my-10 mx-16">
               <Title id={6} />
               <div className="mt-10 mx-16 px-3">
                 <div className="flex grid grid-cols-2 justify-between">
@@ -300,40 +201,37 @@ const Finish: React.FC = () => {
                   </div>
                   <div className="col-span-1 flex">
                     <p className="font-bold text-2xl">Appointment ID: </p>
-                    <span className="ms-12 text-2xl text-[#A9A9A9]">
-                      {appointment.id}
-                    </span>
+                    <span className="ms-12 text-2xl text-[#A9A9A9]">{id}</span>
                   </div>
                   <div className=" mt-7 col-span-1 flex">
                     <p className="font-bold text-2xl">Doctor: </p>
                     <span className="ms-5 text-2xl text-[#A9A9A9] ">
                       {/* Dr. John Doe */}
-                      {departmentInfo?.doctorName}
+                      {doctorName}
                     </span>
                   </div>
                   <div className=" mt-7 col-span-1 flex">
                     <p className="font-bold text-2xl">Department: </p>
                     <span className="ms-5 text-2xl text-[#A9A9A9] ">
-                      {/* Dr. John Doe */}
                       {departmentInfo?.departmentName}
                     </span>
                   </div>
                   <div className="mt-7 col-span-1 flex">
                     <p className="font-bold text-2xl">Date: </p>
                     <span className="ms-12 text-2xl text-[#A9A9A9]">
-                      {formatDate(appointment.appointmentDate)}
+                      {formatDate(appointmentDate)}
                     </span>
                   </div>
                   <div className="mt-7 col-span-1 flex">
                     <p className="font-bold text-2xl">Time Slot: </p>
                     <span className="ms-12 text-2xl text-[#A9A9A9]">
-                      {appointment.timeSlot}
+                      {timeSlot}
                     </span>
                   </div>
                   <div className="mt-7 col-span-1 flex">
                     <p className="font-bold text-2xl">Price: </p>
                     <span className="ms-10 text-2xl text-[#A9A9A9]">
-                      {infoList.price} VNĐ
+                      {formatPrice(infoList.price)} VNĐ
                     </span>
                   </div>
                 </div>
@@ -346,8 +244,7 @@ const Finish: React.FC = () => {
                 <div className="col-span-1 flex">
                   <p className="font-bold text-2xl">Total Price: </p>
                   <span className="ms-12 text-2xl text-[#A9A9A9]">
-                    {/* 75.000 VNĐ */}
-                    {infoList.price} VNĐ
+                    {formatPrice(infoList.price)} VNĐ
                   </span>
                 </div>
               </div>

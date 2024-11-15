@@ -266,8 +266,6 @@ const Service: React.FC = () => {
     }
   };
 
-  console.log(workingDays);
-
   return (
     <>
       <ToastContainer />
