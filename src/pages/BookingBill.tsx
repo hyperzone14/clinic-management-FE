@@ -41,7 +41,6 @@ const AppointmentList = () => {
     error,
     searchTerm
   } = useSelector((state: RootState) => state.appointment);
-  // const showPagination = !searchTerm;
 
   // const [searchTerm, setSearchTerm] = useState("");
 
@@ -50,10 +49,10 @@ const AppointmentList = () => {
   // }, [dispatch, pagination.currentPage]);
   useEffect(() => {
     dispatch(fetchAppointmentPagination({
-      page: pagination.currentPage,
+      page: 0, // Always fetch first page when searching
       searchTerm
     }));
-  }, [dispatch, pagination.currentPage, searchTerm]);
+  }, [dispatch, searchTerm]); // Remove pagination.currentPage from dependencies
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 0 && newPage < pagination.totalPages) {
@@ -64,14 +63,16 @@ const AppointmentList = () => {
     }
   };
 
+  const handleSearch = (value: string) => {
+    dispatch(setSearchTerm(value));
+  };
+
+  const showPagination = !searchTerm;
 
   // const handleSearch = (value: string) => {
-  //   dispatch(setSearchTerm(value));
+  //   dispatch(setSearchTerm(value)); // This sets searchTerm and resets pagination.currentPage
+  //   dispatch(fetchAppointmentPagination({ page: 0, searchTerm: value })); // Immediately fetch page 0
   // };
-
-  const handleSearch = (value: string) => {
-    dispatch(setSearchTerm(value)); // This sets searchTerm and resets pagination.currentPage
-  };
 
   const filteredAppointments = Array.isArray(appointments)
     ? appointments.filter((appointment) => {
@@ -185,33 +186,33 @@ const AppointmentList = () => {
                   ))}
                 </div>
               )}
-              <div className="flex justify-center space-x-4 my-4">
-                <button
-                  className="px-4 py-2 bg-[#34a85a] text-white rounded-lg disabled:opacity-50 hover:bg-[#2e8b46] transition duration-300 ease-in-out"
-                  onClick={() => {
-                    handlePageChange(pagination.currentPage - 1);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  disabled={pagination.currentPage === 0}
-                >
-                  Previous
-                </button>
-                <span className="px-4 py-2">
-                  Page {pagination.currentPage + 1} of {pagination.totalPages}
-                </span>
-                <button
-                  className="px-4 py-2 bg-[#6B87C7] text-[#fff] rounded-lg disabled:opacity-50 hover:bg-[#4567B7] transition duration-300 ease-in-out"
-                  onClick={() => {
-                    handlePageChange(pagination.currentPage + 1);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  disabled={
-                    pagination.currentPage === pagination.totalPages - 1
-                  }
-                >
-                  Next
-                </button>
-              </div>
+              {showPagination && (
+                <div className="flex justify-center space-x-4 my-4">
+                  <button
+                    className="px-4 py-2 bg-[#34a85a] text-white rounded-lg disabled:opacity-50 hover:bg-[#2e8b46] transition duration-300 ease-in-out"
+                    onClick={() => {
+                      handlePageChange(pagination.currentPage - 1);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    disabled={pagination.currentPage === 0}
+                  >
+                    Previous
+                  </button>
+                  <span className="px-4 py-2">
+                    Page {pagination.currentPage + 1} of {pagination.totalPages}
+                  </span>
+                  <button
+                    className="px-4 py-2 bg-[#6B87C7] text-[#fff] rounded-lg disabled:opacity-50 hover:bg-[#4567B7] transition duration-300 ease-in-out"
+                    onClick={() => {
+                      handlePageChange(pagination.currentPage + 1);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    disabled={pagination.currentPage === pagination.totalPages - 1}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

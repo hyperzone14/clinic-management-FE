@@ -121,7 +121,7 @@ export const fetchAppointmentPagination = createAsyncThunk(
 
     // When searching, set a large page size to effectively get all results
     if (searchTerm) {
-      url += `&size=${Number.MAX_SAFE_INTEGER}`; // Large number to get all results
+      url += `&size=1000000000`; // Large number to get all results
     } else {
       url += `&size=10`; // Default page size for normal viewing
     }

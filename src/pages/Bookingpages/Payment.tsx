@@ -14,16 +14,16 @@ interface PaymentResponse {
   url: string;
 }
 
-interface AppointmentResponse {
-  result: {
-    id: number;
-    appointmentStatus: string;
-    appointmentDate: string;
-    doctorId: number;
-    patientId: number;
-    timeSlot: number;
-  };
-}
+// interface AppointmentResponse {
+//   result: {
+//     id: number;
+//     appointmentStatus: string;
+//     appointmentDate: string;
+//     doctorId: number;
+//     patientId: number;
+//     timeSlot: number;
+//   };
+// }
 
 interface BookingStepProps {
   goToNextStep: () => void;
@@ -72,79 +72,48 @@ const Payment: React.FC = () => {
     }
   };
 
-  // const checkPaymentStatus = async () => {
-  //   if (!currentAppointment?.id) {
-  //     toast.error("No appointment selected");
-  //     return;
-  //   }
+  const handleCoDpayment = async () => {
+    if (!currentAppointment?.id) {
+      toast.error("No appointment selected for payment");
+      return;
+    }
 
-  //   try {
-  //     setIsProcessing(true);
+    try {
+      setIsProcessing(true);
+      await dispatch(
+        updateAppointmentStatus({
+          id: currentAppointment.id,
+          status: "CHECKED_IN",
+        })
+      ).unwrap();
 
-  //     // Direct API call to get appointment by ID
-  //     const response = await axios.get<AppointmentResponse>(
-  //       `http://localhost:8080/api/appointment/${currentAppointment.id}`
-  //     );
-
-  //     const appointment = response.data.result;
-
-  //     if (appointment && appointment.appointmentStatus === "CONFIRMED") {
-  //       setIsPaymentConfirmed(true);
-  //       await dispatch(
-  //         updateAppointmentStatus({
-  //           id: currentAppointment.id,
-  //           status: "CONFIRMED",
-  //         })
-  //       );
-  //       // Use goToNextStep instead of navigate
-  //       goToNextStep();
-  //     } else {
-  //       toast.info(
-  //         "Payment not yet confirmed. Please complete the payment process."
-  //       );
-  //     }
-  //   } catch (error) {
-  //     console.error("Error checking appointment status:", error);
-  //     toast.error("Error checking payment status. Please try again.");
-  //   } finally {
-  //     setIsProcessing(false);
-  //   }
-  // };
+      goToNextStep();
+    } catch (error) {
+      console.error("Failed to initiate payment:", error);
+      toast.error("Failed to create payment. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   const checkPaymentStatus = async () => {
-    console.log("Starting payment status check");
     if (!currentAppointment?.id) {
-      console.log("No appointment found");
       toast.error("No appointment selected");
       return;
     }
 
     try {
       setIsProcessing(true);
-      console.log("Fetching appointment status");
-
-      const response = await axios.get<AppointmentResponse>(
+      const response = await axios.get(
         `http://localhost:8080/api/appointment/${currentAppointment.id}`
       );
 
-      console.log("Received response:", response.data);
       const appointment = response.data.result;
 
-      if (appointment && appointment.appointmentStatus === "CONFIRMED") {
-        console.log("Payment confirmed, updating state");
+      if (appointment && (appointment.appointmentStatus === "CONFIRMED" || appointment.appointmentStatus === "CHECKED_IN")) {
         setIsPaymentConfirmed(true);
-
-        await dispatch(
-          updateAppointmentStatus({
-            id: currentAppointment.id,
-            status: "CONFIRMED",
-          })
-        ).unwrap();
-
-        console.log("State updated, navigating to next step");
         goToNextStep();
       } else {
-        console.log("Payment not confirmed yet");
         toast.info(
           "Payment not yet confirmed. Please complete the payment process."
         );
@@ -184,7 +153,7 @@ const Payment: React.FC = () => {
                 Health!
               </span>
             </div>
-            <div className="flex grid grid-cols-2 gap-4 my-24 px-10 justify-items-center">
+            <div className="grid grid-cols-2 gap-4 my-12 px-10 justify-items-center">
               <div className="col-span-1 flex items-center justify-end">
                 <p className="text-2xl font-bold text-[#34A85A] text-end max-w-md">
                   {currentAppointment
@@ -192,36 +161,57 @@ const Payment: React.FC = () => {
                     : "Please select an appointment first"}
                 </p>
               </div>
-              <div className="col-span-1 flex items-center">
-                <div
-                  className={`hover:shadow-xl transition duration-300 ease-in-out rounded-2xl ${
-                    !isProcessing && currentAppointment
+              <div className="flex flex-col gap-y-8">
+                <div className="flex items-center gap-x-5">
+                  <span className="font-bold text-xl">Pay with VNPay</span>
+                  <div
+                    className={`hover:shadow-xl transition duration-300 ease-in-out rounded-2xl ${!isProcessing && currentAppointment
                       ? "cursor-pointer"
                       : "cursor-not-allowed opacity-50"
-                  }`}
-                  onClick={
-                    currentAppointment && !isProcessing
-                      ? handlePaymentClick
-                      : undefined
-                  }
-                >
-                  <img
-                    src="/assets/images/vnpay.png"
-                    alt="payment"
-                    className="w-56 p-5"
-                  />
+                      }`}
+                    onClick={
+                      currentAppointment && !isProcessing
+                        ? handlePaymentClick
+                        : undefined
+                    }
+                  >
+                    <img
+                      src="/assets/images/vnpay.png"
+                      alt="VNPay payment"
+                      className="w-56 p-5"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center gap-x-5">
+                  <span className="font-bold text-xl">Pay with Cash</span>
+                  <div
+                    className={`hover:shadow-xl transition duration-300 ease-in-out rounded-2xl ${!isProcessing && currentAppointment
+                      ? "cursor-pointer"
+                      : "cursor-not-allowed opacity-50"
+                      }`}
+                    onClick={
+                      currentAppointment && !isProcessing
+                        ? handleCoDpayment
+                        : undefined
+                    }
+                  >
+                    <img
+                      src="/assets/images/CoD.png"
+                      alt="Cash payment"
+                      className="w-36 p-5"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="flex justify-center my-3">
+            <div className="flex justify-center mb-10">
               <button
                 onClick={checkPaymentStatus}
                 disabled={isProcessing}
                 className={`px-6 py-3 rounded-lg text-white text-lg font-semibold transition duration-300 ease-in-out
-                  ${
-                    isProcessing
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-blue-500 hover:bg-blue-600"
+                  ${isProcessing
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-blue-500 hover:bg-blue-600"
                   }`}
               >
                 {isProcessing ? "Checking..." : "Finish"}
