@@ -16,7 +16,6 @@ const Schedule: React.FC = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(0);
   const pageSize = 5;
-
   const { appointments, loading, error, currentDoctor, totalPages, totalElements } = useAppSelector(
     (state) => state.schedule
   );
@@ -33,7 +32,6 @@ const Schedule: React.FC = () => {
           return;
         }
 
-
         await dispatch(initializeTreatmentAsync({
           patientId: Number(appointment.patientId),
           patientName: appointment.patientName,
@@ -42,7 +40,7 @@ const Schedule: React.FC = () => {
           appointmentId: Number(appointment.id),
           appointmentDate: appointment.appointmentDate,
           gender: appointment.gender,
-          birthDate: appointment.birthDate 
+          birthDate: appointment.birthDate
         })).unwrap();
 
         navigate('/schedule/medical-service');
@@ -209,16 +207,6 @@ const Schedule: React.FC = () => {
           ))
         )}
       </div>
-
-      {renderPagination()}
-
-      {/* <button
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className="fixed bottom-8 right-8 bg-blue-500 text-white p-3 rounded-full shadow-lg hover:bg-blue-600 transition-colors"
-        style={{ display: window.pageYOffset > 300 ? 'block' : 'none' }}
-      >
-        ↑
-      </button> */}
     </div>
   );
 };

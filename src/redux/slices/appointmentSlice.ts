@@ -25,20 +25,6 @@ interface Appointment {
   timeSlot: string;
   payId?: number;
 }
-
-// interface Pagination {
-//   currentPage: number;
-//   totalPages: number;
-// }
-
-// interface AppointmentState {
-//   appointments: Appointment[];
-//   currentAppointment: Appointment | null;
-//   loading: boolean;
-//   error: string | null;
-//   pagination: Pagination;
-// }
-
 interface AppointmentState {
   appointments: Appointment[];
   currentAppointment: Appointment | null;
@@ -52,14 +38,6 @@ interface AppointmentState {
   };
   searchTerm: string;
 }
-
-// const initialState: AppointmentState = {
-//   appointments: [],
-//   currentAppointment: null,
-//   loading: false,
-//   error: null,
-//   pagination: { currentPage: 0, totalPages: 1 },
-// };
 
 const initialState: AppointmentState = {
   appointments: [],
@@ -102,19 +80,6 @@ export const fetchAppointments = createAsyncThunk(
   }
 );
 
-
-// export const fetchAppointmentPagination = createAsyncThunk(
-//   "appointment/fetchAppointmentPagination",
-//   async (page: number) => {
-//     const response = await apiService.get<ApiResponsePagination>(`/appointment?page=${page}&size=5`);
-//     return {
-//       appointments: response.result.content, // Extract content here
-//       page,
-//       totalPages: response.result.totalPages
-//     };
-//   }
-// );
-
 export const fetchAppointmentPagination = createAsyncThunk(
   "appointment/fetchAppointmentPagination",
   async ({ page, searchTerm }: { page: number; searchTerm?: string }) => {
@@ -122,7 +87,7 @@ export const fetchAppointmentPagination = createAsyncThunk(
 
     // When searching, set a large page size to effectively get all results
     if (searchTerm) {
-      url += `&size=${Number.MAX_SAFE_INTEGER}`; // Large number to get all results
+      url += `&size=1000000000`; // Large number to get all results
     } else {
       url += `&size=10`; // Default page size for normal viewing
     }
@@ -222,6 +187,47 @@ export const getAppointmentById = createAsyncThunk(
   async (id: number) => {
     const response = await apiService.get<ApiResponse>(`/appointment/${id}`);
     return response.result as Appointment;
+  }
+)
+
+export const searchAppointmentsCriteria = createAsyncThunk(
+  "appointment/search",
+  async ({
+    doctorId,
+    appointmentDate,
+    appointmentStatus,
+    page = 0,
+    size = 5,
+    sort = "timeSlot,asc"
+  }: {
+    doctorId?: number;
+    appointmentDate?: string;
+    appointmentStatus?: string;
+    page?: number;
+    size?: number;
+    sort?: string;
+  }) => {
+    let url = `/appointment/search?page=${page}&size=${size}&sort=${sort}`;
+
+    if (doctorId) {
+      url += `&doctorId=${doctorId}`;
+    }
+    if (appointmentDate) {
+      url += `&appointmentDate=${appointmentDate}`;
+    }
+    if (appointmentStatus) {
+      url += `&appointmentStatus=${appointmentStatus}`;
+    }
+
+    const response = await apiService.get<ApiResponsePagination>(url);
+
+    return {
+      appointments: response.result.content,
+      page,
+      totalPages: response.result.totalPages,
+      totalElements: response.result.totalElements,
+      pageSize: response.result.size
+    };
   }
 )
 
@@ -369,21 +375,6 @@ const appointmentSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || "Failed to fetch paginated appointments";
       })
-      // .addCase(fetchAppointmentPagination.pending, (state) => {
-      //   state.loading = true;
-      //   state.error = null;
-      // })
-      // .addCase(fetchAppointmentPagination.fulfilled, (state, action) => {
-      //   state.loading = false;
-      //   state.appointments = action.payload.appointments;
-      //   state.pagination.currentPage = action.payload.page;
-      //   state.pagination.totalPages = action.payload.totalPages; // Set totalPages
-      // })
-      // .addCase(fetchAppointmentPagination.rejected, (state, action) => {
-      //   state.loading = false;
-      //   state.error = action.error.message || "Failed to fetch paginated appointments";
-      // })
-
 
       // Get appointment by ID
       .addCase(getAppointmentById.pending, (state) => {
@@ -404,6 +395,26 @@ const appointmentSlice = createSlice({
       .addCase(getAppointmentById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Failed to fetch appointment by ID";
+      })
+
+      // Add cases for search appointments
+      .addCase(searchAppointmentsCriteria.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(searchAppointmentsCriteria.fulfilled, (state, action) => {
+        state.loading = false;
+        state.appointments = action.payload.appointments;
+        state.pagination = {
+          currentPage: action.payload.page,
+          totalPages: action.payload.totalPages,
+          totalElements: action.payload.totalElements,
+          pageSize: action.payload.pageSize
+        }
+      })
+      .addCase(searchAppointmentsCriteria.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || "Failed to search appointments";
       });
   },
 });

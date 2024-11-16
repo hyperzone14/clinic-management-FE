@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../redux/store";
 import { fetchAppointmentPagination, setSearchTerm } from "../redux/slices/appointmentSlice";
@@ -6,32 +6,11 @@ import { BsClockHistory } from "react-icons/bs";
 import { FaRegCalendarAlt } from "react-icons/fa";
 import { FaUserDoctor } from "react-icons/fa6";
 import { PiUserCircleLight } from "react-icons/pi";
-import { IoSearchOutline } from "react-icons/io5";
+// import { IoSearchOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
+import SearchBar from "../components/common/SearchBar";
 
-interface SearchBarProps {
-  value: string;
-  onChange: (value: string) => void;
-}
-
-const SearchBar: React.FC<SearchBarProps> = ({ value, onChange }) => (
-  <div className="flex items-center justify-center">
-    <div className="mb-6 w-9/12">
-      <div className="flex items-center bg-gray-200 rounded-lg focus-within:ring-2 focus-within:ring-blue-500">
-        <IoSearchOutline className="ml-3 text-gray-500" size={20} />
-        <input
-          type="text"
-          value={value}
-          placeholder="Search..."
-          className="w-full pl-3 pr-4 py-2 bg-transparent focus:outline-none text-gray-700"
-          onChange={(e) => onChange(e.target.value)}
-        />
-      </div>
-    </div>
-  </div>
-);
-
-const AppointmentList = () => {
+const BookingBill = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const {
@@ -41,19 +20,13 @@ const AppointmentList = () => {
     error,
     searchTerm
   } = useSelector((state: RootState) => state.appointment);
-  // const showPagination = !searchTerm;
 
-  // const [searchTerm, setSearchTerm] = useState("");
-
-  // useEffect(() => {
-  //   dispatch(fetchAppointmentPagination(pagination.currentPage));
-  // }, [dispatch, pagination.currentPage]);
   useEffect(() => {
     dispatch(fetchAppointmentPagination({
-      page: pagination.currentPage,
+      page: 0, // Always fetch first page when searching
       searchTerm
     }));
-  }, [dispatch, pagination.currentPage, searchTerm]);
+  }, [dispatch, searchTerm]); // Remove pagination.currentPage from dependencies
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 0 && newPage < pagination.totalPages) {
@@ -64,15 +37,12 @@ const AppointmentList = () => {
     }
   };
 
-
-  // const handleSearch = (value: string) => {
-  //   dispatch(setSearchTerm(value));
-  // };
-
   const handleSearch = (value: string) => {
-    dispatch(setSearchTerm(value)); // This sets searchTerm and resets pagination.currentPage
+    dispatch(setSearchTerm(value));
   };
 
+  const showPagination = !searchTerm;
+  
   const filteredAppointments = Array.isArray(appointments)
     ? appointments.filter((appointment) => {
       const hasPatientId = appointment?.id?.toString().includes(searchTerm);
@@ -185,34 +155,33 @@ const AppointmentList = () => {
                   ))}
                 </div>
               )}
-              <div className="flex justify-center space-x-4 my-4">
-                <button
-                  className="px-4 py-2 bg-[#34a85a] text-white rounded-lg disabled:opacity-50 hover:bg-[#2e8b46] transition duration-300 ease-in-out"
-
-                  onClick={() => {
-                    handlePageChange(pagination.currentPage - 1);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  disabled={pagination.currentPage === 0}
-                >
-                  Previous
-                </button>
-                <span className="px-4 py-2">
-                  Page {pagination.currentPage + 1} of {pagination.totalPages}
-                </span>
-                <button
-                  className="px-4 py-2 bg-[#6B87C7] text-[#fff] rounded-lg disabled:opacity-50 hover:bg-[#4567B7] transition duration-300 ease-in-out"
-                  onClick={() => {
-                    handlePageChange(pagination.currentPage + 1);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  disabled={
-                    pagination.currentPage === pagination.totalPages - 1
-                  }
-                >
-                  Next
-                </button>
-              </div>
+              {showPagination && (
+                <div className="flex justify-center space-x-4 my-4">
+                  <button
+                    className="px-4 py-2 bg-[#34a85a] text-white rounded-lg disabled:opacity-50 hover:bg-[#2e8b46] transition duration-300 ease-in-out"
+                    onClick={() => {
+                      handlePageChange(pagination.currentPage - 1);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    disabled={pagination.currentPage === 0}
+                  >
+                    Previous
+                  </button>
+                  <span className="px-4 py-2">
+                    Page {pagination.currentPage + 1} of {pagination.totalPages}
+                  </span>
+                  <button
+                    className="px-4 py-2 bg-[#6B87C7] text-[#fff] rounded-lg disabled:opacity-50 hover:bg-[#4567B7] transition duration-300 ease-in-out"
+                    onClick={() => {
+                      handlePageChange(pagination.currentPage + 1);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    disabled={pagination.currentPage === pagination.totalPages - 1}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -221,4 +190,4 @@ const AppointmentList = () => {
   );
 };
 
-export default AppointmentList;
+export default BookingBill;

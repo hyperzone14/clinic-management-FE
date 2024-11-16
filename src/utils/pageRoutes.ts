@@ -117,6 +117,11 @@ export const pageRoutes: Routes[] = [
       }
     ]
   },
+  {
+    id: 13,
+    path: "/manual-checkin",
+    location: "ManualCheckin",
+  },
 ];
 
 export const bookingRoutes: Routes[] = [
