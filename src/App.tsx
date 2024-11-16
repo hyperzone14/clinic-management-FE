@@ -230,42 +230,6 @@ function App() {
                 })}
               </Route>
 
-              {/* Dashboard Routes */}
-              {/* <Route
-                path="/dashboard"
-                element={<Dashboard steps={dashboardRoutes} />}
-              >
-                <Route
-                  index
-                  element={
-                    <Navigate
-                      to={`/dashboard/${dashboardRoutes[0].path
-                        .split("/")
-                        .pop()}`}
-                      replace
-                    />
-                  }
-                />
-                {dashboardRoutes.map((step) => {
-                  const StepComponent = lazy(() => {
-                    return pageComponents[
-                      `./pages/Dashboardpages/${step.location}.tsx`
-                    ]() as Promise<{ default: React.ComponentType<unknown> }>;
-                  });
-                  return (
-                    <Route
-                      key={step.id}
-                      path={step.path.split("/").pop()}
-                      element={
-                        <Suspense fallback={<div>Loading step...</div>}>
-                          <StepComponent />
-                        </Suspense>
-                      }
-                    />
-                  );
-                })}
-              </Route> */}
-
               {/* Prescription Routes */}
               <Route
                 path="/prescription"

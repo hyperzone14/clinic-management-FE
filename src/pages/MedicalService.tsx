@@ -1,309 +1,215 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "../redux/store";
-import Title from "../components/common/Title";
-import SymptomSelect from "../components/common/SymptomSelect";
-import { Trash2 } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "../redux/store";
+import { Trash2, Plus, ChevronLeft } from "lucide-react";
 import {
-  removeMedicine,
-  updateMedicine,
-  setDoctorFeedback,
-  LabTest,
-  setLabTest,
-  addMedicine,
+  submitTreatment,
+  addPrescribedDrug,
+  removePrescribedDrug,
+  updatePrescribedDrug,
+  addExamination,
+  removeExamination,
+  updateExamination,
+  setSyndrome,
+  setNote,
   resetTreatment,
-  completeTreatment,
+  fetchDrugs,
+  selectTreatment,
+  updateExaminationFiles,
+  FileManager
 } from "../redux/slices/treatmentSlice";
-import { completeTreatmentAndUpdateStatus } from "../redux/slices/scheduleSlice";
 
-// Default state values
-const defaultTreatmentState = {
-  patientInfo: {
-    name: "",
-    dateOfBirth: "",
-    gender: "Male" as const,
-  },
-  selectedSymptoms: [],
-  medicines: [],
-  labTest: {
-    type: "",
-    results: "",
-  },
-  doctorFeedback: "",
-  total: 0,
-};
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const MedicalService: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const treatment = useSelector((state: RootState) => state.treatment);
-  const currentAppointment = useSelector((state: RootState) => 
-    state.schedule.appointments.find(app => app.patientName === treatment.patientInfo.name)
-  );
+  const {
+    patientInfo,
+    doctorInfo,
+    syndrome,
+    note,
+    prescribedDrugRequestDTOS,
+    examinationDetailRequestDTOS,
+    availableDrugs,
+    loading
+  } = useAppSelector(selectTreatment);
 
   useEffect(() => {
-    if (!treatment.patientInfo.name) {
+    if (!patientInfo.patientId) {
       navigate('/schedule');
+      return;
     }
-  }, [treatment.patientInfo.name, navigate]);
+    dispatch(fetchDrugs());
+  }, [patientInfo.patientId, navigate, dispatch]);
 
-  const {
-    patientInfo = defaultTreatmentState.patientInfo,
-    medicines = defaultTreatmentState.medicines,
-    labTest = defaultTreatmentState.labTest,
-    doctorFeedback = defaultTreatmentState.doctorFeedback,
-    total = defaultTreatmentState.total,
-  } = treatment || defaultTreatmentState;
-
-  const handleMedicineChange = (
-    id: string,
-    field: string,
-    value: string | number
-  ) => {
-    dispatch(
-      updateMedicine({
-        id,
-        updates: {
-          [field]:
-            field === "quantity" || field === "price" ? Number(value) : value,
-        },
-      })
-    );
-  };
-
-  const handleRemoveMedicine = (id: string) => {
-    dispatch(removeMedicine(id));
-  };
-
-  const handleLabTestChange = (field: keyof LabTest, value: string) => {
-    dispatch(
-      setLabTest({
-        ...labTest,
-        [field]: value,
-      })
-    );
-  };
-
-  const handleFeedbackChange = (value: string) => {
-    dispatch(setDoctorFeedback(value));
-  };
-
-  const handleAddCustomMedicine = () => {
-    const newMedicine = {
-      id: `custom-${Date.now()}`,
-      name: "",
-      quantity: 0,
-      note: "",
-      price: 0,
-    };
-    dispatch(addMedicine(newMedicine));
-  };
-
-  const handleDiscard = () => {
-    if (window.confirm("Are you sure you want to discard your changes?")) {
-      dispatch(resetTreatment());
-      navigate('/schedule');
+  const handleSubmit = async () => {
+    if (!syndrome.trim()) {
+      toast.error('Please enter syndrome');
+      return;
     }
-  };
-
-  const handleCompleteTreatment = async () => {
+  
+    if (prescribedDrugRequestDTOS.length === 0) {
+      toast.error('Please add at least one prescribed drug');
+      return;
+    }
+  
     try {
-      dispatch(
-        completeTreatment({
-          patientId: treatment.patientInfo.name,
-          treatmentData: {
-            symptoms: treatment.selectedSymptoms,
-            medicines: treatment.medicines,
-            labTest: treatment.labTest,
-            doctorFeedback: treatment.doctorFeedback,
-          },
-        })
-      );
-  
-      // Update the appointment status in schedule slice
-      dispatch(
-        completeTreatmentAndUpdateStatus({
-          patientName: treatment.patientInfo.name,
-        })
-      );
-  
-      // Reset treatment state
-      dispatch(resetTreatment());
-  
-      // Navigate back to schedule
-      navigate("/schedule");
+      await dispatch(submitTreatment()).unwrap();
+      toast.success('Medical bill created successfully');
+      navigate('/schedule');
     } catch (error) {
-      console.error("Error completing treatment:", error);
+      console.error('Error:', error);
+      toast.error('Failed to create medical bill. Please try again.');
     }
   };
+
+
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>, index: number): void {
+    throw new Error("Function not implemented.");
+  }
 
   return (
-    <>
-      <div className="w-full">
-        {/* Header */}
-        <div className="flex flex-col my-5 mx-10 justify-center items-center relative">
-          <button
-            onClick={() => navigate('/schedule')}
-            className="absolute left-0 px-4 py-2 text-gray-600 hover:text-gray-800"
-          >
-            ← Back
-          </button>
-          <h1 className="text-4xl font-bold font-sans my-5">Medical Service</h1>
-        </div>
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-3xl mx-auto bg-white rounded-lg shadow">
+        <div className="p-6">
+          <h1 className="text-2xl font-bold text-center mb-8">Medical Treatment</h1>
 
-        {/* Patient Information Section */}
-        <div className="mb-8 mx-10">
-          <Title id={5} />
-          <div className="bg-white p-6 rounded-lg shadow-md mt-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    value={patientInfo.name}
-                    disabled
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-50"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Date of Birth
-                  </label>
-                  <input
-                    type="text"
-                    value={patientInfo.dateOfBirth}
-                    disabled
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-50"
-                  />
+          {/* Patient Information Section */}
+          <div className="mb-8">
+            <div className="flex items-center mb-4">
+              <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center mr-2">
+                <span className="text-green-500 text-sm">1</span>
+              </div>
+              <h2 className="text-lg font-semibold">Patient Information</h2>
+            </div>
+            <div className="grid grid-cols-3 gap-4 mb-4">
+              <div>
+                <label className="block text-sm text-gray-600 mb-1">Name</label>
+                <div className="p-2 bg-gray-100 rounded">
+                  {patientInfo.patientName}
                 </div>
               </div>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Gender
-                  </label>
-                  <div className="mt-1 space-x-4">
-                    <label className="inline-flex items-center">
-                      <input
-                        type="radio"
-                        checked={patientInfo.gender === "Male"}
-                        disabled
-                        className="form-radio"
-                      />
-                      <span className="ml-2">Male</span>
-                    </label>
-                    <label className="inline-flex items-center">
-                      <input
-                        type="radio"
-                        checked={patientInfo.gender === "Female"}
-                        disabled
-                        className="form-radio"
-                      />
-                      <span className="ml-2">Female</span>
-                    </label>
-                  </div>
+              <div>
+                <label className="block text-sm text-gray-600 mb-1">Date of Birth</label>
+                <div className="p-2 bg-gray-100 rounded">
+                  {patientInfo.dateOfBirth || 'N/A'}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm text-gray-600 mb-1">Gender</label>
+                <div className="p-2 bg-gray-100 rounded">
+                  {patientInfo.gender || 'N/A'}
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Treatment Information Section */}
-        <div className="mb-8 mx-10">
-          <Title id={6} />
-          <div className="bg-white p-6 rounded-lg shadow-md mt-4">
-            {/* Symptoms MultiSelect */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Symptoms
-              </label>
-              <SymptomSelect />
-            </div>
-
-            {/* Medicine Table */}
-            <div className="mt-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-semibold">Medicines</h3>
-                <button
-                  className="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                  onClick={handleAddCustomMedicine}
-                >
-                  + Add Medicine
-                </button>
+          {/* Treatment Information Section */}
+          <div className="mb-8">
+            <div className="flex items-center mb-4">
+              <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center mr-2">
+                <span className="text-green-500 text-sm">2</span>
               </div>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Medicine name
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Quantity
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Note
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Action
-                      </th>
+              <h2 className="text-lg font-semibold">Treatment Information</h2>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-gray-600 mb-1">Symptom</label>
+                <input
+                  type="text"
+                  value={syndrome}
+                  onChange={(e) => dispatch(setSyndrome(e.target.value))}
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
+              </div>
+              
+              {/* Prescribed Drugs Table */}
+              <div className="mt-4">
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-sm text-gray-600">Medicine List</label>
+                  <button
+                    onClick={() => dispatch(addPrescribedDrug({
+                      drugId: 0,
+                      dosage: 0,
+                      duration: 0,
+                      frequency: "",
+                      specialInstructions: ""
+                    }))}
+                    className="flex items-center text-sm text-green-600 hover:text-green-700"
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add Medicine
+                  </button>
+                </div>
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50">
+                      <th className="text-left p-2 text-sm font-medium text-gray-600">Medicine name</th>
+                      <th className="text-left p-2 text-sm font-medium text-gray-600">Quantity</th>
+                      <th className="text-left p-2 text-sm font-medium text-gray-600">Note</th>
+                      <th className="w-8"></th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {medicines.map((medicine) => (
-                      <tr key={medicine.id}>
-                        <td className="px-6 py-4">
-                          <input
-                            type="text"
-                            value={medicine.name}
-                            onChange={(e) =>
-                              handleMedicineChange(
-                                medicine.id,
-                                "name",
-                                e.target.value
-                              )
-                            }
-                            className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                          />
+                  <tbody>
+                    {prescribedDrugRequestDTOS.map((drug, index) => (
+                      <tr key={index} className="border-t">
+                        <td className="p-2">
+                          <select
+                            value={drug.drugId}
+                            onChange={(e) => dispatch(updatePrescribedDrug({
+                              index,
+                              updates: { drugId: Number(e.target.value) }
+                            }))}
+                            className="w-full p-1 border rounded"
+                          >
+                            <option value="">Select Medicine</option>
+                            {availableDrugs.map((d) => (
+                              <option key={d.id} value={d.id}>
+                                {d.name} ({d.standardDosage})
+                              </option>
+                            ))}
+                          </select>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="p-2">
                           <input
                             type="number"
-                            value={medicine.quantity}
-                            onChange={(e) =>
-                              handleMedicineChange(
-                                medicine.id,
-                                "quantity",
-                                e.target.value
-                              )
-                            }
-                            className="w-24 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            value={drug.dosage}
+                            onChange={(e) => dispatch(updatePrescribedDrug({
+                              index,
+                              updates: { dosage: Number(e.target.value) }
+                            }))}
+                            className="w-full p-1 border rounded"
                           />
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="p-2">
                           <input
                             type="text"
-                            value={medicine.note}
-                            onChange={(e) =>
-                              handleMedicineChange(
-                                medicine.id,
-                                "note",
-                                e.target.value
-                              )
-                            }
-                            className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            value={drug.specialInstructions}
+                            onChange={(e) => dispatch(updatePrescribedDrug({
+                              index,
+                              updates: { specialInstructions: e.target.value }
+                            }))}
+                            className="w-full p-1 border rounded"
+                            placeholder="Take after meals"
                           />
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="p-2">
                           <button
-                            onClick={() => handleRemoveMedicine(medicine.id)}
-                            className="text-red-500 hover:text-red-700"
+                            onClick={() => dispatch(removePrescribedDrug(index))}
+                            className="text-gray-400 hover:text-red-500"
                           >
-                            <Trash2 className="h-5 w-5" />
+                            <Trash2 className="h-4 w-4" />
                           </button>
                         </td>
                       </tr>
@@ -313,80 +219,124 @@ const MedicalService: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Lab Test Section */}
-        <div className="mb-8 mx-10">
-          <div className="flex items-center mb-4">
-            <Title id={6} />
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow-md">
+          {/* Lab Test Section */}
+          <div className="mb-8">
+            <div className="flex items-center mb-4">
+              <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center mr-2">
+                <span className="text-green-500 text-sm">3</span>
+              </div>
+              <h2 className="text-lg font-semibold">Lab test (Optional)</h2>
+            </div>
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Lab Test Type
-                </label>
-                <input
-                  type="text"
-                  value={labTest.type}
-                  onChange={(e) => handleLabTestChange("type", e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                  placeholder="Select lab test type"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Test Results
-                </label>
-                <textarea
-                  value={labTest.results}
-                  onChange={(e) => handleLabTestChange("results", e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                  rows={3}
-                  placeholder="Enter test results"
-                />
-              </div>
+              {examinationDetailRequestDTOS.map((exam, index) => (
+                <div key={index} className="border rounded p-4 relative">
+                  <button
+                    onClick={() => dispatch(removeExamination(index))}
+                    className="absolute top-2 right-2 text-gray-400 hover:text-red-500"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">Lab test type</label>
+                      <input
+                        type="text"
+                        value={exam.examinationType}
+                        onChange={(e) => dispatch(updateExamination({
+                          index,
+                          updates: { examinationType: e.target.value }
+                        }))}
+                        className="w-full p-2 border rounded"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">Test results</label>
+                      <textarea
+                        value={exam.examinationResult}
+                        onChange={(e) => dispatch(updateExamination({
+                          index,
+                          updates: { examinationResult: e.target.value }
+                        }))}
+                        rows={2}
+                        className="w-full p-2 border rounded"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">Upload Images</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={(e) => handleFileUpload(e, index)}
+                        className="w-full p-2 border rounded"
+                      />
+                      {/* Replace the existing image preview section with this new one */}
+                      {exam.imageInfo && exam.imageInfo.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {exam.imageInfo.map((fileInfo, fileIndex) => (
+                            <div key={fileIndex} className="relative">
+                              <img
+                                src={URL.createObjectURL(FileManager.getFiles(index)[fileIndex])}
+                                alt={`Preview ${fileIndex}`}
+                                className="w-20 h-20 object-cover rounded"
+                              />
+                              <span className="text-xs text-gray-500 mt-1 block">
+                                {fileInfo.name}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                  </div>
+                </div>
+              ))}
+              <button
+                onClick={() => dispatch(addExamination({
+                  examinationType: "",
+                  examinationResult: "",
+                  imagesCount: 0
+                }))}
+                className="flex items-center text-sm text-green-600 hover:text-green-700"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Add Lab Test
+              </button>
             </div>
           </div>
-        </div>
 
-        {/* Doctor Feedback Section */}
-        <div className="mb-8 mx-10">
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Doctor Feedback
-              </label>
-              <textarea
-                value={doctorFeedback}
-                onChange={(e) => handleFeedbackChange(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                rows={4}
-                placeholder="Enter your feedback"
-              />
-            </div>
+          {/* Doctor Feedback Section */}
+          <div className="mb-8">
+            <label className="block text-sm text-gray-600 mb-1">Doctor feedback</label>
+            <textarea
+              value={note}
+              onChange={(e) => dispatch(setNote(e.target.value))}
+              rows={3}
+              className="w-full p-2 border rounded"
+              placeholder="Enter your feedback..."
+            />
           </div>
-        </div>
 
-        {/* Action Buttons */}
-        <div className="flex justify-end mx-10 mb-8">
-          <div className="space-x-4">
+          {/* Action Buttons */}
+          <div className="flex justify-end space-x-4">
             <button
-              onClick={handleDiscard}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+              onClick={() => dispatch(resetTreatment())}
+              className="px-4 py-2 text-gray-600 bg-gray-100 rounded hover:bg-gray-200"
             >
               Discard
             </button>
             <button
-              onClick={handleCompleteTreatment}
-              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+              onClick={handleSubmit}
+              className="px-4 py-2 text-white bg-green-500 rounded hover:bg-green-600"
             >
-              Complete Treatment
+              Export
             </button>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

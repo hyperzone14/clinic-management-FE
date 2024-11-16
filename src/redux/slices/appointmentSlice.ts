@@ -1,28 +1,78 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import apiService from "../../utils/axios-config";
 
+interface PatientResponseDTO {
+  id: number;
+  fullName: string;
+  citizenId: string;
+  email: string;
+  gender: string;
+  address: string;
+  birthDate: string;
+  role: null;
+  status: null;
+}
+
 interface Appointment {
   id?: number;
-  patientId: number;
-  doctorId?: number;
-  departmentId?: number;
   appointmentDate: string;
-  timeSlot: number;
-  status?: string;
+  doctorName?: string; // Make optional
+  doctorId?: number; // Make optional
+  departmentId?: number; // Add departmentId
+  patientId: number; // Add patientId
+  patientResponseDTO?: PatientResponseDTO; // Make optional
+  appointmentStatus: string;
+  timeSlot: string;
+  payId?: number;
 }
+
+// interface Pagination {
+//   currentPage: number;
+//   totalPages: number;
+// }
+
+// interface AppointmentState {
+//   appointments: Appointment[];
+//   currentAppointment: Appointment | null;
+//   loading: boolean;
+//   error: string | null;
+//   pagination: Pagination;
+// }
 
 interface AppointmentState {
   appointments: Appointment[];
   currentAppointment: Appointment | null;
   loading: boolean;
   error: string | null;
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalElements: number;
+    pageSize: number;
+  };
+  searchTerm: string;
 }
+
+// const initialState: AppointmentState = {
+//   appointments: [],
+//   currentAppointment: null,
+//   loading: false,
+//   error: null,
+//   pagination: { currentPage: 0, totalPages: 1 },
+// };
 
 const initialState: AppointmentState = {
   appointments: [],
   currentAppointment: null,
   loading: false,
   error: null,
+  pagination: {
+    currentPage: 0,
+    totalPages: 1,
+    totalElements: 0,
+    pageSize: 10
+  },
+  searchTerm: ""
 };
 
 interface ApiResponse {
@@ -31,61 +81,116 @@ interface ApiResponse {
   result: Appointment[] | Appointment;
 }
 
+interface ApiResponsePagination {
+  code: number;
+  message: string;
+  result: {
+    content: Appointment[];
+    totalPages: number;
+    totalElements: number;
+    size: number;
+    // Add other fields if necessary
+  };
+}
+
 // Fetch all appointments
 export const fetchAppointments = createAsyncThunk(
   "appointment/fetchAppointments",
   async () => {
-    try {
-      const response = await apiService.get<ApiResponse>("/appointment/getall");
-      return Array.isArray(response.result)
-        ? response.result
-        : [response.result];
-    } catch (error) {
-      console.error("Error in fetchAppointments:", error);
-      throw error;
+    const response = await apiService.get<ApiResponse>("/appointment");
+    return response.result as Appointment[];
+  }
+);
+
+
+// export const fetchAppointmentPagination = createAsyncThunk(
+//   "appointment/fetchAppointmentPagination",
+//   async (page: number) => {
+//     const response = await apiService.get<ApiResponsePagination>(`/appointment?page=${page}&size=5`);
+//     return {
+//       appointments: response.result.content, // Extract content here
+//       page,
+//       totalPages: response.result.totalPages
+//     };
+//   }
+// );
+
+export const fetchAppointmentPagination = createAsyncThunk(
+  "appointment/fetchAppointmentPagination",
+  async ({ page, searchTerm }: { page: number; searchTerm?: string }) => {
+    let url = `/appointment?page=${page}`;
+
+    // When searching, set a large page size to effectively get all results
+    if (searchTerm) {
+      url += `&size=${Number.MAX_SAFE_INTEGER}`; // Large number to get all results
+    } else {
+      url += `&size=10`; // Default page size for normal viewing
     }
+
+    if (searchTerm) {
+      url += `&search=${encodeURIComponent(searchTerm)}`;
+    }
+
+    const response = await apiService.get<ApiResponsePagination>(url);
+
+    return {
+      appointments: response.result.content,
+      page,
+      totalPages: response.result.totalPages,
+      totalElements: response.result.totalElements,
+      pageSize: response.result.size
+    };
   }
 );
 
 // Add appointment by doctor
 export const addAppointmentByDoctor = createAsyncThunk(
   "appointment/addByDoctor",
-  async (appointmentData: Omit<Appointment, "id" | "departmentId">) => {
+  async (appointmentData: {
+    patientId: number;
+    doctorId: number;
+    appointmentDate: string;
+    timeSlot: number;
+    status: string;
+  }) => {
     const response = await apiService.post<ApiResponse>(
       "/appointment/doctor",
       appointmentData
     );
 
-    console.log("API Response:", response);
-
     if (!response.result) {
       throw new Error("No result in API response");
     }
 
-    const result = response.result as Appointment;
-
-    return result;
+    return response.result as Appointment;
   }
 );
 
 // Add appointment by department
 export const addAppointmentByDepartment = createAsyncThunk(
   "appointment/addByDepartment",
-  async (appointmentData: Omit<Appointment, "id" | "doctorId">) => {
+  async (appointmentData: {
+    patientId: number;
+    departmentId: number;
+    appointmentDate: string;
+    timeSlot: number;
+    status: string;
+  }) => {
     const response = await apiService.post<ApiResponse>(
       "/appointment/department",
       appointmentData
     );
 
-    console.log("API Response:", response);
-
     if (!response.result) {
       throw new Error("No result in API response");
     }
 
-    const result = response.result as Appointment;
-
-    return result;
+    // Ensure departmentId is included in the returned appointment
+    const appointment = response.result as Appointment;
+    return {
+      ...appointment,
+      departmentId: appointmentData.departmentId, // Explicitly include departmentId
+    };
   }
 );
 
@@ -93,9 +198,9 @@ export const addAppointmentByDepartment = createAsyncThunk(
 export const updateAppointmentStatus = createAsyncThunk(
   "appointment/updateStatus",
   async ({ id, status }: { id: number; status: string }) => {
-    const response = await apiService.put<ApiResponse>(
-      `/appointment/updateStatus/${id}`,
-      { status }
+    const response = await apiService.put<ApiResponse, string>(
+      `/appointment/${id}/status`,
+      status
     );
     return response.result as Appointment;
   }
@@ -106,11 +211,19 @@ export const getAppointmentsByDoctorAndDate = createAsyncThunk(
   "appointment/getByDoctorAndDate",
   async ({ doctorId, date }: { doctorId: number; date: string }) => {
     const response = await apiService.get<ApiResponse>(
-      `/appointment/getByDoctorAndDate?doctorId=${doctorId}&date=${date}`
+      `/appointment/doctor/${doctorId}/date/${date}`
     );
-    return Array.isArray(response.result) ? response.result : [response.result];
+    return response.result as Appointment[];
   }
 );
+
+export const getAppointmentById = createAsyncThunk(
+  "appointment/getById",
+  async (id: number) => {
+    const response = await apiService.get<ApiResponse>(`/appointment/${id}`);
+    return response.result as Appointment;
+  }
+)
 
 const appointmentSlice = createSlice({
   name: "appointment",
@@ -124,6 +237,15 @@ const appointmentSlice = createSlice({
     },
     clearCurrentAppointment: (state) => {
       state.currentAppointment = null;
+    },
+    setSearchTerm: (state, action: PayloadAction<string>) => {
+      state.searchTerm = action.payload;
+      // Reset to first page when search term changes
+      state.pagination.currentPage = 0;
+    },
+    clearSearch: (state) => {
+      state.searchTerm = "";
+      state.pagination.currentPage = 0;
     },
     deleteAppointment: (state, action: PayloadAction<number>) => {
       state.appointments = state.appointments.filter(
@@ -194,18 +316,19 @@ const appointmentSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(
-        updateAppointmentStatus.fulfilled,
-        (state, action: PayloadAction<Appointment>) => {
-          state.loading = false;
-          const index = state.appointments.findIndex(
-            (appointment) => appointment.id === action.payload.id
-          );
-          if (index !== -1) {
-            state.appointments[index] = action.payload;
-          }
+      .addCase(updateAppointmentStatus.fulfilled, (state, action) => {
+        state.loading = false;
+        const updatedAppointment = action.payload;
+        const index = state.appointments.findIndex(
+          (appointment) => appointment.id === updatedAppointment.id
+        );
+        if (index !== -1) {
+          state.appointments[index] = updatedAppointment;
         }
-      )
+        if (state.currentAppointment?.id === updatedAppointment.id) {
+          state.currentAppointment = updatedAppointment;
+        }
+      })
       .addCase(updateAppointmentStatus.rejected, (state, action) => {
         state.loading = false;
         state.error =
@@ -225,10 +348,66 @@ const appointmentSlice = createSlice({
         state.error =
           action.error.message ||
           "Failed to fetch appointments by doctor and date";
+      })
+
+      // Fetch paginated appointments
+      .addCase(fetchAppointmentPagination.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchAppointmentPagination.fulfilled, (state, action) => {
+        state.loading = false;
+        state.appointments = action.payload.appointments;
+        state.pagination = {
+          currentPage: action.payload.page,
+          totalPages: action.payload.totalPages,
+          totalElements: action.payload.totalElements,
+          pageSize: action.payload.pageSize
+        };
+      })
+      .addCase(fetchAppointmentPagination.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || "Failed to fetch paginated appointments";
+      })
+      // .addCase(fetchAppointmentPagination.pending, (state) => {
+      //   state.loading = true;
+      //   state.error = null;
+      // })
+      // .addCase(fetchAppointmentPagination.fulfilled, (state, action) => {
+      //   state.loading = false;
+      //   state.appointments = action.payload.appointments;
+      //   state.pagination.currentPage = action.payload.page;
+      //   state.pagination.totalPages = action.payload.totalPages; // Set totalPages
+      // })
+      // .addCase(fetchAppointmentPagination.rejected, (state, action) => {
+      //   state.loading = false;
+      //   state.error = action.error.message || "Failed to fetch paginated appointments";
+      // })
+
+
+      // Get appointment by ID
+      .addCase(getAppointmentById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getAppointmentById.fulfilled, (state, action) => {
+        state.loading = false;
+        state.currentAppointment = action.payload;
+        // Update the appointment in the list if it exists
+        const index = state.appointments.findIndex(
+          (appointment) => appointment.id === action.payload.id
+        );
+        if (index !== -1) {
+          state.appointments[index] = action.payload;
+        }
+      })
+      .addCase(getAppointmentById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || "Failed to fetch appointment by ID";
       });
   },
 });
 
-export const { setAppointments, deleteAppointment, setCurrentAppointment } =
+export const { setAppointments, deleteAppointment, setCurrentAppointment, setSearchTerm, clearSearch } =
   appointmentSlice.actions;
 export default appointmentSlice.reducer;

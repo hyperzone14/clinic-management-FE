@@ -79,7 +79,7 @@ const ChooseDateTime: React.FC = () => {
 
   const handleSubmit = async () => {
     if (!selectedDate || !selectedTime) {
-      toast.error("Please select the date and  time for the reservation.");
+      toast.error("Please select the date and time for the reservation.");
       return;
     }
 
@@ -92,7 +92,7 @@ const ChooseDateTime: React.FC = () => {
     }
 
     const formattedDate = formatDateForApi(selectedDate);
-    const appointmentData = {
+    const baseAppointmentData = {
       patientId: infoList.patientId ?? 1,
       appointmentDate: formattedDate,
       timeSlot: timeSlotObj.slot,
@@ -103,20 +103,18 @@ const ChooseDateTime: React.FC = () => {
       let result;
 
       if (infoList.service === "By doctor" && infoList.doctorId) {
-        const doctorAppointment = {
-          ...appointmentData,
-          doctorId: infoList.doctorId,
-        };
         result = await dispatch(
-          addAppointmentByDoctor(doctorAppointment)
+          addAppointmentByDoctor({
+            ...baseAppointmentData,
+            doctorId: infoList.doctorId,
+          })
         ).unwrap();
       } else if (infoList.service === "By date" && infoList.departmentId) {
-        const departmentAppointment = {
-          ...appointmentData,
-          departmentId: infoList.departmentId,
-        };
         result = await dispatch(
-          addAppointmentByDepartment(departmentAppointment)
+          addAppointmentByDepartment({
+            ...baseAppointmentData,
+            departmentId: infoList.departmentId,
+          })
         ).unwrap();
       } else {
         toast.error("Invalid service type or missing doctor/department ID");
@@ -124,7 +122,6 @@ const ChooseDateTime: React.FC = () => {
       }
 
       if (result) {
-        // Update only the date-related info in infoList
         dispatch(
           setInfoList({
             ...infoList,
@@ -147,28 +144,31 @@ const ChooseDateTime: React.FC = () => {
   };
 
   const tileDisabled = ({ date }: { date: Date }) => {
+    // Get current date at midnight
     const todayDate = new Date();
     todayDate.setHours(0, 0, 0, 0);
 
-    // Ensure we're comparing dates at midnight local time
+    // Get the date to compare at midnight
     const compareDate = new Date(date);
     compareDate.setHours(0, 0, 0, 0);
 
+    // Check if date is before today
     const isBeforeToday = compareDate < todayDate;
+
+    // Get day of week (0 = Sunday, 6 = Saturday)
     const dayOfWeek = date.getDay();
 
-    // Check for weekends (Saturday and Sunday)
-    const isWeekend = dayOfWeek === 6 || dayOfWeek === 0;
+    // Always disable weekends
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
     if (infoList.service === "By doctor") {
       const workingDays = (infoList.workingDays || [])
         .map((day) => (typeof day === "string" ? parseInt(day, 10) : day))
         .filter((day): day is number => !isNaN(day));
 
-      return isBeforeToday || !workingDays.includes(dayOfWeek) || isWeekend;
+      return isBeforeToday || isWeekend || !workingDays.includes(dayOfWeek);
     }
-
-    return isBeforeToday;
+    return isBeforeToday || isWeekend;
   };
 
   return (

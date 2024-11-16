@@ -23,8 +23,8 @@ export const headerRoutes: Routes[] = [
   },
   {
     id: 4,
-    path: "/admin",
-    location: "Admin",
+    path: "/booking-bill",
+    location: "BookingBill",
   },
 ];
 
@@ -93,20 +93,31 @@ export const pageRoutes: Routes[] = [
     path: "/admin",
     location: "Admin",
   },
+  {
+    id: 11,
+    path: "/booking-bill",
+    location: "BookingBill",
+    children: [
+      {
+        id: 111,
+        path: "/booking-detail",
+        location: "BookingDetail",
+      }
+    ]
+  },
+  {
+    id: 12,
+    path: "/treatment-history",
+    location: "TreatmentHistory",
+    children: [
+      {
+        id: 121,
+        path: "/medical-detail",
+        location: "MedicDetail",
+      }
+    ]
+  },
 ];
-
-// export const dashboardRoutes: Routes[] = [
-//   {
-//     id: 1,
-//     path: "schedule",
-//     location: "Schedule",
-//   },
-//   {
-//     id: 2,
-//     path: "medical-service",
-//     location: "MedicalService",
-//   },
-// ];
 
 export const bookingRoutes: Routes[] = [
   {
