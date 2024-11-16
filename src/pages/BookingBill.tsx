@@ -42,7 +42,7 @@ const BookingBill = () => {
   };
 
   const showPagination = !searchTerm;
-
+  
   const filteredAppointments = Array.isArray(appointments)
     ? appointments.filter((appointment) => {
       const hasPatientId = appointment?.id?.toString().includes(searchTerm);

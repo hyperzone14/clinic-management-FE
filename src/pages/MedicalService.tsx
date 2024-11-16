@@ -14,8 +14,13 @@ import {
   setNote,
   resetTreatment,
   fetchDrugs,
-  selectTreatment
+  selectTreatment,
+  updateExaminationFiles,
+  FileManager
 } from "../redux/slices/treatmentSlice";
+
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const MedicalService: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -41,24 +46,26 @@ const MedicalService: React.FC = () => {
 
   const handleSubmit = async () => {
     if (!syndrome.trim()) {
-      alert('Please enter syndrome');
+      toast.error('Please enter syndrome');
       return;
     }
   
     if (prescribedDrugRequestDTOS.length === 0) {
-      alert('Please add at least one prescribed drug');
+      toast.error('Please add at least one prescribed drug');
       return;
     }
   
     try {
       await dispatch(submitTreatment()).unwrap();
-      alert('Medical bill created successfully');
+      toast.success('Medical bill created successfully');
       navigate('/schedule');
     } catch (error) {
       console.error('Error:', error);
-      alert('Failed to create medical bill. Please try again.');
+      toast.error('Failed to create medical bill. Please try again.');
     }
   };
+
+
 
   if (loading) {
     return (
@@ -66,6 +73,10 @@ const MedicalService: React.FC = () => {
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
+  }
+
+  function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>, index: number): void {
+    throw new Error("Function not implemented.");
   }
 
   return (
@@ -251,13 +262,42 @@ const MedicalService: React.FC = () => {
                         className="w-full p-2 border rounded"
                       />
                     </div>
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">Upload Images</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={(e) => handleFileUpload(e, index)}
+                        className="w-full p-2 border rounded"
+                      />
+                      {/* Replace the existing image preview section with this new one */}
+                      {exam.imageInfo && exam.imageInfo.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {exam.imageInfo.map((fileInfo, fileIndex) => (
+                            <div key={fileIndex} className="relative">
+                              <img
+                                src={URL.createObjectURL(FileManager.getFiles(index)[fileIndex])}
+                                alt={`Preview ${fileIndex}`}
+                                className="w-20 h-20 object-cover rounded"
+                              />
+                              <span className="text-xs text-gray-500 mt-1 block">
+                                {fileInfo.name}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
                   </div>
                 </div>
               ))}
               <button
                 onClick={() => dispatch(addExamination({
                   examinationType: "",
-                  examinationResult: ""
+                  examinationResult: "",
+                  imagesCount: 0
                 }))}
                 className="flex items-center text-sm text-green-600 hover:text-green-700"
               >
