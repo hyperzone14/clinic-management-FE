@@ -119,8 +119,6 @@ export const pageRoutes: Routes[] = [
   },
   {
     id: 13,
-    {
-    id: 12,
     path: "/manual-checkin",
     location: "ManualCheckin",
   },
