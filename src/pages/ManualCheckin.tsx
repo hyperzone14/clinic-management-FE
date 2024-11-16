@@ -5,7 +5,7 @@ import { searchAppointmentsCriteria } from "../redux/slices/appointmentSlice";
 import { FaRegCalendarAlt } from "react-icons/fa";
 import { FaUserDoctor } from "react-icons/fa6";
 import { IoSearchOutline } from "react-icons/io5";
-import ManualCheckinCard from "../components/common/ManualCheckInCard";
+import ManualCheckinCard from "../components/common/ManualCheckinCard";
 import { StatusType, updateAppointmentStatus } from "../redux/slices/scheduleSlice";
 
 // Define the enum to match backend
