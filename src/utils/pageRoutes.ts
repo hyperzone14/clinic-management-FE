@@ -105,6 +105,12 @@ export const pageRoutes: Routes[] = [
       }
     ]
   },
+  {
+    id: 12,
+    path: "/manual-checkin",
+    location: "ManualCheckin",
+  },
+
 ];
 
 export const bookingRoutes: Routes[] = [

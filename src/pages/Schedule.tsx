@@ -13,7 +13,7 @@ import AppointmentCard from "../components/common/AppointmentCard";
 const Schedule: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  
+
   const { appointments, loading, error, currentDoctor } = useAppSelector(
     (state) => state.schedule
   );
@@ -32,9 +32,9 @@ const Schedule: React.FC = () => {
           });
           return;
         }
-  
+
         console.log('Full appointment data:', appointment);
-  
+
         await dispatch(initializeTreatmentAsync({
           patientId: Number(appointment.patientId),
           patientName: appointment.patientName,
@@ -43,9 +43,9 @@ const Schedule: React.FC = () => {
           appointmentId: Number(appointment.id),
           appointmentDate: appointment.appointmentDate,
           gender: appointment.gender,
-          birthDate: appointment.birthDate 
+          birthDate: appointment.birthDate
         })).unwrap();
-  
+
         navigate('/schedule/medical-service');
       } catch (error) {
         console.error("Error initializing treatment:", error);
@@ -127,8 +127,8 @@ const Schedule: React.FC = () => {
               key={appointment.id}
               appointment={{
                 id: appointment.id,
-                patientId: appointment.patientId, 
-                doctorId: appointment.doctorId,   
+                patientId: appointment.patientId,
+                doctorId: appointment.doctorId,
                 patientName: appointment.patientName,
                 status: appointment.status,
                 doctorName: appointment.doctorName,
@@ -136,7 +136,7 @@ const Schedule: React.FC = () => {
                 appointmentDate: appointment.appointmentDate,
                 appointmentType: appointment.appointmentType,
                 gender: appointment.gender,
-                birthDate: appointment.patientResponseDTO?.birthDate || '' 
+                birthDate: appointment.patientResponseDTO?.birthDate || ''
               }}
               index={index}
               onPatientClick={handlePatientClick}
@@ -146,14 +146,14 @@ const Schedule: React.FC = () => {
         )}
       </div>
 
-      {/* Back to Top Button */}
+      {/* Back to Top Button
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         className="fixed bottom-8 right-8 bg-blue-500 text-white p-3 rounded-full shadow-lg hover:bg-blue-600 transition-colors"
         style={{ display: window.pageYOffset > 300 ? 'block' : 'none' }}
       >
         ↑
-      </button>
+      </button> */}
     </div>
   );
 };
