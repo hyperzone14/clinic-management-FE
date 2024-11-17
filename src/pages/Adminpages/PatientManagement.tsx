@@ -13,21 +13,19 @@ interface User {
   fullName: string;
   citizenId: string;
   email: string;
+  // password: string;
   gender: string;
   address: string;
   birthDate: string;
-  role: string | null;
   status: string | null;
 }
 
-type TableData = Omit<User, "role" | "status"> & {
-  role: string;
+type TableData = Omit<User, "status"> & {
   status: string;
 };
 
 const transformUser = (user: User): TableData => ({
   ...user,
-  role: user.role || "-",
   status: user.status || "-",
 });
 
@@ -83,11 +81,6 @@ const UserManagement: React.FC = () => {
       render: (user) => user.birthDate?.split("-").reverse().join("/"),
     },
     {
-      id: "role",
-      label: "Role",
-      render: (user) => user.role,
-    },
-    {
       id: "status",
       label: "Status",
       render: (user) => user.status,
@@ -95,11 +88,7 @@ const UserManagement: React.FC = () => {
   ];
 
   useEffect(() => {
-    // console.log("Fetching users...");
-    dispatch(fetchUsers());
-    // .unwrap()
-    // .then((result) => console.log("Fetch result:", result))
-    // .catch((error) => console.error("Fetch error:", error));
+    dispatch(fetchUsers()); // Or whatever default values you want to use
   }, [dispatch]);
 
   useEffect(() => {
@@ -108,16 +97,16 @@ const UserManagement: React.FC = () => {
 
       const filtered = Array.isArray(userManage)
         ? userManage
-          .filter((item): item is User => {
-            if (!item) return false;
+            .filter((item): item is User => {
+              if (!item) return false;
 
-            return (
-              item.fullName.toLowerCase().includes(searchValue) ||
-              item.email.toLowerCase().includes(searchValue) ||
-              item.citizenId.includes(searchValue)
-            );
-          })
-          .map(transformUser)
+              return (
+                item.fullName.toLowerCase().includes(searchValue) ||
+                item.email.toLowerCase().includes(searchValue) ||
+                item.citizenId.includes(searchValue)
+              );
+            })
+            .map(transformUser)
         : [];
 
       setFilteredData(filtered);
@@ -134,7 +123,6 @@ const UserManagement: React.FC = () => {
     // Convert back to User format with potentially null fields
     const originalUser: User = {
       ...user,
-      role: user.role === "-" ? null : user.role,
       status: user.status === "-" ? null : user.status,
     };
     setSelectedUser(originalUser);
@@ -150,7 +138,6 @@ const UserManagement: React.FC = () => {
     // Convert back to User format with potentially null fields
     const originalUser: User = {
       ...user,
-      role: user.role === "-" ? null : user.role,
       status: user.status === "-" ? null : user.status,
     };
     setSelectedUser(originalUser);
@@ -168,9 +155,9 @@ const UserManagement: React.FC = () => {
 
   return (
     <div className="p-4">
-      <h1 className="text-3xl font-bold my-5">User Management</h1>
+      <h1 className="text-3xl font-bold my-5">Patients Management</h1>
       {error && (
-        <div className="text-red-500 mb-4">Error loading users: {error}</div>
+        <div className="text-red-500 mb-4">Error loading patients: {error}</div>
       )}
       {loading ? (
         <div>Loading...</div>

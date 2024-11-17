@@ -20,10 +20,11 @@ interface UserData {
   fullName: string;
   citizenId: string;
   email: string;
+  password: string;
   gender: string;
   address: string;
   birthDate: string;
-  role: "ADMIN" | "CLINIC_OWNER" | "DOCTOR" | "PATIENT" | "";
+  // role: "ADMIN" | "CLINIC_OWNER" | "DOCTOR" | "PATIENT" | "";
   status: "ACTIVE" | "INACTIVE" | "";
 }
 
@@ -34,10 +35,11 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
     fullName: "",
     citizenId: "",
     email: "",
+    password: "",
     gender: "",
     address: "",
     birthDate: "",
-    role: "",
+    // role: "",
     status: "",
   };
 
@@ -66,9 +68,10 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
     if (!newUser.citizenId) newErrors.citizenId = "Citizen ID is required";
     if (!newUser.email) newErrors.email = "Email is required";
     if (!newUser.gender) newErrors.gender = "Gender is required";
+    if (!newUser.password) newErrors.password = "Password is required";
     if (!newUser.address) newErrors.address = "Address is required";
     if (!newUser.birthDate) newErrors.birthDate = "Date of Birth is required";
-    if (!newUser.role) newErrors.role = "Role is required";
+    // if (!newUser.role) newErrors.role = "Role is required";
     if (!newUser.status) newErrors.status = "Status is required";
 
     if (!/^\d{10}$/.test(newUser.citizenId)) {
@@ -90,31 +93,42 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
 
     const userToAdd = {
       ...newUser,
-      id: Date.now(),
     };
 
     dispatch(addUserAsync(userToAdd));
-    setNewUser(initialUserState);
+    resetForm();
     handleClose();
+  };
+
+  // New function to reset the form
+  const resetForm = () => {
+    setNewUser(initialUserState);
+    setErrors({});
   };
 
   const handleModalClose = (e: React.MouseEvent) => {
     e.preventDefault();
+    resetForm();
     handleClose();
   };
 
   const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newDate = event.target.value;
 
-    // Update the newUser state directly with the date value
     setNewUser((prev) => ({
       ...prev,
-      birthDate: newDate, // Store as YYYY-MM-DD format internally
+      birthDate: newDate,
     }));
 
-    // Clear any errors
     setErrors((prev) => ({ ...prev, birthDate: "" }));
   };
+
+  // Add an effect to reset form when modal is opened
+  React.useEffect(() => {
+    if (openAdd) {
+      resetForm();
+    }
+  }, [openAdd]);
 
   return (
     <Dialog open={openAdd} onClose={handleModalClose} maxWidth="sm" fullWidth>
@@ -156,6 +170,19 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
             error={!!errors.email}
             helperText={errors.email}
             type="email"
+            required
+          />
+          <TextField
+            label="Password"
+            name="password"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={newUser.password}
+            onChange={handleChange}
+            error={!!errors.password}
+            helperText={errors.password}
+            type="password"
             required
           />
           <TextField
@@ -231,24 +258,6 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
           />
           <TextField
             select
-            label="Role"
-            name="role"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={newUser.role}
-            onChange={handleChange}
-            error={!!errors.role}
-            helperText={errors.role}
-            required
-          >
-            <MenuItem value="ADMIN">Admin</MenuItem>
-            <MenuItem value="CLINIC_OWNER">Clinic Owner</MenuItem>
-            <MenuItem value="DOCTOR">Doctor</MenuItem>
-            <MenuItem value="PATIENT">Patient</MenuItem>
-          </TextField>
-          <TextField
-            select
             label="Status"
             name="status"
             variant="outlined"
@@ -269,7 +278,12 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
         <Button onClick={handleModalClose} color="secondary">
           Cancel
         </Button>
-        <Button onClick={handleSave} color="primary" variant="contained">
+        <Button
+          onClick={handleSave}
+          color="primary"
+          variant="contained"
+          type="button"
+        >
           Save
         </Button>
       </DialogActions>

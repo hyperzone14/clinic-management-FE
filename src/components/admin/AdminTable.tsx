@@ -114,7 +114,7 @@ const AdminTable = <T extends { id: number | string; role?: string }>({
 
   return (
     <div>
-      {isUserManage && (
+      {/* {isUserManage && (
         <div className="flex items-center mb-4">
           <label htmlFor="role-filter" className="mr-2">
             Filter by Role:
@@ -130,10 +130,9 @@ const AdminTable = <T extends { id: number | string; role?: string }>({
             <option value="CLINIC_OWNER">Clinic Owner</option>
             <option value="DOCTOR">Doctor</option>
             <option value="PATIENT">Patient</option>
-            {/* <option value="Receptionist">Receptionist</option> */}
           </select>
         </div>
-      )}
+      )} */}
       <TableContainer
         component={Paper}
         className="shadow-lg max-h-96 overflow-auto"

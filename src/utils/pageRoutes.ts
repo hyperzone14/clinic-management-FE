@@ -102,8 +102,8 @@ export const pageRoutes: Routes[] = [
         id: 111,
         path: "/booking-detail",
         location: "BookingDetail",
-      }
-    ]
+      },
+    ],
   },
   {
     id: 12,
@@ -114,8 +114,8 @@ export const pageRoutes: Routes[] = [
         id: 121,
         path: "/medical-detail",
         location: "MedicDetail",
-      }
-    ]
+      },
+    ],
   },
   {
     id: 13,
@@ -168,8 +168,8 @@ export const adminRoutes: Routes[] = [
   },
   {
     id: 2,
-    path: "user-management",
-    location: "UserManagement",
+    path: "patient-management",
+    location: "PatientManagement",
   },
   {
     id: 3,
