@@ -144,10 +144,10 @@ const MedicDetail: React.FC = () => {
                 <thead>
                   <tr>
                     <th className="px-6 py-3 text-left text-lg font-medium text-gray-500 tracking-wider">Drug Name</th>
-                    <th className="px-6 py-3 text-left text-lg font-medium text-gray-500 tracking-wider">Dosage</th>
-                    <th className="px-6 py-3 text-left text-lg font-medium text-gray-500 tracking-wider">Duration</th>
-                    <th className="px-6 py-3 text-left text-lg font-medium text-gray-500 tracking-wider">Frequency</th>
-                    <th className="px-6 py-3 text-left text-lg font-medium text-gray-500 tracking-wider">Instructions</th>
+                    <th className="px-6 py-3 text-left text-lg font-medium text-gray-500 tracking-wider">Quantity</th>
+                    {/* <th className="px-6 py-3 text-left text-lg font-medium text-gray-500 tracking-wider">Duration</th>
+                    <th className="px-6 py-3 text-left text-lg font-medium text-gray-500 tracking-wider">Frequency</th> */}
+                    <th className="px-6 py-3 text-left text-lg font-medium text-gray-500 tracking-wider">Notes</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -155,8 +155,8 @@ const MedicDetail: React.FC = () => {
                     <tr key={drug.id}>
                       <td className="px-6 py-4 text-xl text-[#A9A9A9]">{drug.drugName}</td>
                       <td className="px-6 py-4 text-xl text-[#A9A9A9]">{drug.dosage}</td>
-                      <td className="px-6 py-4 text-xl text-[#A9A9A9]">{drug.duration} days</td>
-                      <td className="px-6 py-4 text-xl text-[#A9A9A9]">{drug.frequency}</td>
+                      {/* <td className="px-6 py-4 text-xl text-[#A9A9A9]">{drug.duration} days</td>
+                      <td className="px-6 py-4 text-xl text-[#A9A9A9]">{drug.frequency}</td> */}
                       <td className="px-6 py-4 text-xl text-[#A9A9A9]">{drug.specialInstructions}</td>
                     </tr>
                   ))}
