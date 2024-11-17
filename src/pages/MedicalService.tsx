@@ -75,10 +75,49 @@ const MedicalService: React.FC = () => {
     );
   }
 
-  function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>, index: number): void {
-    throw new Error("Function not implemented.");
+  function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>, index: number) {
+    const files = e.target.files;
+    if (!files) return;
+  
+    // Convert files to array
+    const fileArray = Array.from(files);
+  
+    // Validate files
+    for (const file of fileArray) {
+      if (!file.type.startsWith('image/')) {
+        toast.error(`${file.name} is not an image file`);
+        return;
+      }
+    }
+  
+    try {
+      // Store files in FileManager for use during form submission
+      FileManager.addFiles(index, fileArray);
+  
+      // Create file metadata for Redux state
+      const fileMetadata = fileArray.map(file => ({
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        lastModified: file.lastModified
+      }));
+  
+      // Update Redux state
+      dispatch(updateExaminationFiles({
+        index,
+        fileInfo: fileMetadata
+      }));
+  
+      // Clear input
+      e.target.value = '';
+      
+    } catch (error) {
+      console.error('Error handling file upload:', error);
+      toast.error('Failed to process files');
+    }
   }
 
+  
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow">

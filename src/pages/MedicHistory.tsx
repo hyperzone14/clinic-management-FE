@@ -1,86 +1,107 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../redux/store';
-import SearchFilter from '../components/common/SearchFilter';
 import HistoryCard from '../components/common/HistoryCard';
-import Pagination from '../components/common/Pagination';
-import { fetchMedicalRecords } from '../redux/slices/medicHistorySlice';
-import { Loader2 } from 'lucide-react';
+import { 
+  fetchMedicalRecords, 
+  setCurrentPage 
+} from '../redux/slices/medicHistorySlice';
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const MedicHistory: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { 
     filteredRecords, 
-    currentPage, 
+    currentPage,
+    totalPages,
     itemsPerPage,
-    filterDoctor,
-    filterDate,
-    searchTerm,
     loading,
     error
   } = useAppSelector(state => state.medicHistory);
 
-  // Fetch records when page loads or filters change
   useEffect(() => {
     dispatch(fetchMedicalRecords());
-  }, [dispatch, currentPage, itemsPerPage, filterDoctor, filterDate, searchTerm]);
+  }, [dispatch, currentPage, itemsPerPage]);
 
-  const handleRecordClick = (id: number) => { // Changed from string to number
+  const handleRecordClick = (id: number) => {
     navigate(`/medical-history/${id}`);
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-[400px] flex justify-center items-center">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-[400px] flex justify-center items-center">
-        <div className="text-center">
-          <p className="text-red-500">{error}</p>
-          <button 
-            onClick={() => dispatch(fetchMedicalRecords())}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 0 && newPage < totalPages) {
+      dispatch(setCurrentPage(newPage + 1));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      toast.error('Invalid page number');
+    }
+  };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="w-full">
+      <ToastContainer />
+      
       <div className="flex flex-col my-5 mx-10 justify-center items-center">
-        <h1 className="text-4xl font-bold font-sans my-5">Medical History</h1>
+        <h1 className="text-4xl font-bold font-sans my-5">MEDICAL HISTORY</h1>
       </div>
-      <SearchFilter />
-      <div className="space-y-4">
-        {filteredRecords.length === 0 ? (
-          <div className="text-center text-gray-500 py-8 bg-white rounded-lg shadow-sm">
-            <p className="text-lg">No records found</p>
-            {(filterDoctor || filterDate || searchTerm) && (
-              <p className="text-sm mt-2">Try adjusting your filters</p>
-            )}
+
+      <div className="my-12 flex flex-col items-center">
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+          </div>
+        ) : error ? (
+          <div className="text-red-500 text-center p-4">
+            {toast.error(`Error loading medical records: ${error}`)}
           </div>
         ) : (
-          filteredRecords.map((record) => (
-            <div 
-              key={record.id} 
-              onClick={() => handleRecordClick(record.id)}
-              className="cursor-pointer transition-transform duration-200 hover:scale-[1.01]"
-            >
-              <HistoryCard record={record} />
-            </div>
-          ))
+          <div className="flex flex-col items-center w-full">
+            {filteredRecords.length === 0 ? (
+              <div className="text-center p-8 bg-gray-100 rounded-lg">
+                <p className="text-xl text-gray-600">No medical records found</p>
+                <p className="text-sm text-gray-500 mt-2">
+                  No medical records available
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="w-9/12 space-y-4 max-h-[70vh] pr-4 overflow-y-auto">
+                  {filteredRecords.map((record) => (
+                    <div 
+                      key={record.id}
+                      onClick={() => handleRecordClick(record.id)}
+                      className="cursor-pointer transition-transform duration-200 hover:scale-[1.01]"
+                    >
+                      <HistoryCard record={record} />
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex justify-center space-x-4 mt-10 mb-5">
+                  <button
+                    className="px-4 py-2 bg-[#34a85a] text-white rounded-lg disabled:opacity-50 hover:bg-[#2e8b46] transition duration-300 ease-in-out"
+                    onClick={() => handlePageChange(currentPage - 2)}
+                    disabled={currentPage <= 1}
+                  >
+                    Previous
+                  </button>
+                  <span className="px-4 py-2">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    className="px-4 py-2 bg-[#6B87C7] text-[#fff] rounded-lg disabled:opacity-50 hover:bg-[#4567B7] transition duration-300 ease-in-out"
+                    onClick={() => handlePageChange(currentPage)}
+                    disabled={currentPage >= totalPages}
+                  >
+                    Next
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         )}
       </div>
-      <Pagination />
     </div>
   );
 };

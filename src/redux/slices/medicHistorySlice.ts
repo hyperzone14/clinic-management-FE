@@ -2,6 +2,12 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { apiService } from "../../utils/axios-config";
 
 // Types
+export interface ImageResponse {
+  id: number;
+  fileName: string;
+  downloadUrl: string;
+}
+
 export interface PrescribedDrug {
   id: number;
   drugName: string;
@@ -17,6 +23,7 @@ export interface ExaminationDetail {
   doctorName: string;
   examinationType: string;
   examinationResult: string;
+  imageResponseDTO: ImageResponse[];
 }
 
 export interface MedicalRecord {
@@ -147,6 +154,25 @@ export const fetchMedicalRecordsByPatient = createAsyncThunk(
   }
 );
 
+export const fetchMedicalRecordsByPatientId = createAsyncThunk(
+  "medicHistory/fetchByPatientId",
+  async (patientId: number, { rejectWithValue }) => {
+    try {
+      const response = await apiService.get<MedicalRecord[]>(
+        `/medical-bills/patient-id/${patientId}`
+      );
+      return {
+        content: response,
+        totalPages: 1,
+        totalElements: response.length,
+        currentPage: 1,
+      };
+    } catch (error: any) {
+      return rejectWithValue(error?.message || "Failed to fetch records by patient ID");
+    }
+  }
+);
+
 export const fetchMedicalRecordsByDoctor = createAsyncThunk(
   "medicHistory/fetchByDoctor",
   async (doctorName: string, { rejectWithValue }) => {
@@ -239,7 +265,6 @@ const medicHistorySlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Fetch all records
       .addCase(fetchMedicalRecords.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -258,7 +283,6 @@ const medicHistorySlice = createSlice({
         state.records = [];
         state.filteredRecords = [];
       })
-      // Fetch by ID
       .addCase(fetchRecordById.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -272,7 +296,6 @@ const medicHistorySlice = createSlice({
         state.error = action.payload as string;
         state.selectedRecord = null;
       })
-      // Fetch by patient
       .addCase(fetchMedicalRecordsByPatient.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -289,7 +312,22 @@ const medicHistorySlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
-      // Fetch by doctor
+      .addCase(fetchMedicalRecordsByPatientId.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchMedicalRecordsByPatientId.fulfilled, (state, action) => {
+        state.loading = false;
+        state.records = action.payload.content;
+        state.filteredRecords = action.payload.content;
+        state.totalPages = action.payload.totalPages;
+        state.totalElements = action.payload.totalElements;
+        state.currentPage = action.payload.currentPage;
+      })
+      .addCase(fetchMedicalRecordsByPatientId.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
       .addCase(fetchMedicalRecordsByDoctor.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -306,13 +344,11 @@ const medicHistorySlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
-      // Create record
       .addCase(createMedicalRecord.fulfilled, (state, action) => {
         state.records.unshift(action.payload);
         state.filteredRecords = [...state.records];
         state.totalElements += 1;
       })
-      // Update record
       .addCase(updateMedicalRecord.fulfilled, (state, action) => {
         const index = state.records.findIndex(r => r.id === action.payload.id);
         if (index !== -1) {
@@ -320,7 +356,6 @@ const medicHistorySlice = createSlice({
           state.filteredRecords = [...state.records];
         }
       })
-      // Delete record
       .addCase(deleteMedicalRecord.fulfilled, (state, action) => {
         state.records = state.records.filter(r => r.id !== action.payload);
         state.filteredRecords = [...state.records];

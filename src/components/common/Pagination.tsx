@@ -16,7 +16,7 @@ const Pagination = () => {
     (state) => state.medicHistory
   );
 
-  // Don't show pagination if there's only one page or while loading
+
   if (totalPages <= 1 || loading) {
     return null;
   }

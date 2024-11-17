@@ -54,6 +54,12 @@ export interface DoctorInfo {
   doctorName: string;
 }
 
+interface MedicalBillResponse {
+  id?: number;
+  status?: string;
+  message?: string;
+}
+
 // File Manager
 export class FileManager {
   private static fileMap = new Map<string, File>();
@@ -154,12 +160,12 @@ export const submitTreatment = createAsyncThunk(
         exam.imagesCount > 0
       );
 
-      let response;
+      let response: MedicalBillResponse;
 
       if (hasFiles) {
         const formData = new FormData();
 
-        const medicalBillData = {
+        const medicalBillData = new Blob([JSON.stringify({
           patientId: state.treatment.patientInfo.patientId,
           doctorId: state.treatment.doctorInfo.doctorId,
           date: state.treatment.date,
@@ -169,19 +175,32 @@ export const submitTreatment = createAsyncThunk(
           examinationDetailRequestDTOS: state.treatment.examinationDetailRequestDTOS.map(
             ({ imageInfo, ...rest }) => rest
           )
-        };
+        })], {
+          type: 'application/json'
+        });
 
-        formData.append('medicalBillData', JSON.stringify(medicalBillData));
+        formData.append('medicalBillData', medicalBillData);
 
-        // Add files from FileManager
-        state.treatment.examinationDetailRequestDTOS.forEach((exam, index) => {
-          const files = FileManager.getFiles(index);
+        state.treatment.examinationDetailRequestDTOS.forEach((exam, examIndex) => {
+          const files = FileManager.getFiles(examIndex);
           files.forEach(file => {
             formData.append('files', file);
           });
         });
 
-        response = await apiService.post('/medical-bills/images', formData);
+        const axiosResponse = await axios.post<MedicalBillResponse>(
+          'http://localhost:8080/api/medical-bills/images',
+          formData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              ...(localStorage.getItem('token') ? {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+              } : {})
+            }
+          }
+        );
+        response = axiosResponse.data;
       } else {
         const medicalBillData = {
           patientId: state.treatment.patientInfo.patientId,
@@ -195,11 +214,12 @@ export const submitTreatment = createAsyncThunk(
           )
         };
 
-        response = await apiService.post('/medical-bills', medicalBillData);
+        const apiResponse = await apiService.post<MedicalBillResponse>('/medical-bills', medicalBillData);
+        response = apiResponse;
       }
 
       // Update appointment status
-      await apiService.put(
+      await apiService.put<void>(
         `/appointment/${state.treatment.appointmentId}/status`,
         "SUCCESS"
       );
@@ -217,7 +237,7 @@ export const submitTreatment = createAsyncThunk(
         toast.error(`Failed to create medical bill: ${message}`);
         return rejectWithValue(message);
       }
-      toast.error('Failed to create medical bill. Please try again.');
+      toast.error('Failed to create medical bill');
       return rejectWithValue('Failed to complete operation');
     }
   }

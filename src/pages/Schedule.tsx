@@ -9,13 +9,14 @@ import {
 } from "../redux/slices/scheduleSlice";
 import { initializeTreatmentAsync } from "../redux/slices/treatmentSlice";
 import AppointmentCard from "../components/common/AppointmentCard";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Schedule: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(0);
-  const pageSize = 10; // Updated to match ManualCheckin
+  const pageSize = 10;
   const { appointments, loading, error, currentDoctor, totalPages } = useAppSelector(
     (state) => state.schedule
   );
@@ -49,24 +50,63 @@ const Schedule: React.FC = () => {
         toast.error(`Error initializing treatment: ${errorMessage}`);
       }
     } else {
-      console.log('Appointment not in checked-in status:', appointment.status);
+      switch (appointment.status.toLowerCase()) {
+        case 'success':
+          toast.info(`This appointment has already been completed for ${appointment.patientName}`);
+          break;
+        case 'cancelled':
+          toast.warning(`This appointment was cancelled for ${appointment.patientName}`);
+          break;
+        default:
+          toast.error(`Appointment must be checked-in to proceed.`);
+      }
     }
   };
 
   const handleStatusChange = (index: number, newStatus: StatusType) => {
     const appointment = appointments[index];
     if (appointment) {
-      dispatch(updateAppointmentStatus({ id: appointment.id, status: newStatus }));
+      dispatch(updateAppointmentStatus({ id: appointment.id, status: newStatus }))
+        .unwrap()
+        .then(() => {
+          switch (newStatus.toLowerCase()) {
+            case 'success':
+              toast.success(`Appointment completed successfully for ${appointment.patientName}`);
+              break;
+            case 'cancelled':
+              toast.info(`Appointment cancelled for ${appointment.patientName}`);
+              break;
+            case 'checked-in':
+              toast.success(`${appointment.patientName} has been checked in`);
+              break;
+            case 'confirmed':
+              toast.success(`Appointment confirmed for ${appointment.patientName}`);
+              break;
+            default:
+              toast.info(`Appointment status updated to ${newStatus} for ${appointment.patientName}`);
+          }
+        })
+        .catch((error) => {
+          toast.error(`Failed to update appointment status: ${error.message || 'Unknown error occurred'}`);
+        });
+    } else {
+      toast.error('Failed to update status: Appointment not found');
     }
   };
 
   const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (newPage >= 0 && newPage < totalPages) {
+      setCurrentPage(newPage);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      toast.error('Invalid page number');
+    }
   };
 
   return (
     <div className="w-full">
+      <ToastContainer/>
+      
       <div className="flex flex-col my-5 mx-10 justify-center items-center">
         <h1 className="text-4xl font-bold font-sans my-5">SCHEDULE</h1>
       </div>
@@ -102,7 +142,7 @@ const Schedule: React.FC = () => {
           </div>
         ) : error ? (
           <div className="text-red-500 text-center p-4">
-            Error loading appointments: {error}
+            {toast.error(`Error loading appointments: ${error}`)}
           </div>
         ) : (
           <div className="flex flex-col items-center w-full">
