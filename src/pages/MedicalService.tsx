@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../redux/store";
-import { Trash2, Plus, ChevronLeft } from "lucide-react";
+import { Trash2, Plus, ChevronLeft, ClipboardList } from "lucide-react";
 import {
   submitTreatment,
   addPrescribedDrug,
@@ -126,11 +126,20 @@ const MedicalService: React.FC = () => {
 
           {/* Patient Information Section */}
           <div className="mb-8">
-            <div className="flex items-center mb-4">
-              <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center mr-2">
-                <span className="text-green-500 text-sm">1</span>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center">
+                <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center mr-2">
+                  <span className="text-green-500 text-sm">1</span>
+                </div>
+                <h2 className="text-lg font-semibold">Patient Information</h2>
               </div>
-              <h2 className="text-lg font-semibold">Patient Information</h2>
+              <button
+                onClick={() => window.open(`/medical-history?id=${patientInfo.patientId}`, '_blank')}
+                className="flex items-center text-sm text-blue-600 hover:text-blue-700"
+              >
+                <ClipboardList className="h-4 w-4 mr-1" />
+                View Patient History
+              </button>
             </div>
             <div className="grid grid-cols-3 gap-4 mb-4">
               <div>

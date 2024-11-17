@@ -246,7 +246,7 @@ const MedicDetail: React.FC = () => {
         {/* Back Button */}
         <div className="flex justify-center items-center my-20">
           <button
-            onClick={() => navigate('/medical-history')}
+            onClick={() => navigate(-1)}
             className="bg-[#4567b7] hover:bg-[#3E5CA3] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out"
           >
             Back to History
