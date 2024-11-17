@@ -95,7 +95,7 @@ const UserManagement: React.FC = () => {
   ];
 
   useEffect(() => {
-    console.log("Fetching users...");
+    // console.log("Fetching users...");
     dispatch(fetchUsers());
     // .unwrap()
     // .then((result) => console.log("Fetch result:", result))
@@ -108,16 +108,16 @@ const UserManagement: React.FC = () => {
 
       const filtered = Array.isArray(userManage)
         ? userManage
-            .filter((item): item is User => {
-              if (!item) return false;
+          .filter((item): item is User => {
+            if (!item) return false;
 
-              return (
-                item.fullName.toLowerCase().includes(searchValue) ||
-                item.email.toLowerCase().includes(searchValue) ||
-                item.citizenId.includes(searchValue)
-              );
-            })
-            .map(transformUser)
+            return (
+              item.fullName.toLowerCase().includes(searchValue) ||
+              item.email.toLowerCase().includes(searchValue) ||
+              item.citizenId.includes(searchValue)
+            );
+          })
+          .map(transformUser)
         : [];
 
       setFilteredData(filtered);
