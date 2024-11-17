@@ -42,6 +42,7 @@ const UserManagement: React.FC = () => {
   const [openEdit, setOpenEdit] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [shouldRefresh, setShouldRefresh] = useState(false);
 
   // Define columns for the user table
   const columns: Column<TableData>[] = [
@@ -89,7 +90,7 @@ const UserManagement: React.FC = () => {
 
   useEffect(() => {
     dispatch(fetchUsers()); // Or whatever default values you want to use
-  }, [dispatch]);
+  }, [dispatch, shouldRefresh]);
 
   useEffect(() => {
     const filterUsers = () => {
@@ -115,8 +116,11 @@ const UserManagement: React.FC = () => {
     filterUsers();
   }, [userManage, search]);
 
-  const handleCloseAdd = () => {
+  const handleCloseAdd = (success?: boolean) => {
     setOpenAdd(false);
+    if (success) {
+      setShouldRefresh((prev) => !prev);
+    }
   };
 
   const handleOpenEdit = (user: TableData) => {
@@ -178,7 +182,7 @@ const UserManagement: React.FC = () => {
               className="bg-[#6B87C7] hover:bg-[#4567B7] text-white font-bold p-2 rounded-lg transition duration-300 ease-in-out text-lg"
               onClick={() => setOpenAdd(true)}
             >
-              + Add User
+              + Add Patient
             </button>
           </div>
 

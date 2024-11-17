@@ -13,7 +13,7 @@ import { addUserAsync } from "../../../redux/slices/userManageSlice";
 
 interface AddModalProps {
   openAdd: boolean;
-  handleClose: () => void;
+  handleClose: (success?: boolean) => void;
 }
 
 interface UserData {
@@ -86,7 +86,21 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = (e: React.MouseEvent<HTMLButtonElement>) => {
+  // const handleSave = (e: React.MouseEvent<HTMLButtonElement>) => {
+  //   e.preventDefault();
+
+  //   if (!validateForm()) return;
+
+  //   const userToAdd = {
+  //     ...newUser,
+  //   };
+
+  //   dispatch(addUserAsync(userToAdd));
+  //   resetForm();
+  //   handleClose();
+  // };
+
+  const handleSave = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
     if (!validateForm()) return;
@@ -95,9 +109,20 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
       ...newUser,
     };
 
-    dispatch(addUserAsync(userToAdd));
-    resetForm();
-    handleClose();
+    try {
+      const resultAction = await dispatch(addUserAsync(userToAdd));
+      if (addUserAsync.fulfilled.match(resultAction)) {
+        // If the action was successful
+        resetForm();
+        handleClose(true); // Pass true to indicate success
+      } else {
+        // If the action was rejected
+        handleClose(false); // Pass false to indicate failure
+      }
+    } catch {
+      // Handle any unexpected errors
+      handleClose(false);
+    }
   };
 
   // New function to reset the form
@@ -106,10 +131,16 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
     setErrors({});
   };
 
+  // const handleModalClose = (e: React.MouseEvent) => {
+  //   e.preventDefault();
+  //   resetForm();
+  //   handleClose();
+  // };
+
   const handleModalClose = (e: React.MouseEvent) => {
     e.preventDefault();
     resetForm();
-    handleClose();
+    handleClose(false); // Pass false when modal is closed without saving
   };
 
   const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
