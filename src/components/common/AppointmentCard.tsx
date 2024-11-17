@@ -1,6 +1,11 @@
 import React from "react";
-import { StatusType,Gender } from "../../redux/slices/scheduleSlice";
+import { BsClockHistory } from "react-icons/bs";
+import { FaRegCalendarAlt } from "react-icons/fa";
+import { FaUserDoctor } from "react-icons/fa6";
+import { PiUserCircleLight } from "react-icons/pi";
+import { StatusType, Gender } from "../../redux/slices/scheduleSlice";
 import StatusCircle from "./StatusCircle";
+
 interface AppointmentCardProps {
   appointment: {
     id: number;
@@ -120,9 +125,12 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
       <div className="flex items-center justify-between">
         {/* Left side - Patient info */}
         <div className="flex-1">
-          <h2 className="text-2xl font-semibold text-gray-900">
-            {appointment.patientName}
-          </h2>
+          <div className="flex items-center">
+            <PiUserCircleLight className="w-12 h-12 text-green-500" />
+            <h2 className="text-2xl font-semibold text-gray-900 ms-3">
+              {appointment.patientName}
+            </h2>
+          </div>
           <span
             className={`
               inline-block mt-2 px-3 py-1 rounded-full text-sm font-medium
@@ -136,22 +144,31 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
         </div>
 
         {/* Right side - Appointment details */}
-        <div className="text-right mr-12">
-          <p className="text-lg font-medium text-gray-700">
-            Dr. {appointment.doctorName}
-          </p>
-          <p className="text-gray-600">
-            {formatTimeSlot(appointment.timeSlot)}
-          </p>
-          <p className="text-gray-600">
-            Date: {new Date(appointment.appointmentDate).toLocaleDateString()}
-          </p>
+        <div className="text-right">
+          <div className="flex items-center justify-end mb-2">
+            <p className="text-lg font-medium text-gray-700 me-3">
+              Dr. {appointment.doctorName}
+            </p>
+            <FaUserDoctor className="w-6 h-6" />
+          </div>
+          <div className="flex items-center justify-end mb-2">
+            <p className="text-gray-600 me-3">
+              {new Date(appointment.appointmentDate).toLocaleDateString()}
+            </p>
+            <FaRegCalendarAlt className="w-6 h-6" />
+          </div>
+          <div className="flex items-center justify-end">
+            <p className="text-gray-600 me-3">
+              {formatTimeSlot(appointment.timeSlot)}
+            </p>
+            <BsClockHistory className="w-6 h-6" />
+          </div>
         </div>
 
         {/* Status Circle */}
         <div 
           onClick={(e) => e.stopPropagation()} 
-          className="flex items-center"
+          className="flex items-center ms-5"
         >
           <StatusCircle
             status={appointment.status}

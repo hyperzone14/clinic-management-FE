@@ -1,47 +1,78 @@
-// components/common/HistoryCard.tsx
 import React from "react";
-import { MedicalRecord } from "../../redux/slices/medicHistorySlice";
-import { User, Calendar } from "lucide-react";
+import { Clock, Calendar, UserRound } from "lucide-react";
+import { PiUserCircleLight } from "react-icons/pi";
+
+interface MedicalRecord {
+  syndrome: string;
+  doctorName: string;
+  date: string;
+  treatment?: string;
+  prescription?: string;
+}
 
 interface HistoryCardProps {
   record: MedicalRecord;
+  onClick?: () => void;
 }
 
-const HistoryCard: React.FC<HistoryCardProps> = ({ record }) => {
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      month: "2-digit",
-      day: "2-digit",
-      year: "numeric",
-    });
-  };
-
+const HistoryCard: React.FC<HistoryCardProps> = ({ record, onClick }) => {
   return (
-    <div className="flex items-center p-4 mb-4 bg-white rounded-lg shadow hover:shadow-md transition-all duration-300 cursor-pointer border border-gray-100">
-      <div className="flex-shrink-0">
-        <img
-          src={record.image}
-          alt={record.symptoms}
-          className="w-32 h-32 object-cover rounded-lg shadow-sm"
-        />
-      </div>
-
-      <div className="flex-1 ml-6">
-        <h3 className="text-xl font-semibold mb-3 text-gray-800">
-          {record.symptoms}
-        </h3>
-        <div className="space-y-2">
-          <div className="flex items-center text-gray-600">
-            <User className="w-4 h-4 mr-2 text-blue-500" />
-            <span className="text-sm">{record.doctorName}</span>
+    <div
+      onClick={onClick}
+      className="
+        group relative
+        w-full bg-white rounded-lg shadow-md p-6 
+        transition-all duration-200
+        border-l-4 border-blue-500
+        hover:shadow-lg hover:bg-gray-50 cursor-pointer
+      "
+    >
+      <div className="flex items-center justify-between">
+        {/* Left side - Syndrome info */}
+        <div className="flex-1">
+          <div className="flex items-center">
+            <PiUserCircleLight className="w-12 h-12 text-green-500" />
+            <h2 className="text-2xl font-semibold text-gray-900 ms-3">
+              {record.syndrome}
+            </h2>
           </div>
-          <div className="flex items-center text-gray-600">
-            <Calendar className="w-4 h-4 mr-2 text-blue-500" />
-            <span className="text-sm">{formatDate(record.date)}</span>
+          <span className="inline-block mt-2 px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+            Medical Record
+          </span>
+        </div>
+
+        {/* Right side - Medical details */}
+        <div className="text-right">
+          <div className="flex items-center justify-end mb-2">
+            <p className="text-lg font-medium text-gray-700 me-3">
+              Dr. {record.doctorName}
+            </p>
+            <UserRound className="w-6 h-6" />
+          </div>
+          <div className="flex items-center justify-end mb-2">
+            <p className="text-gray-600 me-3">
+              {new Date(record.date).toLocaleDateString()}
+            </p>
+            <Calendar className="w-6 h-6" />
           </div>
         </div>
       </div>
+
+      {/* Additional medical information */}
+      {(record.treatment || record.prescription) && (
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          {record.treatment && (
+            <p className="text-gray-700 mb-2">
+              <span className="font-medium">Treatment:</span> {record.treatment}
+            </p>
+          )}
+          {record.prescription && (
+            <p className="text-gray-700">
+              <span className="font-medium">Prescription:</span> {record.prescription}
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 };
