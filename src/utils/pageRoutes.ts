@@ -171,4 +171,9 @@ export const adminRoutes: Routes[] = [
     path: "user-management",
     location: "UserManagement",
   },
+  {
+    id: 3,
+    path: "drug-management",
+    location: "DrugManagement",
+  },
 ];
