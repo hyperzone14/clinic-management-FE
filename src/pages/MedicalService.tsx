@@ -19,7 +19,7 @@ import {
   FileManager
 } from "../redux/slices/treatmentSlice";
 
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const MedicalService: React.FC = () => {
@@ -119,10 +119,13 @@ const MedicalService: React.FC = () => {
 
   
   return (
+    
     <div className="min-h-screen bg-gray-50 p-6">
+      <ToastContainer />
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow">
         <div className="p-6">
           <h1 className="text-2xl font-bold text-center mb-8">Medical Treatment</h1>
+          
 
           {/* Patient Information Section */}
           <div className="mb-8">
