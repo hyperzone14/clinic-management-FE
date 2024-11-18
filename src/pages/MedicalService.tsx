@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../redux/store";
-import { Trash2, Plus, ChevronLeft } from "lucide-react";
+import { Trash2, Plus, ChevronLeft, ClipboardList } from "lucide-react";
 import {
   submitTreatment,
   addPrescribedDrug,
@@ -19,7 +19,7 @@ import {
   FileManager
 } from "../redux/slices/treatmentSlice";
 
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const MedicalService: React.FC = () => {
@@ -75,23 +75,74 @@ const MedicalService: React.FC = () => {
     );
   }
 
-  function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>, index: number): void {
-    throw new Error("Function not implemented.");
+  function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>, index: number) {
+    const files = e.target.files;
+    if (!files) return;
+  
+    // Convert files to array
+    const fileArray = Array.from(files);
+  
+    // Validate files
+    for (const file of fileArray) {
+      if (!file.type.startsWith('image/')) {
+        toast.error(`${file.name} is not an image file`);
+        return;
+      }
+    }
+  
+    try {
+      // Store files in FileManager for use during form submission
+      FileManager.addFiles(index, fileArray);
+  
+      // Create file metadata for Redux state
+      const fileMetadata = fileArray.map(file => ({
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        lastModified: file.lastModified
+      }));
+  
+      // Update Redux state
+      dispatch(updateExaminationFiles({
+        index,
+        fileInfo: fileMetadata
+      }));
+  
+      // Clear input
+      e.target.value = '';
+      
+    } catch (error) {
+      console.error('Error handling file upload:', error);
+      toast.error('Failed to process files');
+    }
   }
 
+  
   return (
+    
     <div className="min-h-screen bg-gray-50 p-6">
+      <ToastContainer />
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow">
         <div className="p-6">
           <h1 className="text-2xl font-bold text-center mb-8">Medical Treatment</h1>
+          
 
           {/* Patient Information Section */}
           <div className="mb-8">
-            <div className="flex items-center mb-4">
-              <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center mr-2">
-                <span className="text-green-500 text-sm">1</span>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center">
+                <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center mr-2">
+                  <span className="text-green-500 text-sm">1</span>
+                </div>
+                <h2 className="text-lg font-semibold">Patient Information</h2>
               </div>
-              <h2 className="text-lg font-semibold">Patient Information</h2>
+              <button
+                onClick={() => window.open(`/medical-history?id=${patientInfo.patientId}`, '_blank')}
+                className="flex items-center text-sm text-blue-600 hover:text-blue-700"
+              >
+                <ClipboardList className="h-4 w-4 mr-1" />
+                View Patient History
+              </button>
             </div>
             <div className="grid grid-cols-3 gap-4 mb-4">
               <div>

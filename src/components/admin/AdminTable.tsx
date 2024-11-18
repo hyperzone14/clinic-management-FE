@@ -13,11 +13,7 @@ import { FaRegEdit } from "react-icons/fa";
 import { FaRegTrashCan } from "react-icons/fa6";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../redux/store";
-import {
-  setCurrentPage,
-  setRowsPerPage,
-  setRoleFilter,
-} from "../../redux/slices/tableSlice";
+import { setCurrentPage, setRowsPerPage } from "../../redux/slices/tableSlice";
 
 // Define a generic column configuration type
 export interface Column<T> {
@@ -63,13 +59,6 @@ const AdminTable = <T extends { id: number | string; role?: string }>({
   const endIndex = startIndex + rowsPerPage;
   const currentData = filteredData.slice(startIndex, endIndex);
 
-  const handleRoleFilterChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    dispatch(setRoleFilter(event.target.value));
-    dispatch(setCurrentPage(1)); // Reset to page 1 when filter changes
-  };
-
   const handleRowsPerPageChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
@@ -114,26 +103,6 @@ const AdminTable = <T extends { id: number | string; role?: string }>({
 
   return (
     <div>
-      {isUserManage && (
-        <div className="flex items-center mb-4">
-          <label htmlFor="role-filter" className="mr-2">
-            Filter by Role:
-          </label>
-          <select
-            id="role-filter"
-            value={roleFilter}
-            onChange={handleRoleFilterChange}
-            className="border rounded px-2 py-1"
-          >
-            <option value="All">All</option>
-            <option value="ADMIN">Admin</option>
-            <option value="CLINIC_OWNER">Clinic Owner</option>
-            <option value="DOCTOR">Doctor</option>
-            <option value="PATIENT">Patient</option>
-            {/* <option value="Receptionist">Receptionist</option> */}
-          </select>
-        </div>
-      )}
       <TableContainer
         component={Paper}
         className="shadow-lg max-h-96 overflow-auto"

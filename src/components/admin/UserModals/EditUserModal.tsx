@@ -16,17 +16,18 @@ import { useAppDispatch } from "../../../redux/store";
 import { updateUserAsync } from "../../../redux/slices/userManageSlice";
 
 const VALID_STATUSES = ["ACTIVE", "INACTIVE"];
-const VALID_ROLES = ["ADMIN", "CLINIC_OWNER", "DOCTOR", "PATIENT"];
+// const VALID_ROLES = ["ADMIN", "CLINIC_OWNER", "DOCTOR", "PATIENT"];
 
 interface Data {
   id: number;
   fullName: string;
   citizenId: string;
   email: string;
+  // password: string;
   gender: string;
   address: string;
   birthDate: string;
-  role: string | null;
+  // role: string | null;
   status: string | null;
 }
 
@@ -55,7 +56,6 @@ const EditUserModal: React.FC<EditModalProps> = ({
       | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
       | SelectChangeEvent<string>
   ) => {
-    // Remove e.preventDefault() as it might interfere with Material-UI's internal handling
     const { name, value } = e.target as { name: string; value: string };
     setFormData((prev) => ({
       ...prev,
@@ -67,13 +67,13 @@ const EditUserModal: React.FC<EditModalProps> = ({
     str.charAt(0).toUpperCase() + str.slice(1);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // Keep this preventDefault as it's needed for form submission
+    e.preventDefault();
 
-    // Convert birthDate to format expected by API if necessary
     const updatedData = {
       ...formData,
-      birthDate: formData.birthDate.split("/").reverse().join("-"), // Convert back to "YYYY-MM-DD" format
+      birthDate: formData.birthDate.split("/").reverse().join("-"),
     };
+
     dispatch(updateUserAsync(updatedData));
     handleClose();
   };
@@ -99,7 +99,7 @@ const EditUserModal: React.FC<EditModalProps> = ({
         <DialogContent>
           <div className="grid grid-cols-2 gap-4 mt-4">
             <TextField
-              name="fullName" // Fixed: changed from "name" to "fullName" to match the data structure
+              name="fullName"
               label="Full Name"
               value={formData.fullName}
               onChange={handleChange}
@@ -113,7 +113,7 @@ const EditUserModal: React.FC<EditModalProps> = ({
               fullWidth
             />
             <TextField
-              name="citizenId" // Fixed: changed from "citizenID" to "citizenId" to match the data structure
+              name="citizenId"
               label="Citizen ID"
               value={formData.citizenId}
               onChange={handleChange}
@@ -141,7 +141,7 @@ const EditUserModal: React.FC<EditModalProps> = ({
             />
             <TextField
               label="Date of Birth"
-              name="birthDate" // Fixed: changed from "DoB" to "birthDate" to match the data structure
+              name="birthDate"
               variant="outlined"
               fullWidth
               value={formData.birthDate?.split("-").reverse().join("/")}
@@ -149,7 +149,7 @@ const EditUserModal: React.FC<EditModalProps> = ({
               type="text"
               placeholder="DD/MM/YYYY"
             />
-            <FormControl fullWidth>
+            {/* <FormControl fullWidth>
               <InputLabel>Role</InputLabel>
               <Select
                 name="role"
@@ -163,7 +163,7 @@ const EditUserModal: React.FC<EditModalProps> = ({
                   </MenuItem>
                 ))}
               </Select>
-            </FormControl>
+            </FormControl>*/}
             <FormControl fullWidth>
               <InputLabel>Status</InputLabel>
               <Select

@@ -102,8 +102,8 @@ export const pageRoutes: Routes[] = [
         id: 111,
         path: "/booking-detail",
         location: "BookingDetail",
-      }
-    ]
+      },
+    ],
   },
   {
     id: 12,
@@ -114,13 +114,28 @@ export const pageRoutes: Routes[] = [
         id: 121,
         path: "/medical-detail",
         location: "MedicDetail",
-      }
-    ]
+      },
+    ],
   },
   {
     id: 13,
     path: "/manual-checkin",
     location: "ManualCheckin",
+  },
+  {
+    id: 14,
+    path: "/reschedule",
+    location: "Reschedule",
+  },
+  {
+    id: 15,
+    path: "/payment-callback",
+    location: "PaymentCallBack",
+  },
+  {
+    id: 16,
+    path: "/chatbot",
+    location: "Chatbot",
   },
 ];
 
@@ -145,6 +160,11 @@ export const bookingRoutes: Routes[] = [
     path: "finish",
     location: "Finish",
   },
+  {
+    id: 5,
+    path: "payment-callback",
+    location: "PaymentCallBack",
+  },
 ];
 
 export const prescriptionRoutes: Routes[] = [
@@ -168,8 +188,8 @@ export const adminRoutes: Routes[] = [
   },
   {
     id: 2,
-    path: "user-management",
-    location: "UserManagement",
+    path: "patient-management",
+    location: "PatientManagement",
   },
   {
     id: 3,

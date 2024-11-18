@@ -228,6 +228,7 @@ const ManualCheckinCard: React.FC<ManualCheckinProps> = ({
               appointment.appointmentStatus
             )}
             onStatusChange={(newStatus) => onStatusChange(index, newStatus)}
+            isManualCheckin={true}
           />
         </div>
       </div>
