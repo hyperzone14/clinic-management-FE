@@ -65,8 +65,7 @@ const reducers = Object.entries(sliceModules).reduce<Record<string, Reducer>>(
     const name = path
       .split("/")
       .pop()
-      ?.replace(/Slice\.ts$/, "")
-      .toLowerCase();
+      ?.replace(/Slice\.ts$/, "");
     if (name && module.default) {
       acc[name] = module.default;
     }
