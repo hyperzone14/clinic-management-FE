@@ -122,6 +122,21 @@ export const pageRoutes: Routes[] = [
     path: "/manual-checkin",
     location: "ManualCheckin",
   },
+  {
+    id: 14,
+    path: "/reschedule",
+    location: "Reschedule",
+  },
+  {
+    id: 15,
+    path: "/payment-callback",
+    location: "PaymentCallBack",
+  },
+  {
+    id: 16,
+    path: "/chatbot",
+    location: "Chatbot",
+  },
 ];
 
 export const bookingRoutes: Routes[] = [
@@ -144,6 +159,11 @@ export const bookingRoutes: Routes[] = [
     id: 4,
     path: "finish",
     location: "Finish",
+  },
+  {
+    id: 5,
+    path: "payment-callback",
+    location: "PaymentCallBack",
   },
 ];
 
