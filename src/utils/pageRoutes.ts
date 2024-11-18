@@ -132,11 +132,6 @@ export const pageRoutes: Routes[] = [
     path: "/payment-callback",
     location: "PaymentCallBack",
   },
-  {
-    id: 16,
-    path: "/chatbot",
-    location: "Chatbot",
-  },
 ];
 
 export const bookingRoutes: Routes[] = [

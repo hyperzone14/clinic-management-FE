@@ -24,6 +24,7 @@ import { Provider } from "react-redux";
 import store from "./redux/store";
 import Prescription from "./pages/Prescription";
 import AdminSideBar from "./components/layout/AdminSideBar";
+import Chatbot from "./components/layout/Chatbot";
 
 // Layout wrapper component for pages that need header and footer
 const MainLayout: React.FC = () => {
@@ -33,6 +34,7 @@ const MainLayout: React.FC = () => {
       <main className="flex-grow mx-[11rem]">
         <Outlet />
       </main>
+      <Chatbot />
       <BackToTop />
       <Footer />
     </div>
