@@ -136,6 +136,13 @@ export const pageRoutes: Routes[] = [
     id: 16,
     path: "/examination",
     location: "Examination",
+    children: [
+      {
+        id: 257,
+        path: "/examination-detail",
+        location: "ExaminationDetail",
+      },
+    ],
   },
   {
     id: 17,
