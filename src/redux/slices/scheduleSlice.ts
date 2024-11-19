@@ -214,18 +214,28 @@ export const fetchLabTestAppointments = createAsyncThunk(
     sort?: string;
   }, { rejectWithValue }) => {
     try {
-      // Create base URL with required parameters
       const baseUrl = `/appointment/search?appointmentDate=${params.appointmentDate}&page=${params.page || 0}&size=${params.size || 10}&sort=${params.sort || 'timeSlot,desc'}`;
       
-      // Add both appointment statuses
-      const url = `${baseUrl}&appointmentStatus=LAB_TEST_REQUIRED&appointmentStatus=LAB_TEST_COMPLETED`;
+      // Make separate API calls for each status
+      const [requiredResponse, completedResponse] = await Promise.all([
+        apiService.get<AppointmentResponse>(`${baseUrl}&appointmentStatus=LAB_TEST_REQUIRED`),
+        apiService.get<AppointmentResponse>(`${baseUrl}&appointmentStatus=LAB_TEST_COMPLETED`)
+      ]);
 
-      const response = await apiService.get<AppointmentResponse>(url);
+      // Combine and deduplicate appointments
+      const allAppointments = [
+        ...requiredResponse.result.content,
+        ...completedResponse.result.content
+      ];
+
+      // Calculate combined totals
+      const totalElements = requiredResponse.result.totalElements + completedResponse.result.totalElements;
+      const totalPages = Math.ceil(totalElements / (params.size || 10));
 
       return {
-        appointments: response.result.content.map(transformAppointmentData),
-        totalPages: response.result.totalPages,
-        totalElements: response.result.totalElements,
+        appointments: allAppointments.map(transformAppointmentData),
+        totalPages,
+        totalElements,
         currentPage: params.page || 0,
       };
     } catch (error) {
@@ -235,7 +245,6 @@ export const fetchLabTestAppointments = createAsyncThunk(
     }
   }
 );
-
 
 export const updateAppointmentStatus = createAsyncThunk(
   "schedule/updateStatus",

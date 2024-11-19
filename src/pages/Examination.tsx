@@ -39,11 +39,18 @@ const Examination: React.FC = () => {
     switch (appointment.status) {
       case 'lab_test_required':
         toast.info(`Starting lab tests for ${appointment.patientName}`);
-        navigate(`/examination/lab-test/${appointment.id}`);
+        navigate(`/examination/${appointment.id}`, {
+          state: { 
+            patientId: appointment.patientId,
+            patientName: appointment.patientName,
+            doctorId: appointment.doctorId,
+            doctorName: appointment.doctorName
+          }
+        });
         break;
       case 'lab_test_completed':
         toast.info(`Lab test results are ready for ${appointment.patientName}`);
-        navigate(`/examination/lab-test/results/${appointment.id}`);
+        navigate(`/lab-test/results/${appointment.id}`);
         break;
       default:
         toast.warning(`Invalid status for lab examination`);
