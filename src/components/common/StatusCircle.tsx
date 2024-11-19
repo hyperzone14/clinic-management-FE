@@ -90,7 +90,6 @@ const StatusCircle: React.FC<StatusCircleProps> = ({
       case "lab_test_required":
         return ["lab_test_completed", "cancelled"];
       case "lab_test_completed":
-        return ["lab_test_required", "checked-in"];
       case "cancelled":
       case "success":
         return [];
@@ -101,7 +100,7 @@ const StatusCircle: React.FC<StatusCircleProps> = ({
 
   const handleStatusChange = (newStatus: StatusType) => {
     // Don't allow status changes for final states
-    if (status === "cancelled" || status === "success") return;
+    if (status === "cancelled" || status === "success" || status === "lab_test_completed") return;
     
     if (onStatusChange) {
       onStatusChange(newStatus);
@@ -113,10 +112,10 @@ const StatusCircle: React.FC<StatusCircleProps> = ({
 
   const isClickable = () => {
     if (showLabTestStatusesOnly) {
-      // Only allow interactions for lab test related statuses
-      return status !== "cancelled";
+      // Only allow interactions for lab test required status
+      return status === "lab_test_required";
     }
-    return status !== "cancelled" && status !== "success";
+    return status !== "cancelled" && status !== "success" && status !== "lab_test_completed";
   };
 
   return (
