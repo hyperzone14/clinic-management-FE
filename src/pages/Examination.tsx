@@ -33,7 +33,7 @@ const Examination: React.FC = () => {
 
   useEffect(() => {
     fetchAppointments();
-  }, [currentPage, pageSize]); // Remove dispatch from dependencies to avoid double fetching
+  }, [currentPage, pageSize]); 
 
   const handlePatientClick = (appointment: Appointment, index: number) => {
     switch (appointment.status) {
