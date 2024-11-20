@@ -12,6 +12,7 @@ import doctorReducer from "./slices/doctorSlice";
 import departmentReducer from "./slices/departmentSlice";
 import appointmentReducer from "./slices/appointmentSlice";
 import drugManageReducer from "./slices/drugManageSlice";
+import examinationReducer from "./slices/examinationSlice";
 import checkAvailabilityReducer from "./slices/checkAvailabilitySlice";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { thunk } from "redux-thunk";
@@ -30,6 +31,7 @@ const rootReducer = combineReducers({
   department: departmentReducer,
   appointment: appointmentReducer,
   drugManage: drugManageReducer,
+  examination: examinationReducer,
   checkAvailability: checkAvailabilityReducer,
 });
 
