@@ -231,6 +231,33 @@ export const searchAppointmentsCriteria = createAsyncThunk(
   }
 );
 
+export const rescheduleAppointment = createAsyncThunk(
+  "appointment/reschedule",
+  async ({
+    appointmentId,
+    appointmentDate,
+    timeSlot,
+  }: {
+    appointmentId: number;
+    appointmentDate: string;
+    timeSlot: number;
+  }) => {
+    const response = await apiService.put<ApiResponse>(
+      `/appointment/reschedule/${appointmentId}`,
+      {
+        appointmentDate,
+        timeSlot,
+      }
+    );
+
+    if (!response.result) {
+      throw new Error("No result in API response");
+    }
+
+    return response.result as Appointment;
+  }
+);
+
 const appointmentSlice = createSlice({
   name: "appointment",
   initialState,
@@ -417,6 +444,32 @@ const appointmentSlice = createSlice({
       .addCase(searchAppointmentsCriteria.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Failed to search appointments";
+      })
+
+      // Add cases for reschedule appointment
+      .addCase(rescheduleAppointment.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(rescheduleAppointment.fulfilled, (state, action) => {
+        state.loading = false;
+        const updatedAppointment = action.payload;
+        // Update appointment in the list
+        const index = state.appointments.findIndex(
+          (appointment) => appointment.id === updatedAppointment.id
+        );
+        if (index !== -1) {
+          state.appointments[index] = updatedAppointment;
+        }
+        // Update current appointment if it's the one being rescheduled
+        if (state.currentAppointment?.id === updatedAppointment.id) {
+          state.currentAppointment = updatedAppointment;
+        }
+      })
+      .addCase(rescheduleAppointment.rejected, (state, action) => {
+        state.loading = false;
+        state.error =
+          action.error.message || "Failed to reschedule appointment";
       });
   },
 });

@@ -1,7 +1,7 @@
+// checkAvailabilitySlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import axios from "axios";
+import apiService from "../../utils/axios-config";
 
-// Define the initial state
 interface Timeslot {
   id: number;
   timeSlot: string;
@@ -9,41 +9,52 @@ interface Timeslot {
   currentPatients: number;
 }
 
+interface ScheduleResponse {
+  id: number;
+  date: string;
+  doctorId: number;
+  doctorTimeslotCapacityResponseDTOS: Timeslot[];
+}
+
+interface APIResponse {
+  code: number;
+  message: string;
+  result: ScheduleResponse | null;
+}
+
 interface CheckAvailabilityState {
-  schedule: {
-    id: number;
-    date: string;
-    doctorId: number;
-    doctorTimeslotCapacityResponseDTO: Timeslot[];
-  } | null;
+  doctorTimeslotCapacityResponseDTO: Timeslot[];
   loading: boolean;
   error: string | null;
 }
 
 const initialState: CheckAvailabilityState = {
-  schedule: null,
+  doctorTimeslotCapacityResponseDTO: [],
   loading: false,
   error: null,
 };
 
-// Async thunk to fetch schedule data
 export const fetchSchedule = createAsyncThunk(
-  "schedule/fetchSchedule",
+  "checkAvailability/fetchSchedule",
   async ({ doctorId, date }: { doctorId: number; date: string }) => {
-    const response = await axios.get(
+    const response = await apiService.get<APIResponse>(
       `/schedules/doctor/${doctorId}/date/${date}`
     );
-    return response.data.result;
+    // If result is null, return an empty array
+    if (!response.result) {
+      return [];
+    }
+    const scheduleData = response.result.doctorTimeslotCapacityResponseDTOS;
+    return scheduleData;
   }
 );
 
-// Create the slice
-const CheckAvailabilityState = createSlice({
-  name: "schedule",
+const checkAvailabilitySlice = createSlice({
+  name: "checkAvailability",
   initialState,
   reducers: {
-    setCheckAvailability(state) {
-      state.schedule = null;
+    clearSchedule: (state) => {
+      state.doctorTimeslotCapacityResponseDTO = [];
       state.error = null;
       state.loading = false;
     },
@@ -56,18 +67,19 @@ const CheckAvailabilityState = createSlice({
       })
       .addCase(
         fetchSchedule.fulfilled,
-        (state, action: PayloadAction<CheckAvailabilityState["schedule"]>) => {
+        (state, action: PayloadAction<Timeslot[]>) => {
           state.loading = false;
-          state.schedule = action.payload;
+          state.doctorTimeslotCapacityResponseDTO = action.payload;
+          state.error = null;
         }
       )
       .addCase(fetchSchedule.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || "Failed to fetch schedule";
+        state.doctorTimeslotCapacityResponseDTO = [];
+        state.error = action.error.message ?? "Failed to fetch schedule";
       });
   },
 });
 
-// Export actions and reducer
-export const { setCheckAvailability } = CheckAvailabilityState.actions;
-export default CheckAvailabilityState.reducer;
+export const { clearSchedule } = checkAvailabilitySlice.actions;
+export default checkAvailabilitySlice.reducer;
