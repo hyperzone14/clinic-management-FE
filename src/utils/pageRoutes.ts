@@ -124,11 +124,6 @@ export const pageRoutes: Routes[] = [
   },
   {
     id: 14,
-    path: "/reschedule",
-    location: "Reschedule",
-  },
-  {
-    id: 15,
     path: "/payment-callback",
     location: "PaymentCallBack",
   },

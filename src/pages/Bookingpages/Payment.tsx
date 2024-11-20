@@ -14,17 +14,6 @@ interface PaymentResponse {
   url: string;
 }
 
-// interface AppointmentResponse {
-//   result: {
-//     id: number;
-//     appointmentStatus: string;
-//     appointmentDate: string;
-//     doctorId: number;
-//     patientId: number;
-//     timeSlot: number;
-//   };
-// }
-
 interface BookingStepProps {
   goToNextStep: () => void;
 }
@@ -72,6 +61,44 @@ const Payment: React.FC = () => {
     }
   };
 
+  // const handlePaymentClick = async () => {
+  //   if (!currentAppointment?.id) {
+  //     toast.error("No appointment selected for payment");
+  //     return;
+  //   }
+
+  //   try {
+  //     setIsProcessing(true);
+  //     // Get the current origin for the return URL
+  //     const returnUrl = `${window.location.origin}/payment-callback`;
+
+  //     // Send the returnUrl to the backend
+  //     const response = await axios.post<PaymentResponse>(
+  //       `http://localhost:8080/api/payment/create_payment/${currentAppointment.id}`,
+  //       {
+  //         returnUrl: returnUrl,
+  //       }
+  //     );
+
+  //     if (response.data?.url) {
+  //       // Open VNPay URL in new window without modifying it
+  //       const newWindow = window.open(
+  //         response.data.url,
+  //         "VNPayWindow",
+  //         "width=1000,height=800"
+  //       );
+  //       setPaymentWindow(newWindow);
+  //     } else {
+  //       toast.error("Invalid payment URL received");
+  //     }
+  //   } catch (error) {
+  //     console.error("Failed to initiate payment:", error);
+  //     toast.error("Failed to create payment. Please try again.");
+  //   } finally {
+  //     setIsProcessing(false);
+  //   }
+  // };
+
   const handleCoDpayment = async () => {
     if (!currentAppointment?.id) {
       toast.error("No appointment selected for payment");
@@ -110,7 +137,11 @@ const Payment: React.FC = () => {
 
       const appointment = response.data.result;
 
-      if (appointment && (appointment.appointmentStatus === "CONFIRMED" || appointment.appointmentStatus === "CHECKED_IN")) {
+      if (
+        appointment &&
+        (appointment.appointmentStatus === "CONFIRMED" ||
+          appointment.appointmentStatus === "CHECKED_IN")
+      ) {
         setIsPaymentConfirmed(true);
         goToNextStep();
       } else {
@@ -165,10 +196,11 @@ const Payment: React.FC = () => {
                 <div className="flex items-center gap-x-5">
                   <span className="font-bold text-xl">Pay with VNPay</span>
                   <div
-                    className={`hover:shadow-xl transition duration-300 ease-in-out rounded-2xl ${!isProcessing && currentAppointment
-                      ? "cursor-pointer"
-                      : "cursor-not-allowed opacity-50"
-                      }`}
+                    className={`hover:shadow-xl transition duration-300 ease-in-out rounded-2xl ${
+                      !isProcessing && currentAppointment
+                        ? "cursor-pointer"
+                        : "cursor-not-allowed opacity-50"
+                    }`}
                     onClick={
                       currentAppointment && !isProcessing
                         ? handlePaymentClick
@@ -185,10 +217,11 @@ const Payment: React.FC = () => {
                 <div className="flex items-center gap-x-5">
                   <span className="font-bold text-xl">Pay with Cash</span>
                   <div
-                    className={`hover:shadow-xl transition duration-300 ease-in-out rounded-2xl ${!isProcessing && currentAppointment
-                      ? "cursor-pointer"
-                      : "cursor-not-allowed opacity-50"
-                      }`}
+                    className={`hover:shadow-xl transition duration-300 ease-in-out rounded-2xl ${
+                      !isProcessing && currentAppointment
+                        ? "cursor-pointer"
+                        : "cursor-not-allowed opacity-50"
+                    }`}
                     onClick={
                       currentAppointment && !isProcessing
                         ? handleCoDpayment
@@ -209,9 +242,10 @@ const Payment: React.FC = () => {
                 onClick={checkPaymentStatus}
                 disabled={isProcessing}
                 className={`px-6 py-3 rounded-lg text-white text-lg font-semibold transition duration-300 ease-in-out
-                  ${isProcessing
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-blue-500 hover:bg-blue-600"
+                  ${
+                    isProcessing
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-500 hover:bg-blue-600"
                   }`}
               >
                 {isProcessing ? "Checking..." : "Finish"}
