@@ -36,15 +36,18 @@ const Examination: React.FC = () => {
   }, [currentPage, pageSize]); 
 
   const handlePatientClick = (appointment: Appointment, index: number) => {
+    console.log('Clicked appointment:', appointment);
+    console.log('Current status:', appointment.status);
+    
     switch (appointment.status) {
       case 'lab_test_required':
-        toast.info(`Starting lab tests for ${appointment.patientName}`);
         navigate(`/examination/${appointment.id}`, {
           state: { 
             patientId: appointment.patientId,
             patientName: appointment.patientName,
             doctorId: appointment.doctorId,
-            doctorName: appointment.doctorName
+            doctorName: appointment.doctorName,
+            appointmentId: appointment.id
           }
         });
         break;
