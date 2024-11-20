@@ -13,6 +13,7 @@ import departmentReducer from "./slices/departmentSlice";
 import appointmentReducer from "./slices/appointmentSlice";
 import drugManageReducer from "./slices/drugManageSlice";
 import examinationReducer from "./slices/examinationSlice";
+import checkAvailabilityReducer from "./slices/checkAvailabilitySlice";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { thunk } from "redux-thunk";
 
@@ -31,6 +32,7 @@ const rootReducer = combineReducers({
   appointment: appointmentReducer,
   drugManage: drugManageReducer,
   examination: examinationReducer,
+  checkAvailability: checkAvailabilityReducer,
 });
 
 const store = configureStore({
@@ -45,48 +47,3 @@ export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 export default store;
-
-// import { combineReducers, configureStore, Reducer } from "@reduxjs/toolkit";
-// import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-// import { thunk } from "redux-thunk";
-
-// // Define interface for slice modules
-// interface SliceModule {
-//   default: Reducer;
-// }
-
-// // Automatically import all reducers from the slices directory
-// const sliceModules = import.meta.glob<SliceModule>("./slices/*Slice.ts", {
-//   eager: true,
-// });
-
-// // Build reducers object dynamically
-// const reducers = Object.entries(sliceModules).reduce<Record<string, Reducer>>(
-//   (acc, [path, module]) => {
-//     // Extract name from path, removing 'Slice' suffix
-//     const name = path
-//       .split("/")
-//       .pop()
-//       ?.replace(/Slice\.ts$/, "");
-//     if (name && module.default) {
-//       acc[name] = module.default;
-//     }
-//     return acc;
-//   },
-//   {}
-// );
-
-// const rootReducer = combineReducers(reducers);
-
-// const store = configureStore({
-//   reducer: rootReducer,
-//   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(thunk),
-// });
-
-// export type RootState = ReturnType<typeof rootReducer>;
-// export type AppDispatch = typeof store.dispatch;
-
-// export const useAppDispatch = () => useDispatch<AppDispatch>();
-// export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
-
-// export default store;
