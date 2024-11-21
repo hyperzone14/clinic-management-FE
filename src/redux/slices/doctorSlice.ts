@@ -96,6 +96,16 @@ export const updateDoctorAsync = createAsyncThunk(
   }
 );
 
+export const getDoctorById = createAsyncThunk(
+  "doctor/getDoctorById",
+  async (doctorId: number) => {
+    const response = await apiService.get<{ result: Doctor }>(
+      `/doctor/${doctorId}`
+    );
+    return response.result;
+  }
+);
+
 const doctorSlice = createSlice({
   name: "doctor",
   initialState,
@@ -168,6 +178,32 @@ const doctorSlice = createSlice({
       .addCase(updateDoctorAsync.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Failed to update doctor";
+      })
+
+      // Get doctor by ID cases
+      .addCase(getDoctorById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        getDoctorById.fulfilled,
+        (state, action: PayloadAction<Doctor>) => {
+          state.loading = false;
+          const index = state.doctors.findIndex(
+            (doctor) => doctor.id === action.payload.id
+          );
+          if (index !== -1) {
+            // Update existing doctor
+            state.doctors[index] = action.payload;
+          } else {
+            // If doctor not in list, add to the list
+            state.doctors.push(action.payload);
+          }
+        }
+      )
+      .addCase(getDoctorById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || "Failed to fetch doctor by ID";
       });
   },
 });

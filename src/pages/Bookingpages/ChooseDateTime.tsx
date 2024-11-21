@@ -15,6 +15,7 @@ import {
   addAppointmentByDoctor,
 } from "../../redux/slices/appointmentSlice";
 import { AppDispatch, RootState } from "../../redux/store";
+import { fetchSchedule } from "../../redux/slices/checkAvailabilitySlice";
 
 interface BookingStepProps {
   goToNextStep: () => void;
@@ -23,19 +24,22 @@ interface BookingStepProps {
 
 // Move timeset outside component since it's static
 const TIME_SLOTS = [
-  { id: 1, time: "7AM-8AM", slot: 0 },
-  { id: 2, time: "8AM-9AM", slot: 1 },
-  { id: 3, time: "9AM-10AM", slot: 2 },
-  { id: 4, time: "1PM-2PM", slot: 3 },
-  { id: 5, time: "2PM-3PM", slot: 4 },
-  { id: 6, time: "3PM-4PM", slot: 5 },
+  { id: 1, time: "7AM-8AM", slot: 0, timeSlot: "SLOT_7_TO_8" },
+  { id: 2, time: "8AM-9AM", slot: 1, timeSlot: "SLOT_8_TO_9" },
+  { id: 3, time: "9AM-10AM", slot: 2, timeSlot: "SLOT_9_TO_10" },
+  { id: 4, time: "1PM-2PM", slot: 3, timeSlot: "SLOT_13_TO_14" },
+  { id: 5, time: "2PM-3PM", slot: 4, timeSlot: "SLOT_14_TO_15" },
+  { id: 6, time: "3PM-4PM", slot: 5, timeSlot: "SLOT_15_TO_16" },
 ] as const;
 
 const ChooseDateTime: React.FC = () => {
   // const addApointment = useSelector((state: RootState) => state.appointment);
   const dispatch = useDispatch<AppDispatch>();
   const infoList = useSelector((state: RootState) => state.infoList);
-  // const today = new Date();
+  const availableSlots = useSelector(
+    (state: RootState) =>
+      state.checkAvailability.doctorTimeslotCapacityResponseDTO
+  );
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string>("");
 
@@ -171,6 +175,54 @@ const ChooseDateTime: React.FC = () => {
     return isBeforeToday || isWeekend;
   };
 
+  useEffect(() => {
+    if (selectedDate && infoList.doctorId) {
+      const formattedDate = formatDateForApi(selectedDate);
+      dispatch(
+        fetchSchedule({ doctorId: infoList.doctorId, date: formattedDate })
+      );
+    }
+  }, [selectedDate, infoList.doctorId, dispatch]);
+
+  // Check if a time slot is available
+  const isSlotAvailable = (slotId: string): boolean => {
+    if (availableSlots.length === 0) {
+      // If no schedule exists, all slots are available
+      return true;
+    }
+
+    const slot = availableSlots.find((s) => s.timeSlot === slotId);
+    if (!slot) {
+      return false;
+    }
+    return slot.currentPatients < slot.maxPatients;
+  };
+
+  // Get slot style based on availability
+  const getSlotStyle = (slotId: string): string => {
+    const isAvailable = isSlotAvailable(slotId);
+    return isAvailable
+      ? "my-3 w-fit h-fit p-3 rounded-lg bg-[#BAE3F3] hover:bg-[#87ceeb] cursor-pointer text-[#1F3658] hover:text-[#fff] hover:shadow-lg transition duration-200 ease-in-out"
+      : "my-3 w-fit h-fit p-3 rounded-lg bg-gray-400 text-gray-600 cursor-not-allowed";
+  };
+
+  // Handle time slot click
+  const handleTimeSlotClick = (time: string, slotId: string) => {
+    if (isSlotAvailable(slotId)) {
+      setSelectedTime(time);
+    }
+  };
+
+  // useEffect(() => {
+  //   if (selectedDate && infoList.doctorId) {
+  //     const formattedDate = formatDateForApi(selectedDate);
+  //     dispatch(clearSchedule()); // Clear previous schedule
+  //     dispatch(
+  //       fetchSchedule({ doctorId: infoList.doctorId, date: formattedDate })
+  //     );
+  //   }
+  // }, [selectedDate, infoList.doctorId, dispatch]);
+
   return (
     <>
       <ToastContainer />
@@ -200,10 +252,10 @@ const ChooseDateTime: React.FC = () => {
                   className="col-span-1 flex justify-center items-center"
                 >
                   <div
-                    className="my-3 w-fit h-fit p-3 rounded-lg bg-[#BAE3F3] hover:bg-[#87ceeb] cursor-pointer text-[#1F3658] hover:text-[#fff] hover:shadow-lg transition duration-200 ease-in-out"
-                    onClick={() => {
-                      setSelectedTime(timeSlot.time);
-                    }}
+                    className={getSlotStyle(timeSlot.timeSlot)}
+                    onClick={() =>
+                      handleTimeSlotClick(timeSlot.time, timeSlot.timeSlot)
+                    }
                   >
                     <span className="font-bold">{timeSlot.time}</span>
                   </div>
