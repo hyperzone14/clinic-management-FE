@@ -79,6 +79,9 @@ const Schedule: React.FC = () => {
         case 'cancelled':
           toast.warning(`This appointment was cancelled for ${appointment.patientName}`);
           break;
+        case 'lab_test_completed':
+          toast.info(`Lab tests have been completed for ${appointment.patientName}`);
+          break;
         default:
           toast.error(`Appointment must be checked-in to proceed.`);
       }
