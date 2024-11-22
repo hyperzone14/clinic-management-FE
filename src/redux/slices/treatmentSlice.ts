@@ -23,11 +23,18 @@ export interface PrescribedDrug {
   specialInstructions: string;
 }
 
+// Old Interfaces (Commented)
+/*
 interface FileMetadata {
   name: string;
   type: string;
   size: number;
   lastModified: number;
+}
+
+export interface UpdateExaminationFilesPayload {
+  index: number;
+  fileInfo: FileMetadata[];
 }
 
 export interface ExaminationDetail {
@@ -36,10 +43,11 @@ export interface ExaminationDetail {
   imagesCount: number;
   imageInfo?: FileMetadata[];
 }
+*/
 
-export interface UpdateExaminationFilesPayload {
-  index: number;
-  fileInfo: FileMetadata[];
+// New Simplified Interface
+export interface ExaminationDetail {
+  examinationType: string;
 }
 
 export interface PatientInfo {
@@ -60,7 +68,8 @@ interface MedicalBillResponse {
   message?: string;
 }
 
-// File Manager
+// File Manager (Commented)
+/*
 export class FileManager {
   private static fileMap = new Map<string, File>();
 
@@ -88,6 +97,7 @@ export class FileManager {
     this.fileMap.clear();
   }
 }
+*/
 
 interface TreatmentState {
   patientInfo: PatientInfo;
@@ -144,63 +154,48 @@ export const submitTreatment = createAsyncThunk(
   async (_, { getState, dispatch, rejectWithValue }) => {
     try {
       const state = getState() as { treatment: TreatmentState };
+      const hasLabTests = state.treatment.examinationDetailRequestDTOS.length > 0;
 
-      // Validate required fields
       if (!state.treatment.syndrome.trim()) {
         toast.error('Please enter syndrome');
         return rejectWithValue('Syndrome is required');
       }
 
-      if (state.treatment.prescribedDrugRequestDTOS.length === 0) {
+      if (hasLabTests && state.treatment.prescribedDrugRequestDTOS.length > 0) {
+        toast.error('Prescriptions cannot be added when lab tests are required');
+        return rejectWithValue('Cannot add prescriptions with lab tests');
+      }
+
+      if (!hasLabTests && state.treatment.prescribedDrugRequestDTOS.length === 0) {
         toast.error('Please add at least one prescribed drug');
         return rejectWithValue('At least one prescription is required');
       }
 
-      const hasFiles = state.treatment.examinationDetailRequestDTOS.some(exam =>
-        exam.imagesCount > 0
-      );
-
       let response: MedicalBillResponse;
 
-      if (hasFiles) {
-        const formData = new FormData();
-
-        const medicalBillData = new Blob([JSON.stringify({
+      if (hasLabTests) {
+        const labRequestData = {
           patientId: state.treatment.patientInfo.patientId,
           doctorId: state.treatment.doctorInfo.doctorId,
           date: state.treatment.date,
           syndrome: state.treatment.syndrome,
-          note: state.treatment.note,
-          prescribedDrugRequestDTOS: state.treatment.prescribedDrugRequestDTOS,
-          examinationDetailRequestDTOS: state.treatment.examinationDetailRequestDTOS.map(
-            ({ imageInfo, ...rest }) => rest
+          examinationDetailLabRequestDTOS: state.treatment.examinationDetailRequestDTOS.map(
+            exam => ({
+              examinationType: exam.examinationType
+            })
           )
-        })], {
-          type: 'application/json'
-        });
+        };
 
-        formData.append('medicalBillData', medicalBillData);
-
-        state.treatment.examinationDetailRequestDTOS.forEach((exam, examIndex) => {
-          const files = FileManager.getFiles(examIndex);
-          files.forEach(file => {
-            formData.append('files', file);
-          });
-        });
-
-        const axiosResponse = await axios.post<MedicalBillResponse>(
-          'http://localhost:8080/api/medical-bills/images',
-          formData,
-          {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-              ...(localStorage.getItem('token') ? {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-              } : {})
-            }
-          }
+        const apiResponse = await apiService.post<MedicalBillResponse>(
+          '/medical-bills/lab_request',
+          labRequestData
         );
-        response = axiosResponse.data;
+        response = apiResponse;
+
+        await apiService.put<void>(
+          `/appointment/${state.treatment.appointmentId}/status`,
+          "LAB_TEST_REQUIRED"
+        );
       } else {
         const medicalBillData = {
           patientId: state.treatment.patientInfo.patientId,
@@ -209,35 +204,37 @@ export const submitTreatment = createAsyncThunk(
           syndrome: state.treatment.syndrome,
           note: state.treatment.note,
           prescribedDrugRequestDTOS: state.treatment.prescribedDrugRequestDTOS,
-          examinationDetailRequestDTOS: state.treatment.examinationDetailRequestDTOS.map(
-            ({ imageInfo, ...rest }) => rest
-          )
+          examinationDetailRequestDTOS: []
         };
 
-        const apiResponse = await apiService.post<MedicalBillResponse>('/medical-bills', medicalBillData);
+        const apiResponse = await apiService.post<MedicalBillResponse>(
+          '/medical-bills',
+          medicalBillData
+        );
         response = apiResponse;
+
+        await apiService.put<void>(
+          `/appointment/${state.treatment.appointmentId}/status`,
+          "SUCCESS"
+        );
       }
 
-      // Update appointment status
-      await apiService.put<void>(
-        `/appointment/${state.treatment.appointmentId}/status`,
-        "SUCCESS"
-      );
-
       await dispatch(fetchAppointments());
-
-      FileManager.clear();
-      toast.success('Medical bill created successfully');
+      // FileManager.clear(); // Removed
+      toast.success(hasLabTests ? 
+        'Lab test request submitted successfully' : 
+        'Medical bill created successfully'
+      );
       return response;
 
     } catch (error) {
       console.error('Error:', error);
       if (axios.isAxiosError(error)) {
         const message = error.response?.data?.message || error.message;
-        toast.error(`Failed to create medical bill: ${message}`);
+        toast.error(`Failed to submit: ${message}`);
         return rejectWithValue(message);
       }
-      toast.error('Failed to create medical bill');
+      toast.error('Failed to submit');
       return rejectWithValue('Failed to complete operation');
     }
   }
@@ -350,6 +347,7 @@ const treatmentSlice = createSlice({
       }
     },
 
+    /* File-related reducer (Commented)
     updateExaminationFiles: (state, action: PayloadAction<UpdateExaminationFilesPayload>) => {
       const { index, fileInfo } = action.payload;
       if (state.examinationDetailRequestDTOS[index]) {
@@ -357,13 +355,14 @@ const treatmentSlice = createSlice({
         state.examinationDetailRequestDTOS[index].imagesCount = fileInfo.length;
       }
     },
+    */
 
     removeExamination: (state, action: PayloadAction<number>) => {
       state.examinationDetailRequestDTOS.splice(action.payload, 1);
     },
 
     resetTreatment: () => {
-      FileManager.clear();
+      // FileManager.clear(); // Removed
       return initialState;
     }
   },
@@ -405,7 +404,7 @@ export const {
   removePrescribedDrug,
   addExamination,
   updateExamination,
-  updateExaminationFiles,
+  // updateExaminationFiles, // Commented out
   removeExamination,
   resetTreatment,
   setLoading

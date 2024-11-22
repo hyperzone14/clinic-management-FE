@@ -49,6 +49,28 @@ const Schedule: React.FC = () => {
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
         toast.error(`Error initializing treatment: ${errorMessage}`);
       }
+    } else if (appointment.status.toLowerCase() === 'lab_test_completed') {
+      try {
+        if (!appointment.patientId || !appointment.doctorId) {
+          toast.error('Missing required appointment data');
+          return;
+        }
+
+        
+        navigate('/medical-bill-final', {
+          state: {
+            patientId: Number(appointment.patientId),
+            patientName: appointment.patientName,
+            doctorId: Number(appointment.doctorId),
+            doctorName: appointment.doctorName,
+            appointmentId: Number(appointment.id),
+            appointmentDate: appointment.appointmentDate
+          }
+        });
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+        toast.error(`Error navigating to medical bill: ${errorMessage}`);
+      }
     } else {
       switch (appointment.status.toLowerCase()) {
         case 'success':
