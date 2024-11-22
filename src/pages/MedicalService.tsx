@@ -186,7 +186,7 @@ const MedicalService: React.FC = () => {
           <Title id={6} />
           <div className="mt-8 bg-white rounded-2xl shadow-sm p-8">
             <div className="mb-8">
-            <h3 className="text-xl font-semibold text-gray-800">Prescribed Medications</h3>
+            <h3 className="text-xl font-semibold text-gray-800">Symptoms</h3>
               <input
                 type="text"
                 value={syndrome}
