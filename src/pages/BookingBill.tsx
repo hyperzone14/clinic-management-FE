@@ -1,13 +1,16 @@
 import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../redux/store";
-import { fetchAppointmentPagination, setSearchTerm } from "../redux/slices/appointmentSlice";
+import {
+  fetchAppointmentPagination,
+  setSearchTerm,
+} from "../redux/slices/appointmentSlice";
 import { BsClockHistory } from "react-icons/bs";
 import { FaRegCalendarAlt } from "react-icons/fa";
 import { FaUserDoctor } from "react-icons/fa6";
 import { PiUserCircleLight } from "react-icons/pi";
 // import { IoSearchOutline } from "react-icons/io5";
-import { useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import SearchBar from "../components/common/SearchBar";
 
 const BookingBill = () => {
@@ -18,22 +21,26 @@ const BookingBill = () => {
     pagination,
     loading,
     error,
-    searchTerm
+    searchTerm,
   } = useSelector((state: RootState) => state.appointment);
 
   useEffect(() => {
-    dispatch(fetchAppointmentPagination({
-      page: 0, // Always fetch first page when searching
-      searchTerm
-    }));
+    dispatch(
+      fetchAppointmentPagination({
+        page: 0, // Always fetch first page when searching
+        searchTerm,
+      })
+    );
   }, [dispatch, searchTerm]); // Remove pagination.currentPage from dependencies
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 0 && newPage < pagination.totalPages) {
-      dispatch(fetchAppointmentPagination({
-        page: newPage,
-        searchTerm: searchTerm // Pass the current searchTerm to maintain the search while changing pages
-      }));
+      dispatch(
+        fetchAppointmentPagination({
+          page: newPage,
+          searchTerm: searchTerm, // Pass the current searchTerm to maintain the search while changing pages
+        })
+      );
     }
   };
 
@@ -42,18 +49,18 @@ const BookingBill = () => {
   };
 
   const showPagination = !searchTerm;
-  
+
   const filteredAppointments = Array.isArray(appointments)
     ? appointments.filter((appointment) => {
-      const hasPatientId = appointment?.id?.toString().includes(searchTerm);
-      const hasPatientName = appointment?.patientResponseDTO?.fullName
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase());
-      const hasDoctorName = appointment?.doctorName
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase());
-      return hasPatientId || hasPatientName || hasDoctorName;
-    })
+        const hasPatientId = appointment?.id?.toString().includes(searchTerm);
+        const hasPatientName = appointment?.patientResponseDTO?.fullName
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase());
+        const hasDoctorName = appointment?.doctorName
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase());
+        return hasPatientId || hasPatientName || hasDoctorName;
+      })
     : [];
 
   const timeSlotMap: { [key: string]: string } = {
@@ -80,7 +87,7 @@ const BookingBill = () => {
 
   const handleAppointmentClick = (appointmentId: number | undefined) => {
     sessionStorage.setItem("appointmentId", String(appointmentId));
-    navigate('/booking-bill/booking-detail');
+    navigate("/booking-bill/booking-detail");
   };
 
   return (
@@ -161,7 +168,7 @@ const BookingBill = () => {
                     className="px-4 py-2 bg-[#34a85a] text-white rounded-lg disabled:opacity-50 hover:bg-[#2e8b46] transition duration-300 ease-in-out"
                     onClick={() => {
                       handlePageChange(pagination.currentPage - 1);
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                      window.scrollTo({ top: 0, behavior: "smooth" });
                     }}
                     disabled={pagination.currentPage === 0}
                   >
@@ -174,9 +181,11 @@ const BookingBill = () => {
                     className="px-4 py-2 bg-[#6B87C7] text-[#fff] rounded-lg disabled:opacity-50 hover:bg-[#4567B7] transition duration-300 ease-in-out"
                     onClick={() => {
                       handlePageChange(pagination.currentPage + 1);
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                      window.scrollTo({ top: 0, behavior: "smooth" });
                     }}
-                    disabled={pagination.currentPage === pagination.totalPages - 1}
+                    disabled={
+                      pagination.currentPage === pagination.totalPages - 1
+                    }
                   >
                     Next
                   </button>
@@ -185,7 +194,8 @@ const BookingBill = () => {
             </div>
           )}
         </div>
-      </div >
+      </div>
+      <Outlet />
     </>
   );
 };

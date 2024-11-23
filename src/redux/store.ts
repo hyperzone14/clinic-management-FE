@@ -13,6 +13,7 @@ import departmentReducer from "./slices/departmentSlice";
 import appointmentReducer from "./slices/appointmentSlice";
 import drugManageReducer from "./slices/drugManageSlice";
 import checkAvailabilityReducer from "./slices/checkAvailabilitySlice";
+import auth from "./slices/authSlice";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { thunk } from "redux-thunk";
 
@@ -31,6 +32,7 @@ const rootReducer = combineReducers({
   appointment: appointmentReducer,
   drugManage: drugManageReducer,
   checkAvailability: checkAvailabilityReducer,
+  auth: auth,
 });
 
 const store = configureStore({

@@ -14,8 +14,8 @@ import { RootState, AppDispatch } from "../../redux/store";
 import { fetchDepartments } from "../../redux/slices/departmentSlice";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-// import { set } from "react-datepicker/dist/date_utils";
-// import { fetchDepartments } from "../../redux/slices/departmentSlice";
+import { AuthService } from "../../utils/security/services/AuthService";
+import { setUserId } from "../../redux/slices/authSlice";
 
 interface DoctorInfo {
   id: number;
@@ -160,10 +160,20 @@ const Service: React.FC = () => {
   const [type, setType] = React.useState<string>("");
   const [searchTerm, setSearchTerm] = React.useState<string>("");
   const { goToNextStep } = useOutletContext<BookingStepProps>();
+  const auth = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
     dispatch(resetInfoList());
   }, []);
+
+  useEffect(() => {
+    const id = AuthService.getIdFromToken();
+    if (id) {
+      dispatch(setUserId(id));
+    }
+  }, [dispatch]);
+
+  // console.log("ID: ", auth.id);
 
   useEffect(() => {
     dispatch(fetchDepartments());
@@ -335,7 +345,7 @@ const Service: React.FC = () => {
             </div>
           </div>
           <div className="col-span-1 mb-10">
-            <InformationList />
+            <InformationList patientId={auth.id} />
           </div>
         </div>
       </div>

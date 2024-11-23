@@ -16,7 +16,7 @@ interface InfoListState {
 }
 
 const initialState: InfoListState = {
-  patientId: 1,
+  patientId: 0,
   doctorId: null,
   departmentId: null,
   name: "",

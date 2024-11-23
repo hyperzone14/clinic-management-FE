@@ -1,21 +1,40 @@
 import { useState, useEffect, useRef } from "react";
-import { headerRoutes } from "../../utils/pageRoutes.ts";
+import { getHeaderRoutes, Routes } from "../../utils/pageRoutes.ts";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Dropdown from "../common/Dropdown.tsx";
 import { useSelector } from "react-redux";
-import { RootState } from "../../redux/store.ts";
+import { RootState, useAppDispatch } from "../../redux/store.ts";
 import { PiUserCircleLight } from "react-icons/pi";
+import { JwtUtils } from "../../utils/security/jwt/JwtUtils";
+import { logout } from "../../redux/slices/authSlice";
+import { AuthService } from "../../utils/security/services/AuthService.ts";
 
 export const Header = () => {
   const navigate = useNavigate();
-  const profile = useSelector((state: RootState) => state.profile);
+  const dispatch = useAppDispatch();
+  const auth = useSelector((state: RootState) => state.auth);
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
+  const [headerRoutes, setHeaderRoutes] = useState<Routes[]>([]);
+
+  useEffect(() => {
+    // Check authentication status whenever auth state changes
+    const token = JwtUtils.getToken();
+    setIsAuthenticated(!!token && !!auth.token);
+  }, [auth.token]);
 
   const toggleDropdown = () => setIsOpen(!isOpen);
   const closeDropdown = () => setIsOpen(false);
+
+  const handleLogout = () => {
+    JwtUtils.removeToken();
+    dispatch(logout());
+    navigate("/");
+    closeDropdown();
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -44,6 +63,24 @@ export const Header = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    const checkAuthAndUpdateRoutes = () => {
+      const isAuth = AuthService.isAuthenticated();
+      setIsAuthenticated(isAuth);
+
+      if (isAuth) {
+        const currentRole = AuthService.getCurrentRole();
+        const routes = getHeaderRoutes(currentRole);
+        setHeaderRoutes(routes);
+      } else {
+        // Set default routes for unauthenticated users
+        setHeaderRoutes(getHeaderRoutes("ROLE_PATIENT"));
+      }
+    };
+
+    checkAuthAndUpdateRoutes();
+  }, [auth.token]); // Depend on auth.token to re-run when authentication changes
 
   return (
     <header
@@ -83,33 +120,29 @@ export const Header = () => {
           </div>
 
           <div className="mx-8" ref={dropdownRef}>
-            {/* this will lead to the login page (for unauthorized users)*/}
-            {/* <button
-              className="bg-[#6B87C7] hover:bg-[#4567B7] text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out w-28"
-              onClick={() => {
-                navigate("/login");
-              }}
-            >
-              Log in
-            </button> */}
-
-            {/* this will be for authorized users*/}
-            {profile.imageURL ? (
-              <img
-                src={profile.imageURL}
-                alt="Profile"
-                className="w-28 h-[3.25rem] rounded-full transition duration-300 ease-in-out object-cover cursor-pointer"
-                onClick={toggleDropdown}
-              />
+            {isAuthenticated ? (
+              <>
+                <PiUserCircleLight
+                  size={55}
+                  className="bg-[#6B87C7] hover:bg-[#4567B7] text-white font-bold p-1.5 rounded-full transition duration-300 ease-in-out cursor-pointer"
+                  onClick={toggleDropdown}
+                />
+                <Dropdown
+                  isOpen={isOpen}
+                  onClose={closeDropdown}
+                  onLogout={handleLogout}
+                  userName={auth.username}
+                  userEmail={auth.email}
+                />
+              </>
             ) : (
-              <PiUserCircleLight
-                size={55}
-                className="bg-[#6B87C7] hover:bg-[#4567B7] text-white font-bold p-1.5 rounded-full transition duration-300 ease-in-out"
-                onClick={toggleDropdown}
-              />
+              <button
+                className="bg-[#6B87C7] hover:bg-[#4567B7] text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out w-28"
+                onClick={() => navigate("/login")}
+              >
+                Log in
+              </button>
             )}
-
-            <Dropdown isOpen={isOpen} onClose={closeDropdown} />
           </div>
         </div>
       </nav>
