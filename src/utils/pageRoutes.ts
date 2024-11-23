@@ -93,6 +93,7 @@ export const pageRoutes: Routes[] = [
     id: 9,
     path: "/medical-history",
     location: "MedicHistory",
+    roles: ["ROLE_PATIENT, ROLE_DOCTOR"],
     children: [
       {
         id: 91,
@@ -145,6 +146,7 @@ export const pageRoutes: Routes[] = [
     id: 16,
     path: "/examination",
     location: "Examination",
+    roles: ["ROLE_DOCTOR"],
     children: [
       {
         id: 257,
@@ -157,6 +159,7 @@ export const pageRoutes: Routes[] = [
     id: 17,
     path: "/medical-bill-final",
     location: "MedicalBillFinal",
+    roles: ["ROLE_DOCTOR"],
   },
 ];
 
