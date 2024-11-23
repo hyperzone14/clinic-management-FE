@@ -1,4 +1,5 @@
 import "./App.css";
+import './utils/sockjs-polyfills';
 import {
   Route,
   BrowserRouter,
