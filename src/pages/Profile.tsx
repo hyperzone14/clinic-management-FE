@@ -97,7 +97,7 @@ const Profile = () => {
         </div>
 
         <div className="flex grid grid-cols-3 gap-4 justify-items-center mb-10">
-          <UserImage isEditing={isEditing} />
+          <UserImage />
           <div className="col-span-2 bg-[#fff] rounded-lg shadow-lg w-full">
             <div className="my-5">
               <h1 className="text-3xl font-bold text-center">Profile</h1>

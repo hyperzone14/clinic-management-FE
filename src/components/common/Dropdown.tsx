@@ -7,17 +7,48 @@ import { IoMdLogOut } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
+import { AuthService } from "../../utils/security/services/AuthService";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface DropdownProps {
   isOpen: boolean;
   onClose: () => void;
+  onLogout: () => void;
+  userName?: string | null;
+  userEmail?: string | null;
 }
 
-const Dropdown: React.FC<DropdownProps> = ({ isOpen, onClose }) => {
+const Dropdown: React.FC<DropdownProps> = ({
+  isOpen,
+  onClose,
+  onLogout,
+  userName,
+  userEmail,
+}) => {
   const profile = useSelector((state: RootState) => state.profile);
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [shouldRender, setShouldRender] = useState(isOpen);
+
+  const [roles, setRoles] = useState<string[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const userRoles = AuthService.getRolesFromToken();
+      setRoles(userRoles);
+      if (!userRoles) {
+        setError("No roles found or user is not authenticated");
+      }
+    } catch (err) {
+      setError("Error fetching roles");
+      toast.error("Error fetching roles:", err);
+    }
+  }, []);
+
+  console.log("User name:", userName);
+  console.log("User email:", userEmail);
 
   useEffect(() => {
     if (isOpen) {
@@ -75,8 +106,9 @@ const Dropdown: React.FC<DropdownProps> = ({ isOpen, onClose }) => {
               />
             )}
             <div className="flex flex-col">
-              <span className="ms-5">User name</span>
-              <span className="ms-5">example@gma...</span>
+              {/* <span className="ms-5">User name</span> */}
+              <span className="ms-5">{userName}</span>
+              <span className="ms-5">{userEmail}</span>
             </div>
           </div>
         </li>
@@ -114,7 +146,10 @@ const Dropdown: React.FC<DropdownProps> = ({ isOpen, onClose }) => {
         <hr />
         <li
           className="px-4 py-3 hover:bg-gray-100 cursor-pointer transition-colors rounded-b-lg"
-          onClick={onClose}
+          onClick={() => {
+            onClose();
+            onLogout();
+          }}
         >
           <div className="flex items-center mt-1">
             <IoMdLogOut size={25} className="text-black font-bold" />

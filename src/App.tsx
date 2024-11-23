@@ -25,6 +25,7 @@ import store from "./redux/store";
 import Prescription from "./pages/Prescription";
 import AdminSideBar from "./components/layout/AdminSideBar";
 import Chatbot from "./components/layout/Chatbot";
+import { ProtectedRoute } from "./utils/security/components/ProtectedRoute";
 
 // Layout wrapper component for pages that need header and footer
 const MainLayout: React.FC = () => {
@@ -78,26 +79,28 @@ function App() {
         <Suspense fallback={<div>Loading...</div>}>
           <Routes>
             {/* Admin Routes */}
-            <Route path="/admin" element={<AdminLayout />}>
-              {/* The dashboard is now directly at /admin */}
-              {adminRoutes.map((route) => {
-                const AdminComponent = lazy(() => {
-                  return pageComponents[
-                    `./pages/Adminpages/${route.location}.tsx`
-                  ]() as Promise<{ default: React.ComponentType<unknown> }>;
-                });
-                return (
-                  <Route
-                    key={route.id}
-                    path={route.path}
-                    element={
-                      <Suspense fallback={<div>Loading admin page...</div>}>
-                        <AdminComponent />
-                      </Suspense>
-                    }
-                  />
-                );
-              })}
+            <Route element={<ProtectedRoute allowedRoles={["ROLE_PATIENT"]} />}>
+              <Route path="/admin" element={<AdminLayout />}>
+                {/* The dashboard is now directly at /admin */}
+                {adminRoutes.map((route) => {
+                  const AdminComponent = lazy(() => {
+                    return pageComponents[
+                      `./pages/Adminpages/${route.location}.tsx`
+                    ]() as Promise<{ default: React.ComponentType<unknown> }>;
+                  });
+                  return (
+                    <Route
+                      key={route.id}
+                      path={route.path}
+                      element={
+                        <Suspense fallback={<div>Loading admin page...</div>}>
+                          <AdminComponent />
+                        </Suspense>
+                      }
+                    />
+                  );
+                })}
+              </Route>
             </Route>
 
             {/* Auth Routes */}
@@ -129,148 +132,158 @@ function App() {
             </Route>
 
             {/* Main App Routes */}
-            <Route element={<MainLayout />}>
-              {/* Page Routes */}
-              {pageRoutes.map((route) => {
-                if (route.children) {
+            <Route element={<ProtectedRoute allowedRoles={[]} />}>
+              <Route element={<MainLayout />}>
+                {/* Page Routes */}
+                {pageRoutes.map((route) => {
+                  if (route.children) {
+                    return (
+                      <Route key={route.id} path={route.path}>
+                        {/* Index route (list view) */}
+                        <Route
+                          index
+                          element={
+                            <Suspense fallback={<div>Loading...</div>}>
+                              {React.createElement(
+                                lazy(
+                                  () =>
+                                    pageComponents[
+                                      `./pages/${route.location}.tsx`
+                                    ]() as Promise<{
+                                      default: React.ComponentType<unknown>;
+                                    }>
+                                )
+                              )}
+                            </Suspense>
+                          }
+                        />
+
+                        {/* Child routes (detail view) */}
+                        {route.children.map((child) => {
+                          const ChildComponent = lazy(
+                            () =>
+                              pageComponents[
+                                `./pages/${child.location}.tsx`
+                              ]() as Promise<{
+                                default: React.ComponentType<unknown>;
+                              }>
+                          );
+
+                          return (
+                            <Route
+                              key={child.id}
+                              path=":id"
+                              element={
+                                <Suspense fallback={<div>Loading...</div>}>
+                                  <ChildComponent />
+                                </Suspense>
+                              }
+                            />
+                          );
+                        })}
+                      </Route>
+                    );
+                  }
+                  const Component = lazy(() => {
+                    return pageComponents[
+                      `./pages/${route.location}.tsx`
+                    ]() as Promise<{ default: React.ComponentType<unknown> }>;
+                  });
                   return (
-                    <Route key={route.id} path={route.path}>
-                      {/* Index route (list view) */}
+                    <Route
+                      key={route.id}
+                      path={route.path}
+                      element={
+                        <Suspense fallback={<div>Loading...</div>}>
+                          <Component />
+                        </Suspense>
+                      }
+                    />
+                  );
+                })}
+
+                {/* Booking Routes */}
+                <Route
+                  element={<ProtectedRoute allowedRoles={["ROLE_PATIENT"]} />}
+                >
+                  <Route
+                    path="/booking"
+                    element={<Booking steps={bookingRoutes} />}
+                  >
+                    <Route
+                      index
+                      element={
+                        <Navigate
+                          to={`/booking/${bookingRoutes[0].path
+                            .split("/")
+                            .pop()}`}
+                          replace
+                        />
+                      }
+                    />
+                    {bookingRoutes.map((step) => {
+                      const StepComponent = lazy(() => {
+                        return pageComponents[
+                          `./pages/Bookingpages/${step.location}.tsx`
+                        ]() as Promise<{
+                          default: React.ComponentType<unknown>;
+                        }>;
+                      });
+                      return (
+                        <Route
+                          key={step.id}
+                          path={step.path.split("/").pop()}
+                          element={
+                            <Suspense fallback={<div>Loading step...</div>}>
+                              <StepComponent />
+                            </Suspense>
+                          }
+                        />
+                      );
+                    })}
+                  </Route>
+                </Route>
+
+                {/* Prescription Routes */}
+                <Route
+                  path="/prescription"
+                  element={<Prescription steps={prescriptionRoutes} />}
+                >
+                  <Route
+                    index
+                    element={
+                      <Navigate
+                        to={`/prescription/${prescriptionRoutes[0].path
+                          .split("/")
+                          .pop()}`}
+                        replace
+                      />
+                    }
+                  />
+                  {prescriptionRoutes.map((step) => {
+                    const StepComponent = lazy(() => {
+                      return pageComponents[
+                        `./pages/Prescriptionpages/${step.location}.tsx`
+                      ]() as Promise<{ default: React.ComponentType<unknown> }>;
+                    });
+                    return (
                       <Route
-                        index
+                        key={step.id}
+                        path={step.path.split("/").pop()}
                         element={
-                          <Suspense fallback={<div>Loading...</div>}>
-                            {React.createElement(
-                              lazy(
-                                () =>
-                                  pageComponents[
-                                    `./pages/${route.location}.tsx`
-                                  ]() as Promise<{
-                                    default: React.ComponentType<unknown>;
-                                  }>
-                              )
-                            )}
+                          <Suspense fallback={<div>Loading step...</div>}>
+                            <StepComponent />
                           </Suspense>
                         }
                       />
+                    );
+                  })}
+                </Route>
 
-                      {/* Child routes (detail view) */}
-                      {route.children.map((child) => {
-                        const ChildComponent = lazy(
-                          () =>
-                            pageComponents[
-                              `./pages/${child.location}.tsx`
-                            ]() as Promise<{
-                              default: React.ComponentType<unknown>;
-                            }>
-                        );
-
-                        return (
-                          <Route
-                            key={child.id}
-                            path=":id"
-                            element={
-                              <Suspense fallback={<div>Loading...</div>}>
-                                <ChildComponent />
-                              </Suspense>
-                            }
-                          />
-                        );
-                      })}
-                    </Route>
-                  );
-                }
-                const Component = lazy(() => {
-                  return pageComponents[
-                    `./pages/${route.location}.tsx`
-                  ]() as Promise<{ default: React.ComponentType<unknown> }>;
-                });
-                return (
-                  <Route
-                    key={route.id}
-                    path={route.path}
-                    element={
-                      <Suspense fallback={<div>Loading...</div>}>
-                        <Component />
-                      </Suspense>
-                    }
-                  />
-                );
-              })}
-
-              {/* Booking Routes */}
-              <Route
-                path="/booking"
-                element={<Booking steps={bookingRoutes} />}
-              >
-                <Route
-                  index
-                  element={
-                    <Navigate
-                      to={`/booking/${bookingRoutes[0].path.split("/").pop()}`}
-                      replace
-                    />
-                  }
-                />
-                {bookingRoutes.map((step) => {
-                  const StepComponent = lazy(() => {
-                    return pageComponents[
-                      `./pages/Bookingpages/${step.location}.tsx`
-                    ]() as Promise<{ default: React.ComponentType<unknown> }>;
-                  });
-                  return (
-                    <Route
-                      key={step.id}
-                      path={step.path.split("/").pop()}
-                      element={
-                        <Suspense fallback={<div>Loading step...</div>}>
-                          <StepComponent />
-                        </Suspense>
-                      }
-                    />
-                  );
-                })}
-              </Route>
-
-              {/* Prescription Routes */}
-              <Route
-                path="/prescription"
-                element={<Prescription steps={prescriptionRoutes} />}
-              >
-                <Route
-                  index
-                  element={
-                    <Navigate
-                      to={`/prescription/${prescriptionRoutes[0].path
-                        .split("/")
-                        .pop()}`}
-                      replace
-                    />
-                  }
-                />
-                {prescriptionRoutes.map((step) => {
-                  const StepComponent = lazy(() => {
-                    return pageComponents[
-                      `./pages/Prescriptionpages/${step.location}.tsx`
-                    ]() as Promise<{ default: React.ComponentType<unknown> }>;
-                  });
-                  return (
-                    <Route
-                      key={step.id}
-                      path={step.path.split("/").pop()}
-                      element={
-                        <Suspense fallback={<div>Loading step...</div>}>
-                          <StepComponent />
-                        </Suspense>
-                      }
-                    />
-                  );
-                })}
-              </Route>
-
-              {/* Not Found Route */}
-              <Route path="*" element={<NotFound />}>
-                <Route path="*" element={<Navigate to="/error" replace />} />
+                {/* Not Found Route */}
+                <Route path="*" element={<NotFound />}>
+                  <Route path="*" element={<Navigate to="/error" replace />} />
+                </Route>
               </Route>
             </Route>
           </Routes>

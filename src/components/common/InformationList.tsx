@@ -7,7 +7,11 @@ import { setInfoList } from "../../redux/slices/infoListSlice";
 import { fetchUsers } from "../../redux/slices/userManageSlice";
 // import { setAppointments } from "../../redux/slices/scheduleSlice";
 
-const InformationList: React.FC = () => {
+interface InformationListProps {
+  patientId?: string | null;
+}
+
+const InformationList: React.FC<InformationListProps> = ({ patientId }) => {
   const dispatch = useDispatch<AppDispatch>();
   const infoList = useSelector((state: RootState) => state.infoList);
   const users = useSelector((state: RootState) => state.userManage.users);
@@ -17,7 +21,9 @@ const InformationList: React.FC = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    if (!infoList.patientId) {
+    const patientIdNum = Number(patientId);
+
+    if (!patientIdNum) {
       return;
     }
 
@@ -25,13 +31,12 @@ const InformationList: React.FC = () => {
       return;
     }
 
-    const patient = users.find(
-      (user) => Number(user?.id) === Number(infoList.patientId)
-    );
+    const patient = users.find((user) => Number(user?.id) === patientIdNum);
     if (patient?.fullName && patient.fullName !== infoList.name) {
       dispatch(
         setInfoList({
           ...infoList,
+          patientId: patientIdNum,
           name: patient.fullName,
         })
       );
