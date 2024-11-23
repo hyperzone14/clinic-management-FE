@@ -16,7 +16,7 @@ import examinationReducer from "./slices/examinationSlice"
 import medicalBillReducer from "./slices/medicalBillSlice";
 import checkAvailabilityReducer from "./slices/checkAvailabilitySlice";
 
-import chatbotReducer from "./slices/chatbotSlice";
+import chatReducer from "./slices/chatbotSlice";
 
 import auth from "./slices/authSlice";
 
@@ -40,7 +40,7 @@ const rootReducer = combineReducers({
   examination: examinationReducer,
   medicalBill: medicalBillReducer,
   checkAvailability: checkAvailabilityReducer,
-  Chatbot: chatbotReducer,
+  chat: chatReducer,
   auth: auth,
 
 });
