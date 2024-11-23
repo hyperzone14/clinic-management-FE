@@ -23,6 +23,7 @@ interface AppointmentCardProps {
   index: number;
   onPatientClick: (appointment: any, index: number) => void;
   onStatusChange: (index: number, status: StatusType) => void;
+  showLabTestStatusesOnly?: boolean;
 }
 
 const AppointmentCard: React.FC<AppointmentCardProps> = ({
@@ -30,6 +31,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
   index,
   onPatientClick,
   onStatusChange,
+  showLabTestStatusesOnly = false,
 }) => {
   const formatTimeSlot = (timeSlot: string) => {
     const timeMap: Record<string, string> = {
@@ -55,12 +57,27 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
         return "bg-red-100 text-red-800";
       case 'confirmed':
         return "bg-purple-100 text-purple-800";
+      case 'lab_test_required':
+        return "bg-orange-100 text-orange-800";
+      case 'lab_test_completed':
+        return "bg-sky-100 text-sky-800";
       default:
         return "";
     }
   };
 
   const getTooltipMessage = (status: StatusType) => {
+    if (showLabTestStatusesOnly) {
+      switch (status) {
+        case 'lab_test_required':
+          return "Click to perform lab tests";
+        case 'lab_test_completed':
+          return "Lab test results are ready";
+        default:
+          return "";
+      }
+    }
+
     switch (status) {
       case 'checked-in':
         return "Click to create medical bill";
@@ -72,20 +89,35 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
         return "Appointment cancelled";
       case 'confirmed':
         return "Ready for check-in";
+      case 'lab_test_required':
+        return "Laboratory tests are required";
+      case 'lab_test_completed':
+        return "Lab test results are ready";
       default:
         return "";
     }
   };
 
   const getCardStyles = (status: StatusType) => {
+    if (showLabTestStatusesOnly) {
+      switch (status) {
+        case 'lab_test_required':
+          return "hover:shadow-lg hover:bg-gray-50 cursor-pointer";
+        case 'lab_test_completed':
+          return "";
+        default:
+          return "";
+      }
+    }
+
     switch (status) {
       case 'checked-in':
-        return "hover:shadow-lg hover:bg-gray-50 cursor-pointer";
       case 'confirmed':
-        return "hover:shadow-lg hover:bg-gray-50 cursor-pointer";
       case 'pending':
+      case 'lab_test_required':
         return "hover:shadow-lg hover:bg-gray-50 cursor-pointer";
       case 'success':
+      case 'lab_test_completed':
         return "";
       case 'cancelled':
         return "opacity-75";
@@ -107,6 +139,8 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
         ${appointment.status === 'success' ? 'border-green-500' : ''}
         ${appointment.status === 'cancelled' ? 'border-red-500' : ''}
         ${appointment.status === 'confirmed' ? 'border-purple-500' : ''}
+        ${appointment.status === 'lab_test_required' ? 'border-orange-500' : ''}
+        ${appointment.status === 'lab_test_completed' ? 'border-sky-500' : ''}
         ${getCardStyles(appointment.status)}
       `}
     >
@@ -137,9 +171,10 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
               ${getBadgeStyles(appointment.status)}
             `}
           >
-            {appointment.status.split('-').map(word => 
-              word.charAt(0).toUpperCase() + word.slice(1)
-            ).join(' ')}
+            {appointment.status
+              .split(/[-_]/)
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(' ')}
           </span>
         </div>
 
@@ -173,6 +208,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
           <StatusCircle
             status={appointment.status}
             onStatusChange={(newStatus) => onStatusChange(index, newStatus)}
+            showLabTestStatusesOnly={showLabTestStatusesOnly}
           />
         </div>
       </div>

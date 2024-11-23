@@ -49,6 +49,28 @@ const Schedule: React.FC = () => {
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
         toast.error(`Error initializing treatment: ${errorMessage}`);
       }
+    } else if (appointment.status.toLowerCase() === 'lab_test_completed') {
+      try {
+        if (!appointment.patientId || !appointment.doctorId) {
+          toast.error('Missing required appointment data');
+          return;
+        }
+
+        
+        navigate('/medical-bill-final', {
+          state: {
+            patientId: Number(appointment.patientId),
+            patientName: appointment.patientName,
+            doctorId: Number(appointment.doctorId),
+            doctorName: appointment.doctorName,
+            appointmentId: Number(appointment.id),
+            appointmentDate: appointment.appointmentDate
+          }
+        });
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+        toast.error(`Error navigating to medical bill: ${errorMessage}`);
+      }
     } else {
       switch (appointment.status.toLowerCase()) {
         case 'success':
@@ -56,6 +78,9 @@ const Schedule: React.FC = () => {
           break;
         case 'cancelled':
           toast.warning(`This appointment was cancelled for ${appointment.patientName}`);
+          break;
+        case 'lab_test_completed':
+          toast.info(`Lab tests have been completed for ${appointment.patientName}`);
           break;
         default:
           toast.error(`Appointment must be checked-in to proceed.`);
@@ -81,6 +106,12 @@ const Schedule: React.FC = () => {
               break;
             case 'confirmed':
               toast.success(`Appointment confirmed for ${appointment.patientName}`);
+              break;
+            case 'lab_test_required':
+              toast.info(`Lab tests required for ${appointment.patientName}`);
+              break;
+            case 'lab_test_completed':
+              toast.success(`Lab tests completed for ${appointment.patientName}`);
               break;
             default:
               toast.info(`Appointment status updated to ${newStatus} for ${appointment.patientName}`);
@@ -113,7 +144,7 @@ const Schedule: React.FC = () => {
 
       <div className="my-12 flex flex-col items-center">
         {/* Status Legend */}
-        <div className="flex gap-4 mb-6 w-9/12">
+        <div className="flex gap-4 mb-6 w-9/12 flex-wrap">
           <div className="flex items-center">
             <div className="w-3 h-3 rounded-full bg-yellow-400 mr-2"></div>
             <span className="text-sm text-gray-600">Pending</span>
@@ -133,6 +164,14 @@ const Schedule: React.FC = () => {
           <div className="flex items-center">
             <div className="w-3 h-3 rounded-full bg-purple-500 mr-2"></div>
             <span className="text-sm text-gray-600">Confirm</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-3 h-3 rounded-full bg-orange-500 mr-2"></div>
+            <span className="text-sm text-gray-600">Lab Test Required</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-3 h-3 rounded-full bg-sky-500 mr-2"></div>
+            <span className="text-sm text-gray-600">Lab Test Completed</span>
           </div>
         </div>
 

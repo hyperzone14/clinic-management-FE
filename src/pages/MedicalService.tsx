@@ -1,7 +1,8 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../redux/store";
-import { Trash2, Plus, ChevronLeft, ClipboardList } from "lucide-react";
+import { Trash2, Plus, ClipboardList, UserCircle, Calendar, AlertCircle, Beaker, Pill } from "lucide-react";
+import Title from '../components/common/Title';
 import {
   submitTreatment,
   addPrescribedDrug,
@@ -15,8 +16,6 @@ import {
   resetTreatment,
   fetchDrugs,
   selectTreatment,
-  updateExaminationFiles,
-  FileManager
 } from "../redux/slices/treatmentSlice";
 
 import { toast, ToastContainer } from "react-toastify";
@@ -25,6 +24,7 @@ import "react-toastify/dist/ReactToastify.css";
 const MedicalService: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<'prescription' | 'labtest' | null>(null);
   const {
     patientInfo,
     doctorInfo,
@@ -36,6 +36,9 @@ const MedicalService: React.FC = () => {
     loading
   } = useAppSelector(selectTreatment);
 
+  const hasLabTests = examinationDetailRequestDTOS.length > 0;
+  const hasPrescriptions = prescribedDrugRequestDTOS.length > 0;
+
   useEffect(() => {
     if (!patientInfo.patientId) {
       navigate('/schedule');
@@ -44,20 +47,28 @@ const MedicalService: React.FC = () => {
     dispatch(fetchDrugs());
   }, [patientInfo.patientId, navigate, dispatch]);
 
+  useEffect(() => {
+    if (hasLabTests) {
+      setActiveTab('labtest');
+    } else if (hasPrescriptions) {
+      setActiveTab('prescription');
+    }
+  }, [hasLabTests, hasPrescriptions]);
+
   const handleSubmit = async () => {
     if (!syndrome.trim()) {
       toast.error('Please enter syndrome');
       return;
     }
   
-    if (prescribedDrugRequestDTOS.length === 0) {
-      toast.error('Please add at least one prescribed drug');
+    if (!hasLabTests && prescribedDrugRequestDTOS.length === 0) {
+      toast.error('Please add at least one prescribed drug or lab test');
       return;
     }
   
     try {
       await dispatch(submitTreatment()).unwrap();
-      toast.success('Medical bill created successfully');
+      toast.success(hasLabTests ? 'Lab test request submitted successfully' : 'Medical bill created successfully');
       navigate('/schedule');
     } catch (error) {
       console.error('Error:', error);
@@ -65,330 +76,388 @@ const MedicalService: React.FC = () => {
     }
   };
 
+  const handleAddLabTest = () => {
+    if (hasPrescriptions) {
+      if (window.confirm('Adding a lab test will remove all prescribed drugs. Do you want to continue?')) {
+        prescribedDrugRequestDTOS.forEach((_, index) => {
+          dispatch(removePrescribedDrug(index));
+        });
+        dispatch(addExamination({ examinationType: "" }));
+        setActiveTab('labtest');
+      }
+    } else {
+      dispatch(addExamination({ examinationType: "" }));
+      setActiveTab('labtest');
+    }
+  };
 
+  const handleAddPrescription = () => {
+    if (hasLabTests) {
+      if (window.confirm('Adding a prescription will remove all lab tests. Do you want to continue?')) {
+        examinationDetailRequestDTOS.forEach((_, index) => {
+          dispatch(removeExamination(index));
+        });
+        dispatch(addPrescribedDrug({
+          drugId: 0,
+          dosage: 0,
+          duration: 0,
+          frequency: "",
+          specialInstructions: ""
+        }));
+        setActiveTab('prescription');
+      }
+    } else {
+      dispatch(addPrescribedDrug({
+        drugId: 0,
+        dosage: 0,
+        duration: 0,
+        frequency: "",
+        specialInstructions: ""
+      }));
+      setActiveTab('prescription');
+    }
+  };
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className="flex justify-center items-center min-h-[400px]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
-  function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>, index: number) {
-    const files = e.target.files;
-    if (!files) return;
-  
-    // Convert files to array
-    const fileArray = Array.from(files);
-  
-    // Validate files
-    for (const file of fileArray) {
-      if (!file.type.startsWith('image/')) {
-        toast.error(`${file.name} is not an image file`);
-        return;
-      }
-    }
-  
-    try {
-      // Store files in FileManager for use during form submission
-      FileManager.addFiles(index, fileArray);
-  
-      // Create file metadata for Redux state
-      const fileMetadata = fileArray.map(file => ({
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        lastModified: file.lastModified
-      }));
-  
-      // Update Redux state
-      dispatch(updateExaminationFiles({
-        index,
-        fileInfo: fileMetadata
-      }));
-  
-      // Clear input
-      e.target.value = '';
-      
-    } catch (error) {
-      console.error('Error handling file upload:', error);
-      toast.error('Failed to process files');
-    }
-  }
-
-  
   return (
-    
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="w-full min-h-screen bg-gray-50 pb-20">
       <ToastContainer />
-      <div className="max-w-3xl mx-auto bg-white rounded-lg shadow">
-        <div className="p-6">
-          <h1 className="text-2xl font-bold text-center mb-8">Medical Treatment</h1>
-          
+      
+      <div className="pt-16 pb-10">
+        <h1 className="text-4xl font-bold font-sans text-center text-gray-800">
+          MEDICAL TREATMENT
+        </h1>
+        <div className="w-20 h-1 bg-blue-500 mx-auto mt-4 rounded-full"></div>
+      </div>
 
-          {/* Patient Information Section */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center">
-                <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center mr-2">
-                  <span className="text-green-500 text-sm">1</span>
-                </div>
-                <h2 className="text-lg font-semibold">Patient Information</h2>
-              </div>
-              <button
-                onClick={() => window.open(`/medical-history?id=${patientInfo.patientId}`, '_blank')}
-                className="flex items-center text-sm text-blue-600 hover:text-blue-700"
-              >
-                <ClipboardList className="h-4 w-4 mr-1" />
-                View Patient History
-              </button>
-            </div>
-            <div className="grid grid-cols-3 gap-4 mb-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="mb-12">
+        <Title id={5} />
+        <div className="mt-8 bg-white rounded-2xl shadow-sm p-8">
+          <div className="flex items-center justify-between">
+            {/* Patient Name */}
+            <div className="flex items-center min-w-[250px]">
+              <UserCircle className="w-8 h-8 text-blue-500 mr-4" />
               <div>
-                <label className="block text-sm text-gray-600 mb-1">Name</label>
-                <div className="p-2 bg-gray-100 rounded">
-                  {patientInfo.patientName}
-                </div>
+                <p className="text-sm text-gray-500 mb-1">Patient Name</p>
+                <p className="text-2xl font-medium text-gray-800">{patientInfo.patientName}</p>
               </div>
+            </div>
+
+            {/* Birth Date */}
+            <div className="flex items-center min-w-[200px] mx-16">
+              <Calendar className="w-6 h-6 text-blue-500 mr-3" />
               <div>
-                <label className="block text-sm text-gray-600 mb-1">Date of Birth</label>
-                <div className="p-2 bg-gray-100 rounded">
-                  {patientInfo.dateOfBirth || 'N/A'}
-                </div>
+                <p className="text-sm text-gray-500 mb-1">Birth Date</p>
+                <p className="text-xl text-gray-700">{patientInfo.dateOfBirth || 'N/A'}</p>
               </div>
+            </div>
+
+            {/* Gender */}
+            <div className="flex items-center min-w-[150px] mx-16">
+              <UserCircle className="w-6 h-6 text-blue-500 mr-3" />
               <div>
-                <label className="block text-sm text-gray-600 mb-1">Gender</label>
-                <div className="p-2 bg-gray-100 rounded">
-                  {patientInfo.gender || 'N/A'}
-                </div>
+                <p className="text-sm text-gray-500 mb-1">Gender</p>
+                <p className="text-xl text-gray-700">{patientInfo.gender || 'N/A'}</p>
               </div>
             </div>
-          </div>
 
-          {/* Treatment Information Section */}
-          <div className="mb-8">
-            <div className="flex items-center mb-4">
-              <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center mr-2">
-                <span className="text-green-500 text-sm">2</span>
-              </div>
-              <h2 className="text-lg font-semibold">Treatment Information</h2>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm text-gray-600 mb-1">Symptom</label>
-                <input
-                  type="text"
-                  value={syndrome}
-                  onChange={(e) => dispatch(setSyndrome(e.target.value))}
-                  className="w-full p-2 border rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                />
-              </div>
-              
-              {/* Prescribed Drugs Table */}
-              <div className="mt-4">
-                <div className="flex justify-between items-center mb-2">
-                  <label className="block text-sm text-gray-600">Medicine List</label>
-                  <button
-                    onClick={() => dispatch(addPrescribedDrug({
-                      drugId: 0,
-                      dosage: 0,
-                      duration: 0,
-                      frequency: "",
-                      specialInstructions: ""
-                    }))}
-                    className="flex items-center text-sm text-green-600 hover:text-green-700"
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    Add Medicine
-                  </button>
-                </div>
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="bg-gray-50">
-                      <th className="text-left p-2 text-sm font-medium text-gray-600">Medicine name</th>
-                      <th className="text-left p-2 text-sm font-medium text-gray-600">Quantity</th>
-                      <th className="text-left p-2 text-sm font-medium text-gray-600">Note</th>
-                      <th className="w-8"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {prescribedDrugRequestDTOS.map((drug, index) => (
-                      <tr key={index} className="border-t">
-                        <td className="p-2">
-                          <select
-                            value={drug.drugId}
-                            onChange={(e) => dispatch(updatePrescribedDrug({
-                              index,
-                              updates: { drugId: Number(e.target.value) }
-                            }))}
-                            className="w-full p-1 border rounded"
-                          >
-                            <option value="">Select Medicine</option>
-                            {availableDrugs.map((d) => (
-                              <option key={d.id} value={d.id}>
-                                {d.name} ({d.standardDosage})
-                              </option>
-                            ))}
-                          </select>
-                        </td>
-                        <td className="p-2">
-                          <input
-                            type="number"
-                            value={drug.dosage}
-                            onChange={(e) => dispatch(updatePrescribedDrug({
-                              index,
-                              updates: { dosage: Number(e.target.value) }
-                            }))}
-                            className="w-full p-1 border rounded"
-                          />
-                        </td>
-                        <td className="p-2">
-                          <input
-                            type="text"
-                            value={drug.specialInstructions}
-                            onChange={(e) => dispatch(updatePrescribedDrug({
-                              index,
-                              updates: { specialInstructions: e.target.value }
-                            }))}
-                            className="w-full p-1 border rounded"
-                            placeholder="Take after meals"
-                          />
-                        </td>
-                        <td className="p-2">
-                          <button
-                            onClick={() => dispatch(removePrescribedDrug(index))}
-                            className="text-gray-400 hover:text-red-500"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          {/* Lab Test Section */}
-          <div className="mb-8">
-            <div className="flex items-center mb-4">
-              <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center mr-2">
-                <span className="text-green-500 text-sm">3</span>
-              </div>
-              <h2 className="text-lg font-semibold">Lab test (Optional)</h2>
-            </div>
-            <div className="space-y-4">
-              {examinationDetailRequestDTOS.map((exam, index) => (
-                <div key={index} className="border rounded p-4 relative">
-                  <button
-                    onClick={() => dispatch(removeExamination(index))}
-                    className="absolute top-2 right-2 text-gray-400 hover:text-red-500"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-sm text-gray-600 mb-1">Lab test type</label>
-                      <input
-                        type="text"
-                        value={exam.examinationType}
-                        onChange={(e) => dispatch(updateExamination({
-                          index,
-                          updates: { examinationType: e.target.value }
-                        }))}
-                        className="w-full p-2 border rounded"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm text-gray-600 mb-1">Test results</label>
-                      <textarea
-                        value={exam.examinationResult}
-                        onChange={(e) => dispatch(updateExamination({
-                          index,
-                          updates: { examinationResult: e.target.value }
-                        }))}
-                        rows={2}
-                        className="w-full p-2 border rounded"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm text-gray-600 mb-1">Upload Images</label>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        onChange={(e) => handleFileUpload(e, index)}
-                        className="w-full p-2 border rounded"
-                      />
-                      {/* Replace the existing image preview section with this new one */}
-                      {exam.imageInfo && exam.imageInfo.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {exam.imageInfo.map((fileInfo, fileIndex) => (
-                            <div key={fileIndex} className="relative">
-                              <img
-                                src={URL.createObjectURL(FileManager.getFiles(index)[fileIndex])}
-                                alt={`Preview ${fileIndex}`}
-                                className="w-20 h-20 object-cover rounded"
-                              />
-                              <span className="text-xs text-gray-500 mt-1 block">
-                                {fileInfo.name}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                  </div>
-                </div>
-              ))}
-              <button
-                onClick={() => dispatch(addExamination({
-                  examinationType: "",
-                  examinationResult: "",
-                  imagesCount: 0
-                }))}
-                className="flex items-center text-sm text-green-600 hover:text-green-700"
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Add Lab Test
-              </button>
-            </div>
-          </div>
-
-          {/* Doctor Feedback Section */}
-          <div className="mb-8">
-            <label className="block text-sm text-gray-600 mb-1">Doctor feedback</label>
-            <textarea
-              value={note}
-              onChange={(e) => dispatch(setNote(e.target.value))}
-              rows={3}
-              className="w-full p-2 border rounded"
-              placeholder="Enter your feedback..."
-            />
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex justify-end space-x-4">
+            {/* View History Button */}
             <button
-              onClick={() => dispatch(resetTreatment())}
-              className="px-4 py-2 text-gray-600 bg-gray-100 rounded hover:bg-gray-200"
+              onClick={() => window.open(`/medical-history?id=${patientInfo.patientId}`, '_blank')}
+              className="flex items-center px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors whitespace-nowrap ml-auto"
             >
-              Discard
-            </button>
-            <button
-              onClick={handleSubmit}
-              className="px-4 py-2 text-white bg-green-500 rounded hover:bg-green-600"
-            >
-              Export
+              <ClipboardList className="h-5 w-5 mr-2" />
+              <span>View History</span>
             </button>
           </div>
         </div>
       </div>
-    </div>
-  );
-};
 
-export default MedicalService;
+        {/* Syndrome Section */}
+        <div className="mb-12">
+          <Title id={6} />
+          <div className="mt-8 bg-white rounded-2xl shadow-sm p-8">
+            <div className="mb-8">
+            <h3 className="text-xl font-semibold text-gray-800">Symptoms</h3>
+              <input
+                type="text"
+                value={syndrome}
+                onChange={(e) => dispatch(setSyndrome(e.target.value))}
+                className="w-full p-4 border border-gray-200 rounded-xl text-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                placeholder="Enter patient's symptoms..."
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Treatment Options */}
+        <div className="mb-12">
+          <Title id={6} />
+          <div className="mt-8">
+            {/* Treatment Type Selection */}
+            <div className="flex justify-center space-x-4 mb-6">
+              <button
+                onClick={handleAddPrescription}
+                className={`flex items-center px-6 py-3 rounded-xl transition-all ${
+                  activeTab === 'prescription'
+                    ? 'bg-blue-500 text-white shadow-lg'
+                    : 'bg-white text-gray-600 hover:bg-blue-50'
+                }`}
+              >
+                <Pill className="h-5 w-5 mr-2" />
+                Prescribe Medicine
+              </button>
+              <button
+                onClick={handleAddLabTest}
+                className={`flex items-center px-6 py-3 rounded-xl transition-all ${
+                  activeTab === 'labtest'
+                    ? 'bg-blue-500 text-white shadow-lg'
+                    : 'bg-white text-gray-600 hover:bg-blue-50'
+                }`}
+              >
+                <Beaker className="h-5 w-5 mr-2" />
+                Request Lab Tests
+              </button>
+            </div>
+
+            {/* Dynamic Content Based on Selection */}
+            <div className="bg-white rounded-2xl shadow-sm p-8">
+            {activeTab === 'prescription' && (
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-semibold text-gray-800">Prescribed Medications</h3>
+                    <button
+                      onClick={handleAddPrescription}
+                      className="flex items-center px-4 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors"
+                    >
+                      <Plus className="h-5 w-5 mr-2" />
+                      Add Medicine
+                    </button>
+                  </div>
+
+                  <div className="overflow-hidden rounded-xl border border-gray-200">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Medicine Name</th>
+                          <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Quantity</th>
+                          <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Duration</th>
+                          <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Frequency</th>
+                          <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Instructions</th>
+                          <th className="w-20"></th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {prescribedDrugRequestDTOS.map((drug, index) => (
+                          <tr key={index} className="hover:bg-gray-50 transition-colors">
+                            <td className="px-6 py-4">
+                              <select
+                                value={drug.drugId}
+                                onChange={(e) => dispatch(updatePrescribedDrug({
+                                  index,
+                                  updates: { drugId: Number(e.target.value) }
+                                }))}
+                                className="w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              >
+                                <option value="">Select Medicine</option>
+                                {availableDrugs.map((d) => (
+                                  <option key={d.id} value={d.id}>
+                                    {d.name} ({d.standardDosage})
+                                  </option>
+                                ))}
+                              </select>
+                            </td>
+                            <td className="px-6 py-4">
+                              <input
+                                type="number"
+                                value={drug.dosage}
+                                onChange={(e) => dispatch(updatePrescribedDrug({
+                                  index,
+                                  updates: { dosage: Number(e.target.value) }
+                                }))}
+                                className="w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              <input
+                                type="number"
+                                value={drug.duration}
+                                onChange={(e) => dispatch(updatePrescribedDrug({
+                                  index,
+                                  updates: { duration: Number(e.target.value) }
+                                }))}
+                                className="w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Days"
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              <input
+                                type="text"
+                                value={drug.frequency}
+                                onChange={(e) => dispatch(updatePrescribedDrug({
+                                  index,
+                                  updates: { frequency: e.target.value }
+                                }))}
+                                className="w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="e.g., Twice a day"
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              <input
+                                type="text"
+                                value={drug.specialInstructions}
+                                onChange={(e) => dispatch(updatePrescribedDrug({
+                                  index,
+                                  updates: { specialInstructions: e.target.value }
+                                }))}
+                                className="w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Take after meals"
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              <button
+                                onClick={() => dispatch(removePrescribedDrug(index))}
+                                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                              >
+                                <Trash2 className="h-5 w-5" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'labtest' && (
+                <div className="space-y-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-semibold text-gray-800">Laboratory Tests</h3>
+                    <button
+                      onClick={handleAddLabTest}
+                      className="flex items-center px-4 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors"
+                    >
+                      <Plus className="h-5 w-5 mr-2" />
+                      Add Test
+                    </button>
+                  </div>
+
+                  <div className="space-y-4">
+                    {examinationDetailRequestDTOS.map((exam, index) => (
+                      <div key={index} className="p-6 bg-gray-50 rounded-xl relative group">
+                        <button
+                          onClick={() => dispatch(removeExamination(index))}
+                          className="absolute top-4 right-4 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </button>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Test Type</label>
+                          <input
+                            type="text"
+                            value={exam.examinationType}
+                            onChange={(e) => dispatch(updateExamination({
+                              index,
+                              updates: { examinationType: e.target.value }
+                            }))}
+                            className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"placeholder="Enter test type..."
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+  
+                {!activeTab && (
+                  <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+                    <div className="mb-4 p-4 rounded-full bg-gray-50">
+                      <AlertCircle className="h-8 w-8" />
+                    </div>
+                    <p className="text-lg mb-2">No Treatment Selected</p>
+                    <p className="text-sm">Please select either prescription or lab test above</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+  
+          {/* Doctor Feedback Section */}
+          <div className="mb-12">
+            <Title id={6} />
+            <div className="mt-8 bg-white rounded-2xl shadow-sm p-8">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">Doctor's Notes</h3>
+              <textarea
+                value={note}
+                onChange={(e) => dispatch(setNote(e.target.value))}
+                rows={4}
+                className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Enter your medical notes and observations..."
+              />
+            </div>
+          </div>
+  
+          {/* Action Buttons */}
+          <div className="flex justify-center space-x-4">
+            <button
+              onClick={() => {
+                if (window.confirm('Are you sure you want to discard all changes? This action cannot be undone.')) {
+                  dispatch(resetTreatment());
+                  setActiveTab(null);
+                }
+              }}
+              className="px-8 py-3 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-colors font-medium text-lg"
+            >
+              Discard Changes
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="px-8 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors font-medium text-lg shadow-lg shadow-blue-500/30 flex items-center"
+            >
+              {hasLabTests ? (
+                <>
+                  <Beaker className="h-5 w-5 mr-2" />
+                  Submit Lab Request
+                </>
+              ) : (
+                <>
+                  <Pill className="h-5 w-5 mr-2" />
+                  Create Medical Bill
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+  
+        {/* Floating notification for successful actions */}
+        <div className="fixed bottom-8 right-8 pointer-events-none">
+          <div 
+            className={`
+              transform transition-all duration-300 
+              ${activeTab ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'}
+            `}
+          >
+            <div className="bg-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2">
+              <div className={`w-2 h-2 rounded-full ${
+                activeTab === 'prescription' ? 'bg-blue-500' : 'bg-green-500'
+              }`} />
+              <span className="text-sm text-gray-600">
+                {activeTab === 'prescription' ? 'Prescription Mode' : 'Lab Test Mode'}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+  
+  export default MedicalService;
