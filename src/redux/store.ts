@@ -15,7 +15,11 @@ import drugManageReducer from "./slices/drugManageSlice";
 import examinationReducer from "./slices/examinationSlice"
 import medicalBillReducer from "./slices/medicalBillSlice";
 import checkAvailabilityReducer from "./slices/checkAvailabilitySlice";
-// import chatbotReducer from "./slices/chatbotSlice";
+
+import chatbotReducer from "./slices/chatbotSlice";
+
+import auth from "./slices/authSlice";
+
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { thunk } from "redux-thunk";
 
@@ -36,7 +40,9 @@ const rootReducer = combineReducers({
   examination: examinationReducer,
   medicalBill: medicalBillReducer,
   checkAvailability: checkAvailabilityReducer,
-  // Chatbot: chatbotReducer,
+  Chatbot: chatbotReducer,
+  auth: auth,
+
 });
 
 const store = configureStore({

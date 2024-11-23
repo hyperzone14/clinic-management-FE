@@ -1,32 +1,44 @@
+import { AuthService } from "./security/services/AuthService";
+
 export interface Routes {
   id: number;
   path: string;
   location: string;
   children?: Routes[];
+  roles?: string[];
 }
 
-export const headerRoutes: Routes[] = [
-  {
-    id: 1,
-    path: "/",
-    location: "Home",
-  },
-  {
-    id: 2,
-    path: "/booking",
-    location: "Booking",
-  },
-  {
-    id: 3,
-    path: "/medical-history",
-    location: "MedicHistory",
-  },
-  {
-    id: 4,
-    path: "/booking-bill",
-    location: "BookingBill",
-  },
-];
+export const getHeaderRoutes = (role: string): Routes[] => {
+  // First check if user is authenticated
+  if (!AuthService.isAuthenticated()) {
+    return [
+      { id: 1, path: "/", location: "Home" },
+      { id: 2, path: "/medical-history", location: "MedicHistory" },
+      { id: 3, path: "/feedback", location: "Feedback" },
+    ];
+  }
+  if (role === "ROLE_PATIENT") {
+    return [
+      { id: 1, path: "/", location: "Home" },
+      { id: 2, path: "/booking", location: "Booking" },
+      { id: 3, path: "/medical-history", location: "MedicHistory" },
+      { id: 4, path: "/booking-bill", location: "BookingBill" },
+    ];
+  } else if (role === "ROLE_DOCTOR") {
+    return [
+      { id: 1, path: "/", location: "Home" },
+      { id: 2, path: "/booking", location: "Booking" },
+      { id: 3, path: "/medical-history", location: "MedicHistory" },
+      { id: 4, path: "/booking-bill", location: "BookingBill" },
+    ];
+  } else {
+    return [
+      { id: 1, path: "/", location: "Home" },
+      { id: 2, path: "/medical-history", location: "MedicHistory" },
+      { id: 3, path: "/feedback", location: "Feedback" },
+    ];
+  }
+};
 
 export const pageRoutes: Routes[] = [
   {
@@ -53,10 +65,11 @@ export const pageRoutes: Routes[] = [
     id: 5,
     path: "/schedule",
     location: "Schedule",
+    roles: ["ROLE_DOCTOR"],
     children: [
       {
         id: 51,
-        path: "/medical-service",
+        path: "medical-service",
         location: "MedicalService",
       },
     ],
@@ -80,6 +93,7 @@ export const pageRoutes: Routes[] = [
     id: 9,
     path: "/medical-history",
     location: "MedicHistory",
+    roles: ["ROLE_PATIENT, ROLE_DOCTOR"],
     children: [
       {
         id: 91,
@@ -92,6 +106,7 @@ export const pageRoutes: Routes[] = [
     id: 10,
     path: "/admin",
     location: "Admin",
+    roles: ["ROLE_PATIENT"],
   },
   {
     id: 11,
@@ -131,6 +146,7 @@ export const pageRoutes: Routes[] = [
     id: 16,
     path: "/examination",
     location: "Examination",
+    roles: ["ROLE_DOCTOR"],
     children: [
       {
         id: 257,
@@ -143,6 +159,7 @@ export const pageRoutes: Routes[] = [
     id: 17,
     path: "/medical-bill-final",
     location: "MedicalBillFinal",
+    roles: ["ROLE_DOCTOR"],
   },
 ];
 

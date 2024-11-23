@@ -7,7 +7,12 @@ import InputLabel from "@mui/material/InputLabel";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../redux/store";
+import { setCredentials } from "../../redux/slices/authSlice";
+import { AuthService } from "../../utils/security/services/AuthService";
+import { FormHelperText } from "@mui/material";
 
 interface LogInProps {
   email: string;
@@ -16,6 +21,11 @@ interface LogInProps {
 }
 
 const LogIn: React.FC = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
+  const [error, setError] = React.useState<string>("");
+  const [loading, setLoading] = React.useState<boolean>(false);
+
   const [logInInfo, setLogInInfo] = React.useState<LogInProps>({
     email: "",
     password: "",
@@ -33,6 +43,47 @@ const LogIn: React.FC = () => {
             : event.target.value,
       });
     };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const response: {
+        code: number;
+        result: { id: number; token: string } | boolean;
+        message?: string;
+      } = await AuthService.login({
+        email: logInInfo.email,
+        password: logInInfo.password,
+        rememberMe: logInInfo.rememberMe,
+      });
+
+      if (
+        response.code === 200 &&
+        typeof response.result === "object" &&
+        response.result !== null &&
+        !Array.isArray(response.result)
+      ) {
+        dispatch(
+          setCredentials({
+            id: response.result.id.toString(),
+            email: logInInfo.email,
+            username: logInInfo.email, // You might want to adjust this if you have username in the response
+            token: response.result.token,
+          })
+        );
+        navigate("/"); // Navigate to your dashboard or home page
+      } else {
+        setError(response.message || "Login failed");
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || "An error occurred during login");
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <>
       <div className="flex justify-center items-center">
@@ -48,65 +99,81 @@ const LogIn: React.FC = () => {
               </div>
               <div className="mt-20">
                 <h1 className="text-4xl font-bold text-center">Log in</h1>
-                <div className="mt-10 space-y-4 px-16">
-                  <FormControl fullWidth variant="outlined">
-                    <InputLabel htmlFor="email">Email</InputLabel>
-                    <OutlinedInput
-                      id="email"
-                      type="email"
-                      value={logInInfo.email}
-                      onChange={handleChange("email")}
-                      startAdornment={
-                        <InputAdornment position="start">
-                          <EmailIcon />
-                        </InputAdornment>
-                      }
-                      label="Email"
-                      placeholder="Email"
-                    />
-                  </FormControl>
-                  <FormControl fullWidth variant="outlined">
-                    <InputLabel htmlFor="password">Password</InputLabel>
-                    <OutlinedInput
-                      id="password"
-                      type="password"
-                      value={logInInfo.password}
-                      onChange={handleChange("password")}
-                      startAdornment={
-                        <InputAdornment position="start">
-                          <LockIcon />
-                        </InputAdornment>
-                      }
-                      label="Password"
-                      placeholder="Password"
-                    />
-                  </FormControl>
-                  <div className="flex justify-between remember">
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          color="primary"
-                          checked={logInInfo.rememberMe}
-                          onChange={handleChange("rememberMe")}
-                        />
-                      }
-                      label="Keep me logged in"
-                    />
+                <form onSubmit={handleSubmit}>
+                  {/* {error && (
+                    <div className="text-red-500 text-center mb-4">{error}</div>
+                  )} */}
+                  <div className="mt-10 space-y-4 px-16">
+                    <FormControl fullWidth variant="outlined" error={!!error}>
+                      <InputLabel htmlFor="email">Email</InputLabel>
+                      <OutlinedInput
+                        id="email"
+                        type="email"
+                        value={logInInfo.email}
+                        onChange={handleChange("email")}
+                        startAdornment={
+                          <InputAdornment position="start">
+                            <EmailIcon />
+                          </InputAdornment>
+                        }
+                        label="Email"
+                        placeholder="Email"
+                      />
+                      {error && (
+                        <FormHelperText error>
+                          Incorrect email or password
+                        </FormHelperText>
+                      )}
+                    </FormControl>
+                    <FormControl fullWidth variant="outlined" error={!!error}>
+                      <InputLabel htmlFor="password">Password</InputLabel>
+                      <OutlinedInput
+                        id="password"
+                        type="password"
+                        value={logInInfo.password}
+                        onChange={handleChange("password")}
+                        startAdornment={
+                          <InputAdornment position="start">
+                            <LockIcon />
+                          </InputAdornment>
+                        }
+                        label="Password"
+                        placeholder="Password"
+                      />
+                      {error && (
+                        <FormHelperText error>
+                          Incorrect email or password
+                        </FormHelperText>
+                      )}
+                    </FormControl>
+                    <div className="flex justify-between remember">
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            color="primary"
+                            checked={logInInfo.rememberMe}
+                            onChange={handleChange("rememberMe")}
+                          />
+                        }
+                        label="Keep me logged in"
+                      />
 
-                    <Link
-                      to="/forgot-password"
-                      className="mt-2 text-[#2495c3] hover:text-[#64BFE3] transition duration-300 ease-in-out"
+                      <Link
+                        to="/forgot-password"
+                        className="mt-2 text-[#2495c3] hover:text-[#64BFE3] transition duration-300 ease-in-out"
+                      >
+                        Forget Password?
+                      </Link>
+                    </div>
+                    <button
+                      className="bg-[#6B87C7] hover:bg-[#4567B7] text-white font-bold py-2 px-6 rounded-md transition duration-300 ease-in-out w-full"
+                      type="submit"
+                      disabled={loading}
                     >
-                      Forget Password?
-                    </Link>
+                      {loading ? "Logging in..." : "Log in"}
+                    </button>
                   </div>
-                  <button
-                    className="bg-[#6B87C7] hover:bg-[#4567B7] text-white font-bold py-2 px-6 rounded-md transition duration-300 ease-in-out w-full"
-                    type="submit"
-                  >
-                    Log in
-                  </button>
-                </div>
+                </form>
                 <div className="mt-20 flex justify-center">
                   <span className="gap-2">
                     Not a member yet?{" "}
