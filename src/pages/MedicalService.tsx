@@ -230,7 +230,7 @@ const MedicalService: React.FC = () => {
 
             {/* Dynamic Content Based on Selection */}
             <div className="bg-white rounded-2xl shadow-sm p-8">
-              {activeTab === 'prescription' && (
+            {activeTab === 'prescription' && (
                 <div className="space-y-6">
                   <div className="flex justify-between items-center mb-6">
                     <h3 className="text-xl font-semibold text-gray-800">Prescribed Medications</h3>
@@ -249,6 +249,8 @@ const MedicalService: React.FC = () => {
                         <tr>
                           <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Medicine Name</th>
                           <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Quantity</th>
+                          <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Duration</th>
+                          <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Frequency</th>
                           <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Instructions</th>
                           <th className="w-20"></th>
                         </tr>
@@ -282,6 +284,30 @@ const MedicalService: React.FC = () => {
                                   updates: { dosage: Number(e.target.value) }
                                 }))}
                                 className="w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              <input
+                                type="number"
+                                value={drug.duration}
+                                onChange={(e) => dispatch(updatePrescribedDrug({
+                                  index,
+                                  updates: { duration: Number(e.target.value) }
+                                }))}
+                                className="w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Days"
+                              />
+                            </td>
+                            <td className="px-6 py-4">
+                              <input
+                                type="text"
+                                value={drug.frequency}
+                                onChange={(e) => dispatch(updatePrescribedDrug({
+                                  index,
+                                  updates: { frequency: e.target.value }
+                                }))}
+                                className="w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="e.g., Twice a day"
                               />
                             </td>
                             <td className="px-6 py-4">
