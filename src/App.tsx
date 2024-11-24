@@ -80,7 +80,7 @@ function App() {
         <Suspense fallback={<div>Loading...</div>}>
           <Routes>
             {/* Admin Routes */}
-            <Route element={<ProtectedRoute allowedRoles={["ROLE_PATIENT"]} />}>
+            <Route element={<ProtectedRoute />}>
               <Route path="/admin" element={<AdminLayout />}>
                 {/* The dashboard is now directly at /admin */}
                 {adminRoutes.map((route) => {
@@ -133,7 +133,7 @@ function App() {
             </Route>
 
             {/* Main App Routes */}
-            <Route element={<ProtectedRoute allowedRoles={[]} />}>
+            <Route element={<ProtectedRoute />}>
               <Route element={<MainLayout />}>
                 {/* Page Routes */}
                 {pageRoutes.map((route) => {
@@ -204,14 +204,7 @@ function App() {
                 })}
 
                 {/* Booking Routes */}
-                <Route
-                  element={
-                    <ProtectedRoute
-                      allowedRoles={["ROLE_PATIENT"]}
-                      requireAuth={true}
-                    />
-                  }
-                >
+                <Route element={<ProtectedRoute />}>
                   <Route
                     path="/booking"
                     element={<Booking steps={bookingRoutes} />}
