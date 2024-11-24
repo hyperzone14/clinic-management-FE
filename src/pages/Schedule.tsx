@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../redux/store";
 import {
-  fetchAppointmentsWithPagination,
+  fetchDoctorAppointments,
   updateAppointmentStatus,
   StatusType,
   Appointment,
@@ -11,19 +11,44 @@ import { initializeTreatmentAsync } from "../redux/slices/treatmentSlice";
 import AppointmentCard from "../components/common/AppointmentCard";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { AuthService } from "../utils/security/services/AuthService";
 
 const Schedule: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(0);
   const pageSize = 10;
-  const { appointments, loading, error, currentDoctor, totalPages } = useAppSelector(
+  const { appointments, loading, error, totalPages } = useAppSelector(
     (state) => state.schedule
   );
 
   useEffect(() => {
-    dispatch(fetchAppointmentsWithPagination({ page: currentPage, size: pageSize }));
-  }, [dispatch, currentPage, pageSize]);
+    const fetchDoctorSchedule = async () => {
+      try {
+        const doctorId = AuthService.getIdFromToken();
+        const isDoctor = AuthService.hasRole('ROLE_DOCTOR');
+        
+        if (!doctorId || !isDoctor) {
+          toast.error("Access denied: Doctor credentials required");
+          // navigate('/login');
+          return;
+        }
+
+        const today = new Date().toISOString().split('T')[0];
+        await dispatch(fetchDoctorAppointments({
+          doctorId: Number(doctorId),
+          appointmentDate: today,
+          page: currentPage,
+          size: pageSize
+        })).unwrap();
+      } catch (err) {
+        console.error("Error fetching doctor schedule:", err);
+        toast.error("Error loading appointments");
+      }
+    };
+
+    fetchDoctorSchedule();
+  }, [dispatch, currentPage, pageSize, navigate]);
 
   const handlePatientClick = async (appointment: Appointment, index: number) => {
     if (appointment.status === 'checked-in') {
@@ -56,7 +81,6 @@ const Schedule: React.FC = () => {
           return;
         }
 
-        
         navigate('/medical-bill-final', {
           state: {
             patientId: Number(appointment.patientId),
@@ -104,9 +128,6 @@ const Schedule: React.FC = () => {
             case 'checked-in':
               toast.success(`${appointment.patientName} has been checked in`);
               break;
-            case 'confirmed':
-              toast.success(`Appointment confirmed for ${appointment.patientName}`);
-              break;
             case 'lab_test_required':
               toast.info(`Lab tests required for ${appointment.patientName}`);
               break;
@@ -139,16 +160,12 @@ const Schedule: React.FC = () => {
       <ToastContainer/>
       
       <div className="flex flex-col my-5 mx-10 justify-center items-center">
-        <h1 className="text-4xl font-bold font-sans my-5">SCHEDULE</h1>
+        <h1 className="text-4xl font-bold font-sans my-5">Today Schedule</h1>
       </div>
 
       <div className="my-12 flex flex-col items-center">
         {/* Status Legend */}
         <div className="flex gap-4 mb-6 w-9/12 flex-wrap">
-          <div className="flex items-center">
-            <div className="w-3 h-3 rounded-full bg-yellow-400 mr-2"></div>
-            <span className="text-sm text-gray-600">Pending</span>
-          </div>
           <div className="flex items-center">
             <div className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
             <span className="text-sm text-gray-600">Check-in</span>
@@ -160,10 +177,6 @@ const Schedule: React.FC = () => {
           <div className="flex items-center">
             <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
             <span className="text-sm text-gray-600">Cancelled</span>
-          </div>
-          <div className="flex items-center">
-            <div className="w-3 h-3 rounded-full bg-purple-500 mr-2"></div>
-            <span className="text-sm text-gray-600">Confirm</span>
           </div>
           <div className="flex items-center">
             <div className="w-3 h-3 rounded-full bg-orange-500 mr-2"></div>
@@ -181,7 +194,7 @@ const Schedule: React.FC = () => {
           </div>
         ) : error ? (
           <div className="text-red-500 text-center p-4">
-            {toast.error(`Error loading appointments: ${error}`)}
+            {error}
           </div>
         ) : (
           <div className="flex flex-col items-center w-full">

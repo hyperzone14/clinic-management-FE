@@ -28,8 +28,8 @@ export const getHeaderRoutes = (role: string): Routes[] => {
     return [
       { id: 1, path: "/", location: "Home" },
       { id: 2, path: "/schedule", location: "Schedule" },
-      { id: 3, path: "/medical-history", location: "MedicHistory" },
-      { id: 4, path: "/booking-bill", location: "BookingBill" },
+      { id: 3, path: "/examination", location: "Examination" },
+      // { id: 4, path: "/booking-bill", location: "BookingBill" },
     ];
   } else {
     return [

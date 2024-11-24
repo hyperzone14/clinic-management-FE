@@ -184,6 +184,43 @@ export const fetchAppointments = createAsyncThunk(
   }
 );
 
+export const fetchDoctorAppointments = createAsyncThunk(
+  "schedule/fetchDoctorAppointments",
+  async (params: {
+    doctorId: number;
+    appointmentDate: string;
+    page?: number;
+    size?: number;
+    sort?: string;
+  }, { rejectWithValue }) => {
+    try {
+      // Build query parameters
+      const queryParams = new URLSearchParams({
+        doctorId: params.doctorId.toString(),
+        appointmentDate: params.appointmentDate,
+        page: (params.page || 0).toString(),
+        size: (params.size || 10).toString(),
+        sort: params.sort || 'timeSlot,desc'
+      });
+
+      const response = await apiService.get<AppointmentResponse>(
+        `/appointment/search?${queryParams.toString()}`
+      );
+
+      return {
+        appointments: response.result.content.map(transformAppointmentData),
+        totalPages: response.result.totalPages,
+        totalElements: response.result.totalElements,
+        currentPage: params.page || 0,
+      };
+    } catch (error) {
+      const errorMessage = handleError(error);
+      toast.error(`Failed to fetch doctor appointments: ${errorMessage}`);
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 export const fetchAppointmentsWithPagination = createAsyncThunk(
   "schedule/fetchAppointmentsWithPagination",
   async ({ page, size }: { page: number; size: number }, { rejectWithValue }) => {
@@ -382,6 +419,28 @@ const scheduleSlice = createSlice({
       .addCase(updateAppointmentStatus.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string || "Failed to update appointment status";
+      })
+      .addCase(fetchDoctorAppointments.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchDoctorAppointments.fulfilled, (state, action: PayloadAction<{
+        appointments: Appointment[];
+        totalPages: number;
+        totalElements: number;
+        currentPage: number;
+      }>) => {
+        state.loading = false;
+        state.appointments = action.payload.appointments;
+        state.totalPages = action.payload.totalPages;
+        state.totalElements = action.payload.totalElements;
+        state.currentPage = action.payload.currentPage;
+        state.error = null;
+      })
+      .addCase(fetchDoctorAppointments.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string || "Failed to fetch doctor appointments";
+        state.appointments = [];
       });
   },
 });

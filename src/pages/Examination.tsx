@@ -10,6 +10,7 @@ import {
 import AppointmentCard from "../components/common/AppointmentCard";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { AuthService } from "../utils/security/services/AuthService";
 
 const Examination: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -20,6 +21,15 @@ const Examination: React.FC = () => {
   const { appointments, loading, error, totalPages } = useAppSelector(
     (state) => state.schedule
   );
+
+  useEffect(() => {
+    const isDoctor = AuthService.hasRole('ROLE_DOCTOR');
+    if (!isDoctor) {
+      toast.error("Access denied: Only doctors can view this page");
+      navigate('/login');
+      return;
+    }
+  }, [navigate]);
 
   const fetchAppointments = () => {
     const today = new Date().toISOString().split('T')[0];
@@ -53,7 +63,7 @@ const Examination: React.FC = () => {
         break;
       case 'lab_test_completed':
         toast.info(`Lab test results are ready for ${appointment.patientName}`);
-        navigate(`/lab-test/results/${appointment.id}`);
+        navigate(`/medical-history?id=${appointment.patientId}`);
         break;
       default:
         toast.warning(`Invalid status for lab examination`);
@@ -124,7 +134,7 @@ const Examination: React.FC = () => {
           </div>
         ) : error ? (
           <div className="text-red-500 text-center p-4">
-            {toast.error(`Error loading lab test appointments: ${error}`)}
+            {error}
           </div>
         ) : (
           <div className="flex flex-col items-center w-full">

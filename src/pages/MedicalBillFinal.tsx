@@ -10,6 +10,7 @@ import {
   fetchDrugs
 } from '../redux/slices/medicalBillSlice';
 import { toast, ToastContainer } from 'react-toastify';
+import { AuthService } from '../utils/security/services/AuthService';
 
 interface LocationState {
   patientId: number;
@@ -43,6 +44,26 @@ const MedicalBillFinal: React.FC = () => {
       specialInstructions: ''
     }
   ]);
+
+  // Check doctor access on component mount
+  useEffect(() => {
+    const checkDoctorAccess = () => {
+      const isDoctor = AuthService.hasRole('ROLE_DOCTOR');
+      if (!isDoctor) {
+        toast.error("Access denied: Only doctors can access this page");
+        navigate('/login');
+        return;
+      }
+
+      if (!state?.patientId || !state?.doctorId) {
+        toast.error("Invalid access: Missing required information");
+        navigate('/schedule');
+        return;
+      }
+    };
+
+    checkDoctorAccess();
+  }, [navigate, state]);
 
   useEffect(() => {
     if (state?.patientId) {
@@ -100,8 +121,10 @@ const MedicalBillFinal: React.FC = () => {
         appointmentId: state.appointmentId
       })).unwrap();
 
+      toast.success('Treatment submitted successfully');
       navigate('/schedule');
     } catch (error) {
+      toast.error('Failed to submit treatment');
       console.error('Failed to submit treatment:', error);
     }
   };
@@ -126,32 +149,18 @@ const MedicalBillFinal: React.FC = () => {
     );
   }
 
+  // Error or missing state
   if (!state) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] p-4">
-        <p className="text-gray-500 mb-4">No patient information provided</p>
-        <button
-          onClick={() => navigate('/appointments')}
-          className="bg-[#4567b7] hover:bg-[#3E5CA3] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out"
-        >
-          Back to Appointments
-        </button>
-      </div>
-    );
+    toast.error("Missing required information");
+    navigate('/schedule');
+    return null;
   }
 
+  // Missing bill
   if (!currentBill) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] p-4">
-        <p className="text-gray-500 mb-4">No medical bill found for patient: {state.patientName}</p>
-        <button
-          onClick={() => navigate('/appointments')}
-          className="bg-[#4567b7] hover:bg-[#3E5CA3] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out"
-        >
-          Back to Appointments
-        </button>
-      </div>
-    );
+    toast.error(`No medical bill found for patient: ${state.patientName}`);
+    navigate('/schedule');
+    return null;
   }
 
   return (
@@ -169,23 +178,19 @@ const MedicalBillFinal: React.FC = () => {
         <div className="mb-12">
           <Title id={5} />
           <div className="mt-10 mx-16 px-3">
-            {/* Top row with Patient Name, Birth Date, and View History button */}
             <div className="grid grid-cols-3 gap-4 items-center">
-              {/* Patient Name */}
               <div className="col-span-1 flex">
                 <p className="font-bold text-2xl">Patient Name: </p>
                 <span className="ms-5 text-2xl text-gray-400">
                   {currentBill.patientName}
                 </span>
               </div>
-              {/* Birth Date */}
               <div className="col-span-1 flex">
                 <p className="font-bold text-2xl">Birth Date: </p>
                 <span className="ms-5 text-2xl text-gray-400">
                   {formatDate(currentBill.patientBirthDate)}
                 </span>
               </div>
-              {/* View History Button */}
               <div className="col-span-1 flex justify-end">
                 <button
                   onClick={() => window.open(`/medical-history?id=${currentBill.patientId}`, '_blank')}
@@ -196,7 +201,6 @@ const MedicalBillFinal: React.FC = () => {
                 </button>
               </div>
             </div>
-            {/* Gender on second row */}
             <div className="mt-7 flex">
               <p className="font-bold text-2xl">Gender: </p>
               <span className="ms-12 text-2xl text-gray-400">
