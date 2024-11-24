@@ -53,7 +53,7 @@ const Examination: React.FC = () => {
         break;
       case 'lab_test_completed':
         toast.info(`Lab test results are ready for ${appointment.patientName}`);
-        navigate(`/lab-test/results/${appointment.id}`);
+        navigate(`/medical-history?id=${appointment.patientId}`);
         break;
       default:
         toast.warning(`Invalid status for lab examination`);

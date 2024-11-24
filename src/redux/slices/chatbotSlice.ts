@@ -234,26 +234,16 @@ const chatSlice = createSlice({
       if (!Array.isArray(state.messages)) {
         state.messages = [];
       }
-
+    
       // Basic validation of the incoming message
       const message = action.payload;
       if (!message || !message.type || !message.sender) {
         console.warn('Invalid message format:', message);
         return;
       }
-
-      // More reliable duplicate check
-      const isDuplicate = state.messages.some(existingMsg => 
-        existingMsg &&
-        existingMsg.type === message.type &&
-        existingMsg.sender === message.sender &&
-        existingMsg.content === message.content &&
-        (message.type === 'CHAT' ? existingMsg.content === message.content : true)
-      );
-      
-      if (!isDuplicate) {
-        state.messages.push(message);
-      }
+    
+      // Simply add the message without duplicate checking
+      state.messages.push(message);
     },
     clearChat: (state) => {
       state.messages = [];
