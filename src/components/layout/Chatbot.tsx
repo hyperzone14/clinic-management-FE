@@ -62,14 +62,14 @@ const Chatbot = () => {
   return (
     <div className="fixed bottom-24 right-4 z-50">
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center justify-center w-14 h-14 rounded-full bg-blue-500 text-white shadow-lg hover:bg-blue-600 transition-all duration-300 ${
-          isOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100'
-        }`}
-        aria-label={isOpen ? 'Close chat' : 'Open chat'}
-      >
-        <MessageCircle className="h-7 w-7" />
-      </button>
+      onClick={() => setIsOpen(!isOpen)}
+      className={` right-5 bg-[#4567b7] text-white p-3 rounded-full shadow-lg hover:bg-[#3E5CA3] transition-colors duration-300 ${
+        isOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100'
+      }`}
+      aria-label={isOpen ? 'Close chat' : 'Open chat'}
+    >
+      <MessageCircle className="h-7 w-7" />
+    </button>
 
       <div
         className={`absolute bottom-0 right-0 w-96 bg-white rounded-lg shadow-xl transition-all duration-300 transform ${
