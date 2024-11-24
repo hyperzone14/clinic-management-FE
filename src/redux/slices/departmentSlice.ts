@@ -75,7 +75,7 @@ export const addDepartmentAsync = createAsyncThunk(
   "department/addDepartment",
   async (departmentData: Omit<Department, "id" | "doctors">) => {
     const response = await apiService.post<{ result: Department }>(
-      "/department",
+      "authz/department",
       departmentData
     );
     return response.result;
@@ -86,7 +86,7 @@ export const updateDepartmentAsync = createAsyncThunk(
   "department/updateDepartment",
   async (departmentData: Omit<Department, "doctors">) => {
     const response = await apiService.put<{ result: Department }>(
-      `/department/${departmentData.id}`,
+      `authz/department/${departmentData.id}`,
       departmentData
     );
     return response.result;

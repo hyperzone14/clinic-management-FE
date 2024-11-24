@@ -55,8 +55,13 @@ export const AuthService = {
     );
 
     if (response.data.code === 200 && response.data.result.token) {
-      // Store token with remember me preference
+      // Store token and user info with remember me preference
       JwtUtils.setToken(response.data.result.token, credentials.rememberMe);
+      JwtUtils.setUserInfo(
+        credentials.email,
+        credentials.email, // or username if available in response
+        credentials.rememberMe
+      );
 
       if (response.data.result && typeof response.data.result === "object") {
         store.dispatch(
@@ -68,27 +73,6 @@ export const AuthService = {
           })
         );
       }
-    }
-
-    return response.data;
-  },
-
-  async signup(userData: SignupRequest): Promise<AuthResponse> {
-    const response = await axios.post<AuthResponse>(
-      `${SecurityConfig.API_URL}/api/auth/signup`,
-      userData
-    );
-
-    if (response.data.token) {
-      JwtUtils.setToken(response.data.token);
-      store.dispatch(
-        setCredentials({
-          id: response.data.user.id,
-          email: response.data.user.email,
-          username: response.data.user.username,
-          token: response.data.token,
-        })
-      );
     }
 
     return response.data;

@@ -1,5 +1,5 @@
 import "./App.css";
-import './utils/sockjs-polyfills';
+import "./utils/sockjs-polyfills";
 import {
   Route,
   BrowserRouter,
@@ -205,7 +205,12 @@ function App() {
 
                 {/* Booking Routes */}
                 <Route
-                  element={<ProtectedRoute allowedRoles={["ROLE_PATIENT"]} />}
+                  element={
+                    <ProtectedRoute
+                      allowedRoles={["ROLE_PATIENT"]}
+                      requireAuth={true}
+                    />
+                  }
                 >
                   <Route
                     path="/booking"
