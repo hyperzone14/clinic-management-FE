@@ -15,7 +15,7 @@ import {
 import { useAppDispatch } from "../../../redux/store";
 import { updateUserAsync } from "../../../redux/slices/userManageSlice";
 
-const VALID_STATUSES = ["ACTIVE", "INACTIVE"];
+// const VALID_STATUSES = ["ACTIVE", "INACTIVE"];
 // const VALID_ROLES = ["ADMIN", "CLINIC_OWNER", "DOCTOR", "PATIENT"];
 
 interface Data {
@@ -28,7 +28,7 @@ interface Data {
   address: string;
   birthDate: string;
   // role: string | null;
-  status: string | null;
+  // status: string | null;
 }
 
 interface EditModalProps {
@@ -164,7 +164,7 @@ const EditUserModal: React.FC<EditModalProps> = ({
                 ))}
               </Select>
             </FormControl>*/}
-            <FormControl fullWidth>
+            {/* <FormControl fullWidth>
               <InputLabel>Status</InputLabel>
               <Select
                 name="status"
@@ -178,7 +178,7 @@ const EditUserModal: React.FC<EditModalProps> = ({
                   </MenuItem>
                 ))}
               </Select>
-            </FormControl>
+            </FormControl> */}
           </div>
         </DialogContent>
         <DialogActions>

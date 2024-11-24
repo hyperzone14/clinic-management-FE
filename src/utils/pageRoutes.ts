@@ -161,6 +161,11 @@ export const pageRoutes: Routes[] = [
     location: "MedicalBillFinal",
     roles: ["ROLE_DOCTOR"],
   },
+  {
+    id: 18,
+    path: "/user-information",
+    location: "UserInfo",
+  },
 ];
 
 export const bookingRoutes: Routes[] = [

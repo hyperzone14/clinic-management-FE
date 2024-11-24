@@ -25,7 +25,7 @@ interface UserData {
   address: string;
   birthDate: string;
   // role: "ADMIN" | "CLINIC_OWNER" | "DOCTOR" | "PATIENT" | "";
-  status: "ACTIVE" | "INACTIVE" | "";
+  // status: "ACTIVE" | "INACTIVE" | "";
 }
 
 const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
@@ -40,7 +40,7 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
     address: "",
     birthDate: "",
     // role: "",
-    status: "",
+    // status: "",
   };
 
   const [newUser, setNewUser] = useState<UserData>(initialUserState);
@@ -72,7 +72,7 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
     if (!newUser.address) newErrors.address = "Address is required";
     if (!newUser.birthDate) newErrors.birthDate = "Date of Birth is required";
     // if (!newUser.role) newErrors.role = "Role is required";
-    if (!newUser.status) newErrors.status = "Status is required";
+    // if (!newUser.status) newErrors.status = "Status is required";
 
     if (!/^\d{10}$/.test(newUser.citizenId)) {
       newErrors.citizenId = "Citizen ID must be exactly 10 digits";
@@ -287,7 +287,7 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
               },
             }}
           />
-          <TextField
+          {/* <TextField
             select
             label="Status"
             name="status"
@@ -302,7 +302,7 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
           >
             <MenuItem value="ACTIVE">Active</MenuItem>
             <MenuItem value="INACTIVE">Inactive</MenuItem>
-          </TextField>
+          </TextField> */}
         </form>
       </DialogContent>
       <DialogActions>
