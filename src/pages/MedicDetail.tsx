@@ -4,8 +4,6 @@ import { useAppSelector, useAppDispatch } from '../redux/store';
 import Title from '../components/common/Title';
 import { User, Calendar, Loader2, Image as ImageIcon } from 'lucide-react';
 import { fetchRecordById } from '../redux/slices/medicHistorySlice';
-import { AuthService } from '../utils/security/services/AuthService';
-import { toast, ToastContainer } from 'react-toastify';
 
 const API_BASE_URL = "http://localhost:8080/api";
 
@@ -16,44 +14,10 @@ const MedicDetail: React.FC = () => {
   const { selectedRecord, loading, error } = useAppSelector(state => state.medicHistory);
 
   useEffect(() => {
-    if (!id) return;
-
-    const checkAccessAndFetchRecord = async () => {
-      try {
-        const currentUserId = AuthService.getIdFromToken();
-        const isDoctor = AuthService.hasRole('ROLE_DOCTOR');
-        const isPatient = AuthService.hasRole('ROLE_PATIENT');
-
-        if (!currentUserId) {
-          toast.error("Authentication required");
-          navigate('/login');
-          return;
-        }
-
-        if (isDoctor) {
-          // Doctors can view all records
-          dispatch(fetchRecordById(Number(id)));
-        } else if (isPatient) {
-          // Patients can only view their own records
-          if (selectedRecord && Number(currentUserId) !== selectedRecord.patientId) {
-            toast.error("Access denied: You can only view your own medical records");
-            navigate('/medical-history');
-            return;
-          }
-          dispatch(fetchRecordById(Number(id)));
-        } else {
-          toast.error("Access denied: Invalid role");
-          navigate('/login');
-        }
-      } catch (err) {
-        console.error("Error checking access:", err);
-        toast.error("Error verifying access permissions");
-        navigate('/login');
-      }
-    };
-
-    checkAccessAndFetchRecord();
-  }, [dispatch, id, navigate, selectedRecord]);
+    if (id) {
+      dispatch(fetchRecordById(Number(id)));
+    }
+  }, [dispatch, id]);
 
   const handleImageView = (imageId: number) => {
     window.open(`${API_BASE_URL}/images/download/${imageId}`, '_blank');
@@ -82,16 +46,12 @@ const MedicDetail: React.FC = () => {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] p-4">
-        <p className="text-red-500 mb-4">
-          {error.includes("Access denied") 
-            ? "You don't have permission to view this record" 
-            : error}
-        </p>
+        <p className="text-red-500 mb-4">{error}</p>
         <button 
-          onClick={() => navigate('/medical-history')}
+          onClick={() => dispatch(fetchRecordById(Number(id)))}
           className="bg-[#4567b7] hover:bg-[#3E5CA3] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out"
         >
-          Back to History
+          Try Again
         </button>
       </div>
     );
@@ -113,7 +73,6 @@ const MedicDetail: React.FC = () => {
 
   return (
     <div className="w-full">
-      <ToastContainer />
       {/* Header */}
       <div className="mt-16">
         <h1 className="text-4xl font-bold font-sans my-5 text-center">
@@ -186,8 +145,8 @@ const MedicDetail: React.FC = () => {
                   <tr>
                     <th className="px-6 py-3 text-left text-lg font-medium text-gray-500 tracking-wider">Drug Name</th>
                     <th className="px-6 py-3 text-left text-lg font-medium text-gray-500 tracking-wider">Quantity</th>
-                    <th className="px-6 py-3 text-left text-lg font-medium text-gray-500 tracking-wider">Duration</th>
-                    <th className="px-6 py-3 text-left text-lg font-medium text-gray-500 tracking-wider">Frequency</th>
+                    {/* <th className="px-6 py-3 text-left text-lg font-medium text-gray-500 tracking-wider">Duration</th>
+                    <th className="px-6 py-3 text-left text-lg font-medium text-gray-500 tracking-wider">Frequency</th> */}
                     <th className="px-6 py-3 text-left text-lg font-medium text-gray-500 tracking-wider">Notes</th>
                   </tr>
                 </thead>
@@ -196,8 +155,8 @@ const MedicDetail: React.FC = () => {
                     <tr key={drug.id}>
                       <td className="px-6 py-4 text-xl text-[#A9A9A9]">{drug.drugName}</td>
                       <td className="px-6 py-4 text-xl text-[#A9A9A9]">{drug.dosage}</td>
-                      <td className="px-6 py-4 text-xl text-[#A9A9A9]">{drug.duration} days</td>
-                      <td className="px-6 py-4 text-xl text-[#A9A9A9]">{drug.frequency}</td>
+                      {/* <td className="px-6 py-4 text-xl text-[#A9A9A9]">{drug.duration} days</td>
+                      <td className="px-6 py-4 text-xl text-[#A9A9A9]">{drug.frequency}</td> */}
                       <td className="px-6 py-4 text-xl text-[#A9A9A9]">{drug.specialInstructions}</td>
                     </tr>
                   ))}

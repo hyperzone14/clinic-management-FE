@@ -9,12 +9,13 @@ import {
 } from '../redux/slices/medicHistorySlice';
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { AuthService } from '../utils/security/services/AuthService';
 
-const MedicHistory: React.FC = () => {
+const MedicHistory = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [searchParams] = useSearchParams();
-  const patientId = searchParams.get('patientId');
+  const patientIdFromUrl = searchParams.get('patientId');
 
   const { 
     filteredRecords, 
@@ -26,15 +27,64 @@ const MedicHistory: React.FC = () => {
   } = useAppSelector(state => state.medicHistory);
 
   useEffect(() => {
-    if (patientId) {
-      dispatch(fetchMedicalRecordsByPatientId(Number(patientId)));
-    } else {
-      dispatch(fetchMedicalRecords());
-    }
-  }, [dispatch, currentPage, itemsPerPage, patientId]);
+    const fetchRecords = async () => {
+      try {
+        const isDoctor = AuthService.hasRole('ROLE_DOCTOR');
+        const isPatient = AuthService.hasRole('ROLE_PATIENT');
+        const currentUserId = AuthService.getIdFromToken();
 
-  const handleRecordClick = (id: number) => {
-    navigate(`/medical-history/${id}`);
+        if (!currentUserId) {
+          toast.error("Authentication required");
+          navigate('/login');
+          return;
+        }
+
+        if (isDoctor) {
+          if (patientIdFromUrl) {
+            await dispatch(fetchMedicalRecordsByPatientId(Number(patientIdFromUrl))).unwrap();
+          } else {
+            await dispatch(fetchMedicalRecords()).unwrap();
+          }
+        } else if (isPatient) {
+          const requestedPatientId = patientIdFromUrl || currentUserId;
+          
+          if (requestedPatientId !== currentUserId) {
+            toast.error("Access denied: You can only view your own medical records");
+            navigate('/medical-history');
+            return;
+          }
+          
+          await dispatch(fetchMedicalRecordsByPatientId(Number(currentUserId))).unwrap();
+        } else {
+          toast.error("Access denied: Invalid role");
+          navigate('/login');
+        }
+      } catch (err) {
+        console.error("Error fetching medical records:", err);
+        toast.error("Error loading medical records");
+      }
+    };
+
+    fetchRecords();
+  }, [dispatch, currentPage, itemsPerPage, patientIdFromUrl, navigate]);
+
+  const handleRecordClick = async (id: number) => {
+    try {
+      const isPatient = AuthService.hasRole('ROLE_PATIENT');
+      const currentUserId = AuthService.getIdFromToken();
+
+      if (isPatient) {
+        const record = filteredRecords.find(r => r.id === id);
+        if (record && record.patientId !== Number(currentUserId)) {
+          toast.error("Access denied: You can only view your own medical records");
+          return;
+        }
+      }
+
+      navigate(`/medical-history/${id}`);
+    } catch (err) {
+      toast.error("Error accessing record");
+    }
   };
 
   const handlePageChange = (newPage: number) => {
@@ -46,13 +96,26 @@ const MedicHistory: React.FC = () => {
     }
   };
 
+  if (error) {
+    return (
+      <div className="w-full">
+        {/* <ToastContainer /> */}
+        <div className="flex justify-center items-center h-64">
+          <div className="text-center p-8 bg-gray-100 rounded-lg">
+            <p className="text-xl text-gray-600">No Treatment history</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full">
       <ToastContainer />
       
       <div className="flex flex-col my-5 mx-10 justify-center items-center">
         <h1 className="text-4xl font-bold font-sans my-5">
-          {patientId ? 'PATIENT MEDICAL HISTORY' : 'MEDICAL HISTORY'}
+          {patientIdFromUrl ? 'PATIENT MEDICAL HISTORY' : 'MEDICAL HISTORY'}
         </h1>
       </div>
 
@@ -61,21 +124,11 @@ const MedicHistory: React.FC = () => {
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
           </div>
-        ) : error ? (
-          <div className="text-red-500 text-center p-4">
-            {toast.error(`Error loading medical records: ${error}`)}
-          </div>
         ) : (
           <div className="flex flex-col items-center w-full">
-            {filteredRecords.length === 0 ? (
+            {!filteredRecords || filteredRecords.length === 0 ? (
               <div className="text-center p-8 bg-gray-100 rounded-lg">
-                <p className="text-xl text-gray-600">No medical records found</p>
-                <p className="text-sm text-gray-500 mt-2">
-                  {patientId 
-                    ? 'This patient has no medical records'
-                    : 'No medical records available'
-                  }
-                </p>
+                <p className="text-xl text-gray-600">No Treatment history</p>
               </div>
             ) : (
               <>
@@ -91,7 +144,7 @@ const MedicHistory: React.FC = () => {
                   ))}
                 </div>
 
-                {!patientId && ( // Only show pagination when viewing all records
+                {!patientIdFromUrl && AuthService.hasRole('ROLE_DOCTOR') && (
                   <div className="flex justify-center space-x-4 mt-10 mb-5">
                     <button
                       className="px-4 py-2 bg-[#34a85a] text-white rounded-lg disabled:opacity-50 hover:bg-[#2e8b46] transition duration-300 ease-in-out"

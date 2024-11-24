@@ -41,7 +41,7 @@ const MedicalService: React.FC = () => {
 
   useEffect(() => {
     if (!patientInfo.patientId) {
-      navigate('/schedule');
+      
       return;
     }
     dispatch(fetchDrugs());
