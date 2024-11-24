@@ -6,8 +6,12 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import WarningIcon from "@mui/icons-material/Warning";
-import { Link } from "react-router-dom";
+// import WarningIcon from "@mui/icons-material/Warning";
+import { Link, useNavigate } from "react-router-dom";
+import { useAppDispatch } from "../../redux/store";
+import { setSigninProfile } from "../../redux/slices/signinProfileSlice";
+import { FormHelperText } from "@mui/material";
+// import { sign } from "crypto";
 
 interface SignInProps {
   username: string;
@@ -17,9 +21,12 @@ interface SignInProps {
 }
 
 const SignIn: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const [isPasswordMatch, setIsPasswordMatch] = React.useState<boolean>(false);
   const [hasTypedConfirmPassword, setHasTypedConfirmPassword] =
     React.useState<boolean>(false);
+  const [formErrors, setFormErrors] = React.useState<Partial<SignInProps>>({});
   const [signInInfo, setSignInInfo] = React.useState<SignInProps>({
     username: "",
     email: "",
@@ -49,6 +56,61 @@ const SignIn: React.FC = () => {
         return updatedInfo;
       });
     };
+
+  const validateForm = (): boolean => {
+    const errors: Partial<SignInProps> = {};
+    let isValid = true;
+
+    // Check for empty fields
+    if (!signInInfo.username.trim()) {
+      errors.username = "Full name is required";
+      isValid = false;
+    }
+
+    if (!signInInfo.email.trim()) {
+      errors.email = "Email is required";
+      isValid = false;
+    } else {
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(signInInfo.email)) {
+        errors.email = "Please enter a valid email address";
+        isValid = false;
+      }
+    }
+
+    if (!signInInfo.password) {
+      errors.password = "Password is required";
+      isValid = false;
+    }
+
+    if (!signInInfo.checkPassword) {
+      errors.checkPassword = "Please confirm your password";
+      isValid = false;
+    } else if (signInInfo.password !== signInInfo.checkPassword) {
+      errors.checkPassword = "Passwords do not match";
+      isValid = false;
+    }
+
+    setFormErrors(errors);
+    return isValid;
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (validateForm()) {
+      dispatch(
+        setSigninProfile({
+          fullName: signInInfo.username,
+          email: signInInfo.email,
+          password: signInInfo.password,
+        })
+      );
+      navigate("/user-information");
+    }
+  };
+
   return (
     <>
       <div className="flex justify-center items-center">
@@ -73,92 +135,119 @@ const SignIn: React.FC = () => {
                 <h1 className="text-4xl font-bold text-center">
                   Create an Account
                 </h1>
-                <div className="mt-10 space-y-4 px-16">
-                  <FormControl fullWidth variant="outlined">
-                    <InputLabel htmlFor="email">Full name</InputLabel>
-                    <OutlinedInput
-                      id="username"
-                      type="text"
-                      value={signInInfo.username}
-                      onChange={handleChange("username")}
-                      startAdornment={
-                        <InputAdornment position="start">
-                          <AccountCircleIcon />
-                        </InputAdornment>
-                      }
-                      label="Username"
-                      placeholder="Full name"
-                    />
-                  </FormControl>
-                  <FormControl fullWidth variant="outlined">
-                    <InputLabel htmlFor="email">Email</InputLabel>
-                    <OutlinedInput
-                      id="email"
-                      type="email"
-                      value={signInInfo.email}
-                      onChange={handleChange("email")}
-                      startAdornment={
-                        <InputAdornment position="start">
-                          <EmailIcon />
-                        </InputAdornment>
-                      }
-                      label="Email"
-                      placeholder="Email"
-                    />
-                  </FormControl>
-                  <FormControl fullWidth variant="outlined">
-                    <InputLabel htmlFor="password">Password</InputLabel>
-                    <OutlinedInput
-                      id="password"
-                      type="password"
-                      value={signInInfo.password}
-                      onChange={handleChange("password")}
-                      startAdornment={
-                        <InputAdornment position="start">
-                          <LockIcon />
-                        </InputAdornment>
-                      }
-                      label="Password"
-                      placeholder="Password"
-                    />
-                  </FormControl>
-                  <FormControl fullWidth variant="outlined">
-                    <InputLabel
-                      htmlFor="checkPassword"
-                      error={!isPasswordMatch && hasTypedConfirmPassword}
+                <form onSubmit={handleSubmit}>
+                  <div className="mt-10 space-y-4 px-16">
+                    <FormControl
+                      fullWidth
+                      variant="outlined"
+                      error={!!formErrors.username}
                     >
-                      Confirm Password
-                    </InputLabel>
-                    <OutlinedInput
-                      id="checkPassword"
-                      type="password"
-                      value={signInInfo.checkPassword}
-                      onChange={handleChange("checkPassword")}
-                      startAdornment={
-                        <InputAdornment position="start">
-                          <LockIcon />
-                        </InputAdornment>
-                      }
-                      endAdornment={
-                        !isPasswordMatch &&
-                        hasTypedConfirmPassword && (
-                          <InputAdornment position="end">
-                            <WarningIcon color="error" />
+                      <InputLabel htmlFor="email">Full name</InputLabel>
+                      <OutlinedInput
+                        id="username"
+                        type="text"
+                        value={signInInfo.username}
+                        onChange={handleChange("username")}
+                        startAdornment={
+                          <InputAdornment position="start">
+                            <AccountCircleIcon />
                           </InputAdornment>
-                        )
-                      }
-                      label="Confirm Password"
-                      placeholder="Confirm Password"
-                      error={!isPasswordMatch && hasTypedConfirmPassword} // Turns the input border red if passwords don't match
-                    />
-                  </FormControl>
-                  <button
-                    className="bg-[#6B87C7] hover:bg-[#4567B7] text-white font-bold py-2 px-6 rounded-md transition duration-300 ease-in-out w-full"
-                    type="submit"
-                  >
-                    Log in
-                  </button>
-                </div>
+                        }
+                        label="Username"
+                        placeholder="Full name"
+                      />
+                      {formErrors.username && (
+                        <FormHelperText error>
+                          {formErrors.username}
+                        </FormHelperText>
+                      )}
+                    </FormControl>
+                    <FormControl
+                      fullWidth
+                      variant="outlined"
+                      error={!!formErrors.email}
+                    >
+                      <InputLabel htmlFor="email">Email</InputLabel>
+                      <OutlinedInput
+                        id="email"
+                        type="email"
+                        value={signInInfo.email}
+                        onChange={handleChange("email")}
+                        startAdornment={
+                          <InputAdornment position="start">
+                            <EmailIcon />
+                          </InputAdornment>
+                        }
+                        label="Email"
+                        placeholder="Email"
+                      />
+                      {formErrors.email && (
+                        <FormHelperText error>
+                          {formErrors.email}
+                        </FormHelperText>
+                      )}
+                    </FormControl>
+                    <FormControl
+                      fullWidth
+                      variant="outlined"
+                      error={!!formErrors.password}
+                    >
+                      <InputLabel htmlFor="password">Password</InputLabel>
+                      <OutlinedInput
+                        id="password"
+                        type="password"
+                        value={signInInfo.password}
+                        onChange={handleChange("password")}
+                        startAdornment={
+                          <InputAdornment position="start">
+                            <LockIcon />
+                          </InputAdornment>
+                        }
+                        label="Password"
+                        placeholder="Password"
+                      />
+                      {formErrors.password && (
+                        <FormHelperText error>
+                          {formErrors.password}
+                        </FormHelperText>
+                      )}
+                    </FormControl>
+                    <FormControl
+                      fullWidth
+                      variant="outlined"
+                      error={!!formErrors.checkPassword}
+                    >
+                      <InputLabel htmlFor="checkPassword">
+                        Confirm Password
+                      </InputLabel>
+                      <OutlinedInput
+                        id="checkPassword"
+                        type="password"
+                        value={signInInfo.checkPassword}
+                        onChange={handleChange("checkPassword")}
+                        startAdornment={
+                          <InputAdornment position="start">
+                            <LockIcon />
+                          </InputAdornment>
+                        }
+                        label="Confirm Password"
+                        placeholder="Confirm Password"
+                        error={!isPasswordMatch && hasTypedConfirmPassword} // Turns the input border red if passwords don't match
+                      />
+                      {formErrors.checkPassword && (
+                        <FormHelperText error>
+                          Passwords do not match. Please try again.
+                        </FormHelperText>
+                      )}
+                    </FormControl>
+                    <button
+                      className="bg-[#6B87C7] hover:bg-[#4567B7] text-white font-bold py-2 px-6 rounded-md transition duration-300 ease-in-out w-full"
+                      type="submit"
+                    >
+                      Create an Account
+                    </button>
+                  </div>
+                </form>
                 <div className="mt-8 flex justify-center">
                   <span className="gap-2">
                     Already a member?{" "}

@@ -11,7 +11,7 @@ interface User {
   address: string;
   birthDate: string;
   // role: string | null;
-  status: string | null;
+  // status: string | null;
 }
 
 interface NewUser extends Omit<User, "id"> {

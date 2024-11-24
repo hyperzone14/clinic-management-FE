@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import { RootState, useAppDispatch } from "../../redux/store.ts";
 import { PiUserCircleLight } from "react-icons/pi";
 import { JwtUtils } from "../../utils/security/jwt/JwtUtils";
-import { logout } from "../../redux/slices/authSlice";
+import { logout, setCredentials } from "../../redux/slices/authSlice";
 import { AuthService } from "../../utils/security/services/AuthService.ts";
 
 export const Header = () => {
@@ -21,10 +21,30 @@ export const Header = () => {
   const [headerRoutes, setHeaderRoutes] = useState<Routes[]>([]);
 
   useEffect(() => {
-    // Check authentication status whenever auth state changes
-    const token = JwtUtils.getToken();
-    setIsAuthenticated(!!token && !!auth.token);
-  }, [auth.token]);
+    const initializeUserData = () => {
+      const token = JwtUtils.getToken();
+      const email = JwtUtils.getEmail();
+      const username = JwtUtils.getUsername();
+      const id = AuthService.getIdFromToken();
+
+      if (token && email && username && id) {
+        // Restore user data to Redux state
+        dispatch(
+          setCredentials({
+            id,
+            email,
+            username,
+            token,
+          })
+        );
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+      }
+    };
+
+    initializeUserData();
+  }, [dispatch]);
 
   const toggleDropdown = () => setIsOpen(!isOpen);
   const closeDropdown = () => setIsOpen(false);

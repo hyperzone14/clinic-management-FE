@@ -60,6 +60,7 @@ export const pageRoutes: Routes[] = [
     id: 4,
     path: "/booking",
     location: "Booking",
+    roles: ["ROLE_PATIENT"],
   },
   {
     id: 5,
@@ -160,6 +161,11 @@ export const pageRoutes: Routes[] = [
     path: "/medical-bill-final",
     location: "MedicalBillFinal",
     roles: ["ROLE_DOCTOR"],
+  },
+  {
+    id: 18,
+    path: "/user-information",
+    location: "UserInfo",
   },
 ];
 
