@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import { apiService } from "../../utils/axios-config";
+import { JwtUtils } from "../../utils/security/jwt/JwtUtils";
 
 interface AuthState {
   id: string | null;
@@ -22,10 +23,42 @@ const initialState: AuthState = {
 };
 
 // Async thunk for login
+// export const login = createAsyncThunk(
+//   "auth/login",
+//   async (
+//     { email, password }: { email: string; password: string },
+//     { rejectWithValue }
+//   ) => {
+//     try {
+//       const response = await apiService.post<{
+//         code: number;
+//         result: { id: string; token: string };
+//       }>("/auth/login", { email, password });
+
+//       if (response.code === 200) {
+//         const { id, token } = response.result;
+//         localStorage.setItem("token", token);
+//         return { id, token, email };
+//       }
+
+//       return rejectWithValue("Invalid credentials");
+//     } catch (error: any) {
+//       return rejectWithValue(error.response?.data?.message || "Login failed");
+//     }
+//   }
+// );
 export const login = createAsyncThunk(
   "auth/login",
   async (
-    { email, password }: { email: string; password: string },
+    {
+      email,
+      password,
+      rememberMe,
+    }: {
+      email: string;
+      password: string;
+      rememberMe: boolean;
+    },
     { rejectWithValue }
   ) => {
     try {
@@ -36,12 +69,12 @@ export const login = createAsyncThunk(
 
       if (response.code === 200) {
         const { id, token } = response.result;
-        localStorage.setItem("token", token);
+        JwtUtils.setToken(token, rememberMe); // Use the updated setToken method
         return { id, token, email };
       }
 
       return rejectWithValue("Invalid credentials");
-    } catch (error: any) {
+    } catch (error) {
       return rejectWithValue(error.response?.data?.message || "Login failed");
     }
   }
@@ -49,8 +82,7 @@ export const login = createAsyncThunk(
 
 // Async thunk for logout
 export const logout = createAsyncThunk("auth/logout", async () => {
-  localStorage.removeItem("token");
-  // Additional logout logic if needed
+  JwtUtils.clearAll(); // This will clear token, email, and username from both storages
 });
 
 const authSlice = createSlice({
@@ -75,6 +107,12 @@ const authSlice = createSlice({
     },
     setUserId: (state, action: PayloadAction<string>) => {
       state.id = action.payload;
+    },
+    setUserName: (state, action: PayloadAction<string>) => {
+      state.username = action.payload;
+    },
+    setUserEmail: (state, action: PayloadAction<string>) => {
+      state.email = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -107,5 +145,6 @@ const authSlice = createSlice({
 });
 
 // Exporting actions
-export const { setCredentials, setUserId } = authSlice.actions;
+export const { setCredentials, setUserId, setUserName, setUserEmail } =
+  authSlice.actions;
 export default authSlice.reducer;

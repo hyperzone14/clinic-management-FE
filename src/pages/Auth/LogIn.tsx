@@ -13,6 +13,9 @@ import { AppDispatch } from "../../redux/store";
 import { setCredentials } from "../../redux/slices/authSlice";
 import { AuthService } from "../../utils/security/services/AuthService";
 import { FormHelperText } from "@mui/material";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { JwtUtils } from "../../utils/security/jwt/JwtUtils";
 
 interface LogInProps {
   email: string;
@@ -66,26 +69,32 @@ const LogIn: React.FC = () => {
         response.result !== null &&
         !Array.isArray(response.result)
       ) {
+        // Store the token using the appropriate storage method
+        JwtUtils.setToken(response.result.token, logInInfo.rememberMe);
+
         dispatch(
           setCredentials({
             id: response.result.id.toString(),
             email: logInInfo.email,
-            username: logInInfo.email, // You might want to adjust this if you have username in the response
+            username: logInInfo.email,
             token: response.result.token,
           })
         );
-        navigate("/"); // Navigate to your dashboard or home page
+        navigate("/");
       } else {
         setError(response.message || "Login failed");
       }
     } catch (err) {
-      setError(err.response?.data?.message || "An error occurred during login");
+      toast.error(
+        err.response?.data?.message || "An error occurred during login"
+      );
     } finally {
       setLoading(false);
     }
   };
   return (
     <>
+      <ToastContainer />
       <div className="flex justify-center items-center">
         <div className="bg-[#fff] shadow-md p-8 rounded-lg w-9/12 h-fit">
           <div className="grid grid-cols-2">
@@ -157,13 +166,6 @@ const LogIn: React.FC = () => {
                         }
                         label="Keep me logged in"
                       />
-
-                      <Link
-                        to="/forgot-password"
-                        className="mt-2 text-[#2495c3] hover:text-[#64BFE3] transition duration-300 ease-in-out"
-                      >
-                        Forget Password?
-                      </Link>
                     </div>
                     <button
                       className="bg-[#6B87C7] hover:bg-[#4567B7] text-white font-bold py-2 px-6 rounded-md transition duration-300 ease-in-out w-full"
