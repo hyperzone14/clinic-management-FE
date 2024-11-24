@@ -30,7 +30,7 @@ const Schedule: React.FC = () => {
         
         if (!doctorId || !isDoctor) {
           toast.error("Access denied: Doctor credentials required");
-          navigate('/login');
+          // navigate('/login');
           return;
         }
 
