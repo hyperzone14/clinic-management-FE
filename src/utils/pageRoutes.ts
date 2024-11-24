@@ -27,9 +27,9 @@ export const getHeaderRoutes = (role: string): Routes[] => {
   } else if (role === "ROLE_DOCTOR") {
     return [
       { id: 1, path: "/", location: "Home" },
-      { id: 2, path: "/booking", location: "Booking" },
-      { id: 3, path: "/medical-history", location: "MedicHistory" },
-      { id: 4, path: "/booking-bill", location: "BookingBill" },
+      { id: 2, path: "/schedule", location: "Schedule" },
+      { id: 3, path: "/examination", location: "Examination" },
+      // { id: 4, path: "/booking-bill", location: "BookingBill" },
     ];
   } else {
     return [
