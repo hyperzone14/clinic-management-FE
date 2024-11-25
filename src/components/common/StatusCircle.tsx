@@ -2,6 +2,22 @@ import React, { useState } from "react";
 import { Check, Clock, X, UserCheck, CheckCircle, Beaker, ClipboardCheck } from "lucide-react";
 import { StatusType } from "../../redux/slices/scheduleSlice";
 
+// Define valid status types explicitly
+export const VALID_STATUS_TYPES = [
+  'success',
+  'checked-in',
+  'pending',
+  'cancelled',
+  'confirmed',
+  'lab_test_required',
+  'lab_test_completed'
+] as const;
+
+// Type guard to check if a status is valid
+const isValidStatus = (status: string): status is StatusType => {
+  return VALID_STATUS_TYPES.includes(status as StatusType);
+};
+
 interface StatusStyle {
   background: string;
   icon: React.ReactNode;
@@ -71,6 +87,10 @@ const StatusCircle: React.FC<StatusCircleProps> = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
+  // Validate and normalize status
+  const normalizedStatus = isValidStatus(status) ? status : "pending";
+  const currentStyle = STATUS_STYLES[normalizedStatus];
+
   const getAvailableStatuses = (): StatusType[] => {
     if (showLabTestStatusesOnly) {
       const labTestTransitions: Record<StatusType, StatusType[]> = {
@@ -82,27 +102,27 @@ const StatusCircle: React.FC<StatusCircleProps> = ({
         pending: ["lab_test_required", "lab_test_completed"],
         "checked-in": ["lab_test_required", "lab_test_completed"]
       };
-      return labTestTransitions[status] ?? ["lab_test_required", "lab_test_completed"];
+      return labTestTransitions[normalizedStatus] ?? ["lab_test_required", "lab_test_completed"];
     }
 
     const statusTransitions: Record<StatusType, StatusType[]> = {
       pending: ["confirmed", "cancelled"],
       confirmed: ["checked-in", "cancelled"],
       "checked-in": ["cancelled"],
-      lab_test_required: [ "cancelled"],
+      lab_test_required: ["cancelled"],
       lab_test_completed: [],
       cancelled: [],
       success: [],
     };
 
-    return statusTransitions[status] ?? ["checked-in", "confirmed", "cancelled", "lab_test_required", "lab_test_completed"];
+    return statusTransitions[normalizedStatus] ?? ["checked-in", "confirmed", "cancelled", "lab_test_required", "lab_test_completed"];
   };
 
   const isClickable = () => {
     if (showLabTestStatusesOnly) {
-      return status === "lab_test_required";
+      return normalizedStatus === "lab_test_required";
     }
-    return !FINAL_STATES.includes(status);
+    return !FINAL_STATES.includes(normalizedStatus);
   };
 
   const handleStatusChange = (newStatus: StatusType) => {
@@ -121,11 +141,11 @@ const StatusCircle: React.FC<StatusCircleProps> = ({
           ${isClickable() ? "hover:scale-105 cursor-pointer" : "cursor-not-allowed opacity-75"}`}
         style={{ 
           backgroundColor: isHovered && isClickable() ? 
-            STATUS_STYLES[status].hoverBackground : 
-            STATUS_STYLES[status].background 
+            currentStyle.hoverBackground : 
+            currentStyle.background 
         }}
       >
-        {STATUS_STYLES[status].icon}
+        {currentStyle.icon}
       </div>
 
       {isMenuOpen && isClickable() && (

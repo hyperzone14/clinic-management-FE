@@ -137,6 +137,7 @@ export const pageRoutes: Routes[] = [
     id: 13,
     path: "/manual-checkin",
     location: "ManualCheckin",
+    roles: ["ROLE_DOCTOR"],
   },
   {
     id: 14,

@@ -13,6 +13,8 @@ export enum AppointmentStatus {
   SUCCESS = "SUCCESS",
   CANCELLED = "CANCELLED",
   CONFIRMED = "CONFIRMED",
+  LAB_TEST_REQUIRED = "LAB_TEST_REQUIRED",    
+  LAB_TEST_COMPLETED="LAB_TEST_COMPLETED",
 }
 
 // Map AppointmentStatus to StatusType
@@ -31,6 +33,10 @@ const mapAppointmentStatusToStatusType = (
       return "cancelled" as StatusType;
     case AppointmentStatus.CONFIRMED:
       return "confirmed" as StatusType;
+    case AppointmentStatus.LAB_TEST_REQUIRED:
+      return "lab_test_required" as StatusType;  
+    case AppointmentStatus.LAB_TEST_COMPLETED:
+      return "lab_test_completed" as StatusType;  
     default:
       return "pending" as StatusType;
   }
@@ -77,6 +83,10 @@ const getBadgeStyles = (status: string = AppointmentStatus.PENDING): string => {
       return "bg-red-100 text-red-800";
     case AppointmentStatus.CONFIRMED:
       return "bg-purple-100 text-purple-800";
+    case AppointmentStatus.LAB_TEST_REQUIRED:
+      return "bg-orange-100 text-orange-800";
+    case AppointmentStatus.LAB_TEST_COMPLETED:
+      return "bg-sky-100 text-sky-800";
     default:
       return "";
   }
@@ -93,6 +103,10 @@ const getCardStyles = (status: string = AppointmentStatus.PENDING): string => {
       return "";
     case AppointmentStatus.CANCELLED:
       return "opacity-75";
+    case AppointmentStatus.LAB_TEST_REQUIRED:
+      return "hover:shadow-lg hover:bg-gray-50 cursor-pointer";
+    case AppointmentStatus.LAB_TEST_COMPLETED:
+      return "";
     default:
       return "";
   }
@@ -167,6 +181,15 @@ const ManualCheckinCard: React.FC<ManualCheckinProps> = ({
                 ${
                   enumStatus === AppointmentStatus.CONFIRMED
                     ? "border-purple-500"
+                    : ""
+                }
+                ${
+                  enumStatus === AppointmentStatus.LAB_TEST_REQUIRED
+                    ? "border-orange-500"
+                    : ""
+                }${
+                  enumStatus === AppointmentStatus.LAB_TEST_COMPLETED
+                    ? "border-sky-500"
                     : ""
                 }
                 ${getCardStyles(appointment.appointmentStatus)}
