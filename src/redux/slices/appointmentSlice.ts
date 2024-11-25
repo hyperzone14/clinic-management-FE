@@ -108,6 +108,20 @@ export const fetchAppointmentPagination = createAsyncThunk(
   }
 );
 
+export const fetchPatientAppointments = createAsyncThunk(
+  "appointment/fetchPatientAppointments",
+  async (patientId: number) => {
+    const response = await apiService.get<ApiResponse>(`/appointment/patient/${patientId}`);
+    return {
+      appointments: Array.isArray(response.result) ? response.result : [response.result],
+      totalElements: Array.isArray(response.result) ? response.result.length : 1,
+      totalPages: 1,
+      page: 0,
+      pageSize: Array.isArray(response.result) ? response.result.length : 1
+    };
+  }
+);
+
 // Add appointment by doctor
 export const addAppointmentByDoctor = createAsyncThunk(
   "appointment/addByDoctor",
