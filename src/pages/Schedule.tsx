@@ -25,29 +25,47 @@ const Schedule: React.FC = () => {
   useEffect(() => {
     const fetchDoctorSchedule = async () => {
       try {
+        // Check authentication first
         const doctorId = AuthService.getIdFromToken();
         const isDoctor = AuthService.hasRole('ROLE_DOCTOR');
         
         if (!doctorId || !isDoctor) {
           toast.error("Access denied: Doctor credentials required");
-          // navigate('/login');
+          navigate('/login'); // Uncomment this to redirect to login
           return;
         }
 
+        // Get today's date in YYYY-MM-DD format
         const today = new Date().toISOString().split('T')[0];
+
+        // Validate pagination parameters
+        const validatedPage = Math.max(0, currentPage); // Ensure page is not negative
+        const validatedSize = Math.max(1, Math.min(100, pageSize)); // Ensure size is between 1 and 100
+
+        // Fetch appointments
         await dispatch(fetchDoctorAppointments({
           doctorId: Number(doctorId),
           appointmentDate: today,
-          page: currentPage,
-          size: pageSize
+          page: validatedPage,
+          size: validatedSize,
+          sort: 'timeSlot,desc' // Explicitly set sort order
         })).unwrap();
+
       } catch (err) {
         console.error("Error fetching doctor schedule:", err);
-        toast.error("Error loading appointments");
+        toast.error("Failed to load appointments. Please try again.");
+        
+        // If the error is due to authentication, redirect to login
+        if (err instanceof Error && err.message.includes('unauthorized')) {
+          navigate('/login');
+        }
       }
     };
 
+    // Execute the fetch function
     fetchDoctorSchedule();
+
+    // Include all dependencies that the effect uses
   }, [dispatch, currentPage, pageSize, navigate]);
 
   const handlePatientClick = async (appointment: Appointment, index: number) => {
