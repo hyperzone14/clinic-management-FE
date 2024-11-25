@@ -144,6 +144,14 @@ export const updateUserAsync = createAsyncThunk(
   }
 );
 
+export const getUserById = createAsyncThunk(
+  "userManage/getUserById",
+  async (id: number) => {
+    const response = await apiService.get<{ result: User }>(`/patient/${id}`);
+    return response.result;
+  }
+);
+
 const userManageSlice = createSlice({
   name: "userManage",
   initialState,
@@ -222,6 +230,25 @@ const userManageSlice = createSlice({
       .addCase(updateUserAsync.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Failed to update user";
+      })
+
+      // Get user by id cases
+      .addCase(getUserById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getUserById.fulfilled, (state, action: PayloadAction<User>) => {
+        state.loading = false;
+        const index = state.users.findIndex(
+          (user) => user.id === action.payload.id
+        );
+        if (index !== -1) {
+          state.users[index] = action.payload;
+        }
+      })
+      .addCase(getUserById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || "Failed to get user";
       });
   },
 });

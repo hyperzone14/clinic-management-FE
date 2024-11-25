@@ -4,35 +4,92 @@ import "react-datepicker/dist/react-datepicker.css";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import UserImage from "../components/common/UserImage";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setProfile } from "../redux/slices/profileSlice";
+import { AppDispatch, RootState } from "../redux/store";
+import { AuthService } from "../utils/security/services/AuthService";
+import { getUserById } from "../redux/slices/userManageSlice";
+import { getDoctorById } from "../redux/slices/doctorSlice";
 
 interface PatientProfile {
   name: string;
   gender: string;
   DoB: string | null;
   citizenId: string;
-  phoneNumber: string;
   address: string;
   email: string;
-  password: string;
 }
 
 const Profile = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
+  const currentId = AuthService.getIdFromToken();
+  const currentRole = AuthService.getRolesFromToken();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const userManageData = useSelector(
+    (state: RootState) => state.userManage.users
+  );
+  const doctorData = useSelector((state: RootState) => state.doctor.doctors);
   const [formData, setFormData] = useState<PatientProfile>({
     name: "",
     gender: "",
     DoB: null,
     citizenId: "",
-    phoneNumber: "",
     address: "",
     email: "",
-    password: "",
   });
   const [initData, setInitData] = useState<PatientProfile>(formData);
+
+  useEffect(() => {
+    if (String(currentRole) === "ROLE_PATIENT") {
+      dispatch(getUserById(Number(currentId)));
+    } else if (String(currentRole) === "ROLE_DOCTOR") {
+      dispatch(getDoctorById(Number(currentId)));
+    }
+  }, [currentId, dispatch]);
+
+  useEffect(() => {
+    if (String(currentRole) === "ROLE_PATIENT" && userManageData) {
+      const userData = {
+        name: userManageData[0]?.fullName || "",
+        gender: userManageData[0]?.gender || "",
+        DoB: userManageData[0]?.birthDate || null,
+        citizenId: userManageData[0]?.citizenId || "",
+        address: userManageData[0]?.address || "",
+        email: userManageData[0]?.email || "",
+      };
+      setFormData(userData);
+      setInitData(userData);
+      setSelectedDate(userData.DoB ? new Date(userData.DoB) : null);
+    } else if (String(currentRole) === "ROLE_DOCTOR" && doctorData) {
+      const userData = {
+        name: doctorData[0]?.fullName || "",
+        gender: doctorData[0]?.gender || "",
+        DoB: doctorData[0]?.birthDate || null,
+        citizenId: doctorData[0]?.citizenId || "",
+        address: doctorData[0]?.address || "",
+        email: doctorData[0]?.email || "",
+      };
+      setFormData(userData);
+      setInitData(userData);
+      setSelectedDate(userData.DoB ? new Date(userData.DoB) : null);
+    }
+  }, [userManageData, doctorData, currentRole]);
+
+  // useEffect(() => {
+  //   // Load formData from localStorage on component mount
+  //   const storedFormData = localStorage.getItem("formData");
+  //   if (storedFormData) {
+  //     setFormData(JSON.parse(storedFormData));
+  //     const parsedFormData = JSON.parse(storedFormData);
+  //     setSelectedDate(parsedFormData.DoB ? new Date(parsedFormData.DoB) : null);
+  //   }
+  // }, []);
+
+  // useEffect(() => {
+  //   // Save formData to localStorage whenever it changes
+  //   localStorage.setItem("formData", JSON.stringify(formData));
+  // }, [formData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -80,10 +137,8 @@ const Profile = () => {
         gender: formData.gender,
         DoB: formData.DoB,
         citizenId: formData.citizenId,
-        phoneNumber: formData.phoneNumber,
         address: formData.address,
         email: formData.email,
-        password: formData.password,
       })
     );
   }, [dispatch, formData]);
@@ -96,7 +151,7 @@ const Profile = () => {
           <h1 className="text-4xl font-bold font-sans my-5">Patient Profile</h1>
         </div>
 
-        <div className="flex grid grid-cols-3 gap-4 justify-items-center mb-10">
+        <div className="grid grid-cols-3 gap-4 justify-items-center mb-10">
           <UserImage />
           <div className="col-span-2 bg-[#fff] rounded-lg shadow-lg w-full">
             <div className="my-5">
@@ -134,11 +189,11 @@ const Profile = () => {
                               type="radio"
                               name="gender"
                               value="Male"
-                              checked={formData.gender === "Male"}
+                              checked={formData.gender === "MALE"}
                               onChange={handleChange}
                               className="mr-2 cursor-pointer w-[1.5rem] h-[1.5rem]"
                             />
-                            Male
+                            MALE
                           </label>
 
                           <label className="flex items-center text-2xl">
@@ -146,11 +201,11 @@ const Profile = () => {
                               type="radio"
                               name="gender"
                               value="Female"
-                              checked={formData.gender === "Female"}
+                              checked={formData.gender === "FEMALE"}
                               onChange={handleChange}
                               className="mr-2 cursor-pointer w-[1.5rem] h-[1.5rem]"
                             />
-                            Female
+                            FEMALE
                           </label>
 
                           <label className="flex items-center text-2xl">
@@ -158,11 +213,11 @@ const Profile = () => {
                               type="radio"
                               name="gender"
                               value="Other"
-                              checked={formData.gender === "Other"}
+                              checked={formData.gender === "OTHER"}
                               onChange={handleChange}
                               className="mr-2 cursor-pointer w-[1.5rem] h-[1.5rem]"
                             />
-                            Other
+                            OTHER
                           </label>
                         </div>
                       </div>
@@ -187,9 +242,7 @@ const Profile = () => {
                     </div>
                     {[
                       { label: "Citizen ID", name: "citizenId" },
-                      { label: "Phone number", name: "phoneNumber" },
                       { label: "Email", name: "email", type: "email" },
-                      { label: "Password", name: "password", type: "password" },
                     ].map((field) => (
                       <div key={field.name} className="col-span-1">
                         <div className="flex flex-col">
