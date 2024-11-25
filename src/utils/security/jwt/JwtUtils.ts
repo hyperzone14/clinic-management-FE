@@ -1,39 +1,3 @@
-// // src/utils/security/jwt/JwtUtils.ts
-
-// import { SecurityConfig } from "../config/SecurityConfig";
-
-// export class JwtUtils {
-//   static getToken(): string | null {
-//     // First check sessionStorage, then localStorage
-//     return (
-//       sessionStorage.getItem(SecurityConfig.TOKEN_KEY) ||
-//       localStorage.getItem(SecurityConfig.TOKEN_KEY)
-//     );
-//   }
-
-//   static setToken(token: string, rememberMe: boolean): void {
-//     if (rememberMe) {
-//       localStorage.setItem(SecurityConfig.TOKEN_KEY, token);
-//     } else {
-//       sessionStorage.setItem(SecurityConfig.TOKEN_KEY, token);
-//     }
-//   }
-
-//   static removeToken(): void {
-//     sessionStorage.removeItem(SecurityConfig.TOKEN_KEY);
-//     localStorage.removeItem(SecurityConfig.TOKEN_KEY);
-//   }
-
-//   static parseToken(token: string): Record<string, unknown> {
-//     return JSON.parse(atob(token.split(".")[1]));
-//   }
-
-//   static getAuthHeader(): string {
-//     const token = this.getToken();
-//     return token ? `${SecurityConfig.AUTH_PREFIX} ${token}` : "";
-//   }
-// }
-
 import { SecurityConfig } from "../config/SecurityConfig";
 
 export class JwtUtils {

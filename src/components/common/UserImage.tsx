@@ -9,7 +9,11 @@ import "react-toastify/dist/ReactToastify.css";
 //   isEditing: boolean;
 // }
 
-const UserImage: React.FC = () => {
+interface UserImageProps {
+  fullName?: string;
+}
+
+const UserImage: React.FC<UserImageProps> = ({ fullName }) => {
   // const dispatch = useDispatch();
   // const [imageURL, setImageURL] = useState<string | null>(null);
 
@@ -86,10 +90,7 @@ const UserImage: React.FC = () => {
           {/* )} */}
         </div>
         <div className="flex flex-col justify-center items-center">
-          <span className="text-2xl font-bold">Patient Name</span>
-          <span className="text-lg text-[#A9A9A9] font-bold mt-1 mb-3">
-            Role
-          </span>
+          <span className="text-2xl font-bold mb-5">{fullName}</span>
         </div>
         {/* <div className="flex flex-col justify-center items-center mt-2 mb-7">
           Button to upload image

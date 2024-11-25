@@ -76,6 +76,21 @@ const Profile = () => {
     }
   }, [userManageData, doctorData, currentRole]);
 
+  // useEffect(() => {
+  //   // Load formData from localStorage on component mount
+  //   const storedFormData = localStorage.getItem("formData");
+  //   if (storedFormData) {
+  //     setFormData(JSON.parse(storedFormData));
+  //     const parsedFormData = JSON.parse(storedFormData);
+  //     setSelectedDate(parsedFormData.DoB ? new Date(parsedFormData.DoB) : null);
+  //   }
+  // }, []);
+
+  // useEffect(() => {
+  //   // Save formData to localStorage whenever it changes
+  //   localStorage.setItem("formData", JSON.stringify(formData));
+  // }, [formData]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prevData) => {
@@ -136,7 +151,7 @@ const Profile = () => {
           <h1 className="text-4xl font-bold font-sans my-5">Patient Profile</h1>
         </div>
 
-        <div className="flex grid grid-cols-3 gap-4 justify-items-center mb-10">
+        <div className="grid grid-cols-3 gap-4 justify-items-center mb-10">
           <UserImage />
           <div className="col-span-2 bg-[#fff] rounded-lg shadow-lg w-full">
             <div className="my-5">
@@ -174,11 +189,11 @@ const Profile = () => {
                               type="radio"
                               name="gender"
                               value="Male"
-                              checked={formData.gender === "Male"}
+                              checked={formData.gender === "MALE"}
                               onChange={handleChange}
                               className="mr-2 cursor-pointer w-[1.5rem] h-[1.5rem]"
                             />
-                            Male
+                            MALE
                           </label>
 
                           <label className="flex items-center text-2xl">
@@ -186,11 +201,11 @@ const Profile = () => {
                               type="radio"
                               name="gender"
                               value="Female"
-                              checked={formData.gender === "Female"}
+                              checked={formData.gender === "FEMALE"}
                               onChange={handleChange}
                               className="mr-2 cursor-pointer w-[1.5rem] h-[1.5rem]"
                             />
-                            Female
+                            FEMALE
                           </label>
 
                           <label className="flex items-center text-2xl">
@@ -198,11 +213,11 @@ const Profile = () => {
                               type="radio"
                               name="gender"
                               value="Other"
-                              checked={formData.gender === "Other"}
+                              checked={formData.gender === "OTHER"}
                               onChange={handleChange}
                               className="mr-2 cursor-pointer w-[1.5rem] h-[1.5rem]"
                             />
-                            Other
+                            OTHER
                           </label>
                         </div>
                       </div>
@@ -227,9 +242,7 @@ const Profile = () => {
                     </div>
                     {[
                       { label: "Citizen ID", name: "citizenId" },
-                      { label: "Phone number", name: "phoneNumber" },
                       { label: "Email", name: "email", type: "email" },
-                      { label: "Password", name: "password", type: "password" },
                     ].map((field) => (
                       <div key={field.name} className="col-span-1">
                         <div className="flex flex-col">

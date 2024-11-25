@@ -13,8 +13,7 @@ export const getHeaderRoutes = (role: string): Routes[] => {
   if (!AuthService.isAuthenticated()) {
     return [
       { id: 1, path: "/", location: "Home" },
-      { id: 2, path: "/medical-history", location: "MedicHistory" },
-      { id: 3, path: "/feedback", location: "Feedback" },
+      { id: 2, path: "/booking", location: "Booking" },
     ];
   }
   if (role === "ROLE_PATIENT") {
@@ -22,8 +21,6 @@ export const getHeaderRoutes = (role: string): Routes[] => {
     return [
       { id: 1, path: "/", location: "Home" },
       { id: 2, path: "/booking", location: "Booking" },
-      { id: 3, path: "/medical-history", location: "MedicHistory" },
-      { id: 4, path: "/booking-bill", location: "BookingBill" },
     ];
   } else if (role === "ROLE_DOCTOR") {
     // /, /schedule, /examination
@@ -36,8 +33,7 @@ export const getHeaderRoutes = (role: string): Routes[] => {
   } else {
     return [
       { id: 1, path: "/", location: "Home" },
-      { id: 2, path: "/medical-history", location: "MedicHistory" },
-      { id: 3, path: "/feedback", location: "Feedback" },
+      { id: 2, path: "/booking", location: "Booking" },
     ];
   }
 };
@@ -59,26 +55,26 @@ export const pageRoutes: Routes[] = [
   //   location: "Search",
   // },
   {
-    id: 4,
+    id: 2,
     path: "/booking",
     location: "Booking",
     roles: ["ROLE_PATIENT"],
   },
   {
-    id: 5,
+    id: 3,
     path: "/schedule",
     location: "Schedule",
     roles: ["ROLE_DOCTOR"],
     children: [
       {
-        id: 51,
+        id: 31,
         path: "medical-service",
         location: "MedicalService",
       },
     ],
   },
   {
-    id: 6,
+    id: 4,
     path: "/profile",
     location: "Profile",
   },
@@ -93,32 +89,32 @@ export const pageRoutes: Routes[] = [
   //   location: "Rollcall",
   // },
   {
-    id: 9,
+    id: 5,
     path: "/medical-history",
     location: "MedicHistory",
     roles: ["ROLE_PATIENT, ROLE_DOCTOR"],
     children: [
       {
-        id: 91,
+        id: 51,
         path: "/medical-detail",
         location: "MedicDetail",
       },
     ],
   },
   {
-    id: 10,
+    id: 6,
     path: "/admin",
     location: "Admin",
     roles: ["ROLE_DOCTOR"],
   },
   {
-    id: 11,
+    id: 7,
     path: "/booking-bill",
     location: "BookingBill",
     roles: ["ROLE_PATIENT, ROLE_DOCTOR"],
     children: [
       {
-        id: 111,
+        id: 71,
         path: "/booking-detail",
         location: "BookingDetail",
       },
@@ -137,18 +133,18 @@ export const pageRoutes: Routes[] = [
   //   ],
   // },
   {
-    id: 13,
+    id: 8,
     path: "/manual-checkin",
     location: "ManualCheckin",
     roles: ["ROLE_DOCTOR"],
   },
   {
-    id: 14,
+    id: 9,
     path: "/payment-callback",
     location: "PaymentCallBack",
   },
   {
-    id: 16,
+    id: 10,
     path: "/examination",
     location: "Examination",
     roles: ["ROLE_DOCTOR"],
@@ -161,16 +157,15 @@ export const pageRoutes: Routes[] = [
     ],
   },
   {
-    id: 17,
+    id: 11,
     path: "/medical-bill-final",
     location: "MedicalBillFinal",
     roles: ["ROLE_DOCTOR"],
   },
   {
-    id: 18,
+    id: 12,
     path: "/user-information",
     location: "UserInfo",
-    roles: [" ROLE_DOCTOR"],
   },
 ];
 
