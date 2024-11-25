@@ -117,8 +117,8 @@ const Dashboard: React.FC<DashboardProps> = ({ revenuePerAppointment = 70000 }) 
   // Calculate statistics
   const appointmentStats: AppointmentStats = appointments.reduce((stats: AppointmentStats, apt: Appointment) => {
     const status = apt.status.toLowerCase();
-    if (['confirmed', 'checked-in', 'lab_test_required'].includes(status)) stats.confirmed++;
-    else if (['success', 'lab_test_completed'].includes(status)) stats.success++;
+    if (['confirmed', 'checked-in'].includes(status)) stats.confirmed++;
+    else if (['success', 'lab_test_completed', 'lab_test_required'].includes(status)) stats.success++;
     else if (status === 'cancelled') stats.cancelled++;
     return stats;
   }, { confirmed: 0, success: 0, cancelled: 0 });
@@ -143,9 +143,9 @@ const Dashboard: React.FC<DashboardProps> = ({ revenuePerAppointment = 70000 }) 
       }
 
       const status = apt.status.toLowerCase();
-      if (['confirmed'].includes(status)) {
+      if (['confirmed', 'checked-in'].includes(status)) {
         acc[date].confirmed++;
-      } else if (['success', 'lab_test_completed', 'checked-in', 'lab_test_required'].includes(status)) {
+      } else if (['success', 'lab_test_completed', 'lab_test_required'].includes(status)) {
         acc[date].success++;
       } else if (status === 'cancelled') {
         acc[date].cancelled++;
