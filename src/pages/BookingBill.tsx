@@ -3,6 +3,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../redux/store";
 import {
   fetchAppointmentPagination,
+  fetchPatientAppointments,
+  getAppointmentById,
   setSearchTerm,
 } from "../redux/slices/appointmentSlice";
 import { BsClockHistory } from "react-icons/bs";
@@ -12,6 +14,8 @@ import { PiUserCircleLight } from "react-icons/pi";
 // import { IoSearchOutline } from "react-icons/io5";
 import { Outlet, useNavigate } from "react-router-dom";
 import SearchBar from "../components/common/SearchBar";
+import { toast } from "react-toastify";
+import { AuthService } from "../utils/security/services/AuthService";
 
 const BookingBill = () => {
   const navigate = useNavigate();
@@ -25,13 +29,41 @@ const BookingBill = () => {
   } = useSelector((state: RootState) => state.appointment);
 
   useEffect(() => {
-    dispatch(
-      fetchAppointmentPagination({
-        page: 0, // Always fetch first page when searching
-        searchTerm,
-      })
-    );
-  }, [dispatch, searchTerm]); // Remove pagination.currentPage from dependencies
+    const checkAccessAndFetchAppointments = async () => {
+      try {
+        const isDoctor = AuthService.hasRole('ROLE_DOCTOR');
+        const isPatient = AuthService.hasRole('ROLE_PATIENT');
+        const currentUserId = AuthService.getIdFromToken();
+
+        if (!currentUserId) {
+          toast.error("Authentication required");
+          navigate('/login');
+          return;
+        }
+
+        if (!isDoctor && !isPatient) {
+          toast.error("Access denied: Invalid role");
+          navigate('/login');
+          return;
+        }
+
+        // For patients, filter their appointments after fetching
+        if (isPatient) {
+          await dispatch(fetchPatientAppointments(Number(currentUserId))).unwrap();
+         } else {
+        //   await dispatch(fetchAppointmentPagination({
+        //     page: 0,
+        //     searchTerm,
+        //   })).unwrap();
+        }
+      } catch (err) {
+        console.error("Error fetching appointments:", err);
+        toast.error("Error loading appointments");
+      }
+    };
+
+    checkAccessAndFetchAppointments();
+  }, [dispatch, searchTerm, navigate]); // Remove pagination.currentPage from dependencies
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 0 && newPage < pagination.totalPages) {
