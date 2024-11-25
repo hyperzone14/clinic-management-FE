@@ -31,30 +31,37 @@ const BookingBill = () => {
   useEffect(() => {
     const checkAccessAndFetchAppointments = async () => {
       try {
-        const isDoctor = AuthService.hasRole('ROLE_DOCTOR');
-        const isPatient = AuthService.hasRole('ROLE_PATIENT');
+        const isDoctor = AuthService.hasRole("ROLE_DOCTOR");
+        console.log("isDoctor", isDoctor);
+        const isPatient = AuthService.hasRole("ROLE_PATIENT");
+        console.log("isPatient", isPatient);
         const currentUserId = AuthService.getIdFromToken();
+        console.log("currentUserId", currentUserId);
 
         if (!currentUserId) {
           toast.error("Authentication required");
-          navigate('/login');
+          navigate("/login");
           return;
         }
 
         if (!isDoctor && !isPatient) {
           toast.error("Access denied: Invalid role");
-          navigate('/login');
+          navigate("/login");
           return;
         }
 
         // For patients, filter their appointments after fetching
         if (isPatient) {
-          await dispatch(fetchPatientAppointments(Number(currentUserId))).unwrap();
-         } else {
-        //   await dispatch(fetchAppointmentPagination({
-        //     page: 0,
-        //     searchTerm,
-        //   })).unwrap();
+          await dispatch(
+            fetchPatientAppointments(Number(currentUserId))
+          ).unwrap();
+        } else {
+          await dispatch(
+            fetchAppointmentPagination({
+              page: 0,
+              searchTerm,
+            })
+          ).unwrap();
         }
       } catch (err) {
         console.error("Error fetching appointments:", err);
