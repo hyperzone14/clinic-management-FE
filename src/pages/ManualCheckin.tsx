@@ -13,6 +13,7 @@ import { TbCheckupList } from "react-icons/tb";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AxiosError } from "axios";
+import { AuthService } from "../utils/security/services/AuthService";
 
 // Define the enum to match backend
 enum AppointmentStatus {
@@ -21,6 +22,8 @@ enum AppointmentStatus {
   SUCCESS = "SUCCESS",
   CANCELLED = "CANCELLED",
   CONFIRMED = "CONFIRMED",
+  LAB_TEST_REQUIRED = "LAB_TEST_REQUIRED",    
+  LAB_TEST_COMPLETED="LAB_TEST_COMPLETED",
 }
 
 interface ApiErrorResponse {
@@ -128,6 +131,11 @@ const ManualCheckin = () => {
   const [currentFilters, setCurrentFilters] = useState<SearchFilters>({});
 
   useEffect(() => {
+    const isDoctor = AuthService.hasRole('ROLE_DOCTOR');
+    if ( !isDoctor) {
+      toast.error("Access denied: Doctor credentials required");
+      return;
+    }
     handleSearch({});
   }, []);
 
