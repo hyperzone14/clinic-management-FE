@@ -22,6 +22,8 @@ import signinProfileReducer from "./slices/signinProfileSlice";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { thunk } from "redux-thunk";
 
+import dashboardReducer from './slices/dashboardSlice';
+
 const rootReducer = combineReducers({
   bookingInfo: bookingReducer,
   infoList: infoListReducer,
@@ -42,6 +44,8 @@ const rootReducer = combineReducers({
   chat: chatReducer,
   auth: auth,
   signinProfile: signinProfileReducer,
+  dashboard: dashboardReducer,
+  
 });
 
 const store = configureStore({

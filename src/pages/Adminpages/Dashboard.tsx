@@ -1,14 +1,9 @@
+// components/Dashboard/index.tsx
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { DollarSign, Calendar, CheckCircle, TrendingUp, AlertCircle, RefreshCw } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { fetchAppointments } from '../../redux/slices/scheduleSlice';
-import { RootState } from '../../redux/store';
-import { Appointment, AppointmentStats } from '../../types/appointment';
-
-interface DashboardProps {
-  revenuePerAppointment?: number;
-}
+import { fetchDashboardData, updateStats, Appointment } from '../../redux/slices/dashboardSlice';
+import { useAppDispatch, useAppSelector } from '../../redux/store';
 
 interface ChartDataPoint {
   date: string;
@@ -18,6 +13,7 @@ interface ChartDataPoint {
   status: string;
 }
 
+// Skeleton Loading Component
 const DashboardSkeleton = () => (
   <div className="p-6 bg-gray-50 animate-pulse">
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -51,6 +47,7 @@ const DashboardSkeleton = () => (
   </div>
 );
 
+// Stat Card Component
 const StatCard: React.FC<{
   title: string;
   value: string | number;
@@ -73,20 +70,20 @@ const StatCard: React.FC<{
   </div>
 );
 
-const Dashboard: React.FC<DashboardProps> = ({ revenuePerAppointment = 70000 }) => {
-  const dispatch = useDispatch();
-  const { appointments, loading, error } = useSelector((state: RootState) => state.schedule);
+const Dashboard: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const { appointments, loading, error, stats } = useAppSelector((state) => state.dashboard);
 
   useEffect(() => {
-    handleFetchAppointments();
+    handleFetchDashboardData();
   }, [dispatch]);
 
-  const handleFetchAppointments = () => {
-    dispatch(fetchAppointments());
+  const handleFetchDashboardData = () => {
+    dispatch(fetchDashboardData());
   };
 
   const handleRefresh = () => {
-    handleFetchAppointments();
+    handleFetchDashboardData();
   };
 
   if (loading) {
@@ -113,18 +110,6 @@ const Dashboard: React.FC<DashboardProps> = ({ revenuePerAppointment = 70000 }) 
       </div>
     );
   }
-
-  // Calculate statistics
-  const appointmentStats: AppointmentStats = appointments.reduce((stats: AppointmentStats, apt: Appointment) => {
-    const status = apt.status.toLowerCase();
-    if (['confirmed', 'checked-in'].includes(status)) stats.confirmed++;
-    else if (['success', 'lab_test_completed', 'lab_test_required'].includes(status)) stats.success++;
-    else if (status === 'cancelled') stats.cancelled++;
-    return stats;
-  }, { confirmed: 0, success: 0, cancelled: 0 });
-
-  const totalAppointments = appointments.length;
-  const totalRevenue = (appointmentStats.confirmed + appointmentStats.success) * revenuePerAppointment;
 
   // Group appointments by date for chart
   const chartData: ChartDataPoint[] = Object.values(
@@ -178,28 +163,28 @@ const Dashboard: React.FC<DashboardProps> = ({ revenuePerAppointment = 70000 }) 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard
           title="Total Revenue"
-          value={formatCurrency(totalRevenue)}
+          value={formatCurrency(stats.totalRevenue)}
           icon={DollarSign}
           bgColor="bg-blue-100"
           textColor="text-blue-600"
         />
         <StatCard
           title="Total Appointments"
-          value={totalAppointments}
+          value={stats.totalAppointments}
           icon={Calendar}
           bgColor="bg-green-100"
           textColor="text-green-600"
         />
         <StatCard
           title="Success Rate"
-          value={`${totalAppointments ? Math.round((appointmentStats.success / totalAppointments) * 100) : 0}%`}
+          value={`${stats.totalAppointments ? Math.round((stats.successfulAppointments / stats.totalAppointments) * 100) : 0}%`}
           icon={CheckCircle}
           bgColor="bg-yellow-100"
           textColor="text-yellow-600"
         />
         <StatCard
           title="Average Revenue/Day"
-          value={formatCurrency(totalRevenue / (chartData.length || 1))}
+          value={formatCurrency(stats.averageRevenuePerDay)}
           icon={TrendingUp}
           bgColor="bg-purple-100"
           textColor="text-purple-600"
@@ -268,22 +253,22 @@ const Dashboard: React.FC<DashboardProps> = ({ revenuePerAppointment = 70000 }) 
           <h3 className="text-lg font-semibold mb-6">Appointment Status</h3>
           <div className="space-y-6">
             {[
-              { label: 'Confirmed', count: appointmentStats.confirmed, color: 'bg-green-500' },
-              { label: 'Success', count: appointmentStats.success, color: 'bg-blue-500' },
-              { label: 'Cancelled', count: appointmentStats.cancelled, color: 'bg-red-500' }
+              { label: 'Confirmed', count: stats.confirmedAppointments, color: 'bg-green-500' },
+              { label: 'Success', count: stats.successfulAppointments, color: 'bg-blue-500' },
+              { label: 'Cancelled', count: stats.cancelledAppointments, color: 'bg-red-500' }
             ].map(({ label, count, color }) => (
               <div key={label} className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600 font-medium">{label}</span>
                   <span className="text-sm font-semibold">
-                    {count} ({totalAppointments ? Math.round((count / totalAppointments) * 100) : 0}%)
+                    {count} ({stats.totalAppointments ? Math.round((count / stats.totalAppointments) * 100) : 0}%)
                   </span>
                 </div>
                 <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
                   <div 
                     className={`${color} h-2 rounded-full transition-all duration-500`}
                     style={{ 
-                      width: `${totalAppointments ? (count / totalAppointments) * 100 : 0}%`,
+                      width: `${stats.totalAppointments ? (count / stats.totalAppointments) * 100 : 0}%`,
                     }}
                   />
                 </div>
