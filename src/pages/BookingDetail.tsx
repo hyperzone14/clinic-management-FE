@@ -9,10 +9,12 @@ import Title from "../components/common/Title";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Reschedule from "../components/common/Reschedule";
+import { AuthService } from "../utils/security/services/AuthService";
 
 const BookingDetail = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+  const currentRole = AuthService.getRolesFromToken();
   const [openReschedule, setOpenReschedule] = useState(false);
   const [appointmentId, setAppointmentId] = React.useState<number | undefined>(
     undefined
@@ -247,14 +249,19 @@ const BookingDetail = () => {
               </div>
             </div>
             <div className="flex justify-center items-center my-20 gap-x-5">
-              <button
-                className="bg-[#FF4747] hover:bg-[#FF1F1F] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out"
-                onClick={() => {
-                  handleOpenReschedule();
-                }}
-              >
-                Reschedule
-              </button>
+              {
+                // Only show Reschedule button for patient
+                String(currentRole) === "ROLE_PATIENT" && (
+                  <button
+                    className="bg-[#FF4747] hover:bg-[#FF1F1F] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out"
+                    onClick={() => {
+                      handleOpenReschedule();
+                    }}
+                  >
+                    Reschedule
+                  </button>
+                )
+              }
               <button
                 className="bg-[#4567b7] hover:bg-[#3E5CA3] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out"
                 onClick={() => {

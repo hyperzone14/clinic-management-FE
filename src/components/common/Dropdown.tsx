@@ -124,10 +124,16 @@ const Dropdown: React.FC<DropdownProps> = ({
             <span className="ms-5">Patient Profile</span>
           </div>
         </li>
-        <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors">
+        <li
+          className="px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors"
+          onClick={() => {
+            navigate("/booking-bill");
+            onClose();
+          }}
+        >
           <div className="flex items-center my-1">
             <IoNewspaperOutline size={25} className="text-black font-bold" />
-            <span className="ms-5">Appointments</span>
+            <span className="ms-5">Booking Bill</span>
           </div>
         </li>
         {roles?.includes("ROLE_DOCTOR") ? (

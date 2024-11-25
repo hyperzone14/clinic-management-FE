@@ -103,8 +103,7 @@ const UserManagement: React.FC = () => {
 
               return (
                 item.fullName.toLowerCase().includes(searchValue) ||
-                item.email.toLowerCase().includes(searchValue) ||
-                item.citizenId.includes(searchValue)
+                item.email.toLowerCase().includes(searchValue)
               );
             })
             .map(transformUser)
