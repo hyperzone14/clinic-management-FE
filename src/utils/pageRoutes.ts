@@ -46,16 +46,16 @@ export const pageRoutes: Routes[] = [
     path: "/",
     location: "Home",
   },
-  {
-    id: 2,
-    path: "/feedback",
-    location: "Feedback",
-  },
-  {
-    id: 3,
-    path: "/search",
-    location: "Search",
-  },
+  // {
+  //   id: 2,
+  //   path: "/feedback",
+  //   location: "Feedback",
+  // },
+  // {
+  //   id: 3,
+  //   path: "/search",
+  //   location: "Search",
+  // },
   {
     id: 4,
     path: "/booking",
@@ -80,16 +80,16 @@ export const pageRoutes: Routes[] = [
     path: "/profile",
     location: "Profile",
   },
-  {
-    id: 7,
-    path: "/prescription",
-    location: "Prescription",
-  },
-  {
-    id: 8,
-    path: "/roll-call",
-    location: "Rollcall",
-  },
+  // {
+  //   id: 7,
+  //   path: "/prescription",
+  //   location: "Prescription",
+  // },
+  // {
+  //   id: 8,
+  //   path: "/roll-call",
+  //   location: "Rollcall",
+  // },
   {
     id: 9,
     path: "/medical-history",
@@ -107,12 +107,13 @@ export const pageRoutes: Routes[] = [
     id: 10,
     path: "/admin",
     location: "Admin",
-    roles: ["ROLE_PATIENT"],
+    roles: ["ROLE_DOCTOR"],
   },
   {
     id: 11,
     path: "/booking-bill",
     location: "BookingBill",
+    roles: ["ROLE_PATIENT, ROLE_DOCTOR"],
     children: [
       {
         id: 111,
@@ -121,18 +122,18 @@ export const pageRoutes: Routes[] = [
       },
     ],
   },
-  {
-    id: 12,
-    path: "/treatment-history",
-    location: "TreatmentHistory",
-    children: [
-      {
-        id: 121,
-        path: "/medical-detail",
-        location: "MedicDetail",
-      },
-    ],
-  },
+  // {
+  //   id: 12,
+  //   path: "/treatment-history",
+  //   location: "TreatmentHistory",
+  //   children: [
+  //     {
+  //       id: 121,
+  //       path: "/medical-detail",
+  //       location: "MedicDetail",
+  //     },
+  //   ],
+  // },
   {
     id: 13,
     path: "/manual-checkin",
@@ -167,6 +168,7 @@ export const pageRoutes: Routes[] = [
     id: 18,
     path: "/user-information",
     location: "UserInfo",
+    roles: [" ROLE_DOCTOR"],
   },
 ];
 
