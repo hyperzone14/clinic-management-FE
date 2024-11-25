@@ -109,18 +109,6 @@ export const fetchUsers = createAsyncThunk(
   }
 );
 
-// Async thunk to add a new user
-// export const addUserAsync = createAsyncThunk(
-//   "userManage/addUser",
-//   async (userData: Omit<User, "id">) => {
-//     const response = await apiService.post<{ result: User }>(
-//       "/patient",
-//       userData
-//     );
-//     return response.result;
-//   }
-// );
-
 export const addUserAsync = createAsyncThunk(
   "userManage/addUser",
   async (userData: NewUser) => {

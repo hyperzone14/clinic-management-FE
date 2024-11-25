@@ -226,4 +226,9 @@ export const adminRoutes: Routes[] = [
     path: "drug-management",
     location: "DrugManagement",
   },
+  {
+    id: 4,
+    path: "doctor-management",
+    location: "DoctorManagement",
+  },
 ];

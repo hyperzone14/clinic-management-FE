@@ -18,11 +18,12 @@ import checkAvailabilityReducer from "./slices/checkAvailabilitySlice";
 import chatReducer from "./slices/chatbotSlice";
 import auth from "./slices/authSlice";
 import signinProfileReducer from "./slices/signinProfileSlice";
+import doctorManageReducer from "./slices/doctorManageSlice";
 
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { thunk } from "redux-thunk";
 
-import dashboardReducer from './slices/dashboardSlice';
+import dashboardReducer from "./slices/dashboardSlice";
 
 const rootReducer = combineReducers({
   bookingInfo: bookingReducer,
@@ -45,7 +46,7 @@ const rootReducer = combineReducers({
   auth: auth,
   signinProfile: signinProfileReducer,
   dashboard: dashboardReducer,
-  
+  doctorManage: doctorManageReducer,
 });
 
 const store = configureStore({
