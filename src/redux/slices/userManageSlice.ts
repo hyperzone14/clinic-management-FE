@@ -144,6 +144,14 @@ export const updateUserAsync = createAsyncThunk(
   }
 );
 
+export const getUserById = createAsyncThunk(
+  "userManage/getUserById",
+  async (id: number) => {
+    const response = await apiService.get<{ result: User }>(`/patient/${id}`);
+    return response.result;
+  }
+);
+
 const userManageSlice = createSlice({
   name: "userManage",
   initialState,

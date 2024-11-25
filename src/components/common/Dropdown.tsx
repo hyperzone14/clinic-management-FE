@@ -113,6 +113,8 @@ const Dropdown: React.FC<DropdownProps> = ({
           </div>
         </li>
         <hr />
+        {/* doctor: profile, booking-bills, manual-checkin*/}
+        {/* patient: profile, booking-bills, medical-history*/}
         <li
           className="px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors"
           onClick={() => {
