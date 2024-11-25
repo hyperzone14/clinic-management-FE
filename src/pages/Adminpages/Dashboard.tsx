@@ -143,9 +143,9 @@ const Dashboard: React.FC<DashboardProps> = ({ revenuePerAppointment = 70000 }) 
       }
 
       const status = apt.status.toLowerCase();
-      if (['confirmed', 'checked-in', 'lab_test_required'].includes(status)) {
+      if (['confirmed'].includes(status)) {
         acc[date].confirmed++;
-      } else if (['success', 'lab_test_completed'].includes(status)) {
+      } else if (['success', 'lab_test_completed', 'checked-in', 'lab_test_required'].includes(status)) {
         acc[date].success++;
       } else if (status === 'cancelled') {
         acc[date].cancelled++;
