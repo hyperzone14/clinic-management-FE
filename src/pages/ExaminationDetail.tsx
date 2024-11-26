@@ -230,7 +230,7 @@ const ExaminationDetail = () => {
                     id={`exam-${exam.id}-title`}
                     className="font-bold text-2xl mb-4"
                   >
-                    {exam.examinationType}
+                    Lab Test: {exam.examinationType}
                   </h2>
 
                   <div className="mt-6">
