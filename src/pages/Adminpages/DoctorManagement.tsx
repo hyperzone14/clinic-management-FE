@@ -111,9 +111,13 @@ const DoctorManagement = () => {
             .filter((item): item is Doctor => {
               if (!item) return false;
 
+              // Add null/undefined checks
+              const fullName = item.fullName || "";
+              const email = item.email || "";
+
               return (
-                item.fullName.toLowerCase().includes(searchValue) ||
-                item.email.toLowerCase().includes(searchValue)
+                fullName.toLowerCase().trim().includes(searchValue) ||
+                email.toLowerCase().includes(searchValue)
               );
             })
             .map(transformDoctor)
