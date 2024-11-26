@@ -25,17 +25,3 @@
 .disabled-day {
   @apply text-gray-400 pointer-events-none;
 }
-
-@keyframes slide-left {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-100%);
-  }
-}
-
-.slider {
-  display: flex;
-  animation: slide-left 30s linear infinite; /* Adjust the speed by modifying '30s' */
-}
