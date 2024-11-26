@@ -12,7 +12,7 @@ import { getUserById } from "../redux/slices/userManageSlice";
 import { getDoctorById } from "../redux/slices/doctorSlice";
 
 interface PatientProfile {
-  name: string;
+  fullName: string;
   gender: string;
   DoB: string | null;
   citizenId: string;
@@ -31,7 +31,7 @@ const Profile = () => {
   );
   const doctorData = useSelector((state: RootState) => state.doctor.doctors);
   const [formData, setFormData] = useState<PatientProfile>({
-    name: "",
+    fullName: "",
     gender: "",
     DoB: null,
     citizenId: "",
@@ -51,7 +51,7 @@ const Profile = () => {
   useEffect(() => {
     if (String(currentRole) === "ROLE_PATIENT" && userManageData) {
       const userData = {
-        name: userManageData[0]?.fullName || "",
+        fullName: userManageData[0]?.fullName || "",
         gender: userManageData[0]?.gender || "",
         DoB: userManageData[0]?.birthDate || null,
         citizenId: userManageData[0]?.citizenId || "",
@@ -63,7 +63,7 @@ const Profile = () => {
       setSelectedDate(userData.DoB ? new Date(userData.DoB) : null);
     } else if (String(currentRole) === "ROLE_DOCTOR" && doctorData) {
       const userData = {
-        name: doctorData[0]?.fullName || "",
+        fullName: doctorData[0]?.fullName || "",
         gender: doctorData[0]?.gender || "",
         DoB: doctorData[0]?.birthDate || null,
         citizenId: doctorData[0]?.citizenId || "",
@@ -75,21 +75,6 @@ const Profile = () => {
       setSelectedDate(userData.DoB ? new Date(userData.DoB) : null);
     }
   }, [userManageData, doctorData, currentRole]);
-
-  // useEffect(() => {
-  //   // Load formData from localStorage on component mount
-  //   const storedFormData = localStorage.getItem("formData");
-  //   if (storedFormData) {
-  //     setFormData(JSON.parse(storedFormData));
-  //     const parsedFormData = JSON.parse(storedFormData);
-  //     setSelectedDate(parsedFormData.DoB ? new Date(parsedFormData.DoB) : null);
-  //   }
-  // }, []);
-
-  // useEffect(() => {
-  //   // Save formData to localStorage whenever it changes
-  //   localStorage.setItem("formData", JSON.stringify(formData));
-  // }, [formData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -133,7 +118,7 @@ const Profile = () => {
   useEffect(() => {
     dispatch(
       setProfile({
-        name: formData.name,
+        fullName: formData.fullName,
         gender: formData.gender,
         DoB: formData.DoB,
         citizenId: formData.citizenId,
@@ -152,7 +137,7 @@ const Profile = () => {
         </div>
 
         <div className="grid grid-cols-3 gap-4 justify-items-center mb-10">
-          <UserImage />
+          <UserImage fullName={formData.fullName} />
           <div className="col-span-2 bg-[#fff] rounded-lg shadow-lg w-full">
             <div className="my-5">
               <h1 className="text-3xl font-bold text-center">Profile</h1>
@@ -168,8 +153,8 @@ const Profile = () => {
                         <input
                           type="text"
                           id="name"
-                          name="name"
-                          value={formData.name}
+                          name="fullName"
+                          value={formData.fullName}
                           onChange={handleChange}
                           className="w-full h-[2.5rem] bg-[#d9d9d9] rounded-md p-2"
                           placeholder="Enter your name..."
@@ -188,7 +173,7 @@ const Profile = () => {
                             <input
                               type="radio"
                               name="gender"
-                              value="Male"
+                              value="MALE"
                               checked={formData.gender === "MALE"}
                               onChange={handleChange}
                               className="mr-2 cursor-pointer w-[1.5rem] h-[1.5rem]"
@@ -200,7 +185,7 @@ const Profile = () => {
                             <input
                               type="radio"
                               name="gender"
-                              value="Female"
+                              value="FEMALE"
                               checked={formData.gender === "FEMALE"}
                               onChange={handleChange}
                               className="mr-2 cursor-pointer w-[1.5rem] h-[1.5rem]"
@@ -212,7 +197,7 @@ const Profile = () => {
                             <input
                               type="radio"
                               name="gender"
-                              value="Other"
+                              value="OTHER"
                               checked={formData.gender === "OTHER"}
                               onChange={handleChange}
                               className="mr-2 cursor-pointer w-[1.5rem] h-[1.5rem]"
