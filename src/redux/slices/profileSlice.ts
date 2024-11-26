@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface ProfileState {
-  name?: string;
+  fullName?: string;
   gender?: string;
   DoB?: string | null;
   citizenId?: string;
@@ -14,7 +14,7 @@ interface ProfileState {
 }
 
 const initialState: ProfileState = {
-  name: "",
+  fullName: "",
   gender: "",
   DoB: null,
   citizenId: "",

@@ -225,14 +225,9 @@ const userManageSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(getUserById.fulfilled, (state, action: PayloadAction<User>) => {
-        state.loading = false;
-        const index = state.users.findIndex(
-          (user) => user.id === action.payload.id
-        );
-        if (index !== -1) {
-          state.users[index] = action.payload;
-        }
+      .addCase(getUserById.fulfilled, (state, action) => {
+        const user = action.payload;
+        state.users.push(user);
       })
       .addCase(getUserById.rejected, (state, action) => {
         state.loading = false;
