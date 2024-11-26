@@ -110,7 +110,6 @@ const DoctorManagement = () => {
         ? doctorManage
             .filter((item): item is Doctor => {
               if (!item) return false;
-
               // Add null/undefined checks
               const fullName = item.fullName || "";
               const email = item.email || "";
