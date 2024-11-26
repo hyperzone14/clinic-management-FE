@@ -110,14 +110,28 @@ export const fetchAppointmentPagination = createAsyncThunk(
 
 export const fetchPatientAppointments = createAsyncThunk(
   "appointment/fetchPatientAppointments",
-  async (patientId: number) => {
-    const response = await apiService.get<ApiResponse>(`/appointment/patient/${patientId}`);
+  async ({ page, searchTerm, patientId }: { page: number; searchTerm?: string; patientId: number  }) => {
+    let url = `/appointment/patient/${patientId}?page=${page}`;
+
+    // When searching, set a large page size to effectively get all results
+    if (searchTerm) {
+      url += `&size=1000000000`; // Large number to get all results
+    } else {
+      url += `&size=10`; // Default page size for normal viewing
+    }
+
+    if (searchTerm) {
+      url += `&search=${encodeURIComponent(searchTerm)}`;
+    }
+
+    const response = await apiService.get<ApiResponsePagination>(url);
+
     return {
-      appointments: Array.isArray(response.result) ? response.result : [response.result],
-      totalElements: Array.isArray(response.result) ? response.result.length : 1,
-      totalPages: 1,
-      page: 0,
-      pageSize: Array.isArray(response.result) ? response.result.length : 1
+      appointments: response.result.content,
+      page,
+      totalPages: response.result.totalPages,
+      totalElements: response.result.totalElements,
+      pageSize: response.result.size,
     };
   }
 );
@@ -484,7 +498,29 @@ const appointmentSlice = createSlice({
         state.loading = false;
         state.error =
           action.error.message || "Failed to reschedule appointment";
+      })
+      .addCase(fetchPatientAppointments.pending, (state) => {
+        console.log('Patient appointments fetch pending');
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchPatientAppointments.fulfilled, (state, action) => {
+        console.log('Patient appointments fetch fulfilled:', action.payload);
+        state.loading = false;
+        state.appointments = action.payload.appointments;
+        state.pagination = {
+          currentPage: action.payload.page,
+          totalPages: action.payload.totalPages,
+          totalElements: action.payload.totalElements,
+          pageSize: action.payload.pageSize,
+        };
+      })
+      .addCase(fetchPatientAppointments.rejected, (state, action) => {
+        console.log('Patient appointments fetch rejected:', action.error);
+        state.loading = false;
+        state.error = action.error.message || "Failed to fetch patient appointments";
       });
+      
   },
 });
 
