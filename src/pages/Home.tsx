@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Specialties } from "../utils/Specialties";
 import { GiKidneys, GiStomach, GiWaterDrop, GiNoseSide } from "react-icons/gi";
 import {
@@ -12,7 +12,7 @@ import { TbBodyScan } from "react-icons/tb";
 import { MdPregnantWoman } from "react-icons/md";
 import { PiBoneFill } from "react-icons/pi";
 import { IconType } from "react-icons";
-import "../styles/global.css";
+import "../styles/mainPage.css";
 import { useNavigate } from "react-router-dom";
 import { AuthService } from "../utils/security/services/AuthService";
 
