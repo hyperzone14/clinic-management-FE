@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../redux/store";
 import {
@@ -27,16 +27,15 @@ const BookingBill = () => {
     error,
     searchTerm,
   } = useSelector((state: RootState) => state.appointment);
+  const [isPatient, setIsPatient] = useState(false);
 
   useEffect(() => {
     const checkAccessAndFetchAppointments = async () => {
       try {
         const isDoctor = AuthService.hasRole("ROLE_DOCTOR");
-        console.log("isDoctor", isDoctor);
-        const isPatient = AuthService.hasRole("ROLE_PATIENT");
-        console.log("isPatient", isPatient);
+        const isPatientUser = AuthService.hasRole("ROLE_PATIENT");
+        setIsPatient(isPatientUser);
         const currentUserId = AuthService.getIdFromToken();
-        console.log("currentUserId", currentUserId);
 
         if (!currentUserId) {
           toast.error("Authentication required");
@@ -44,17 +43,21 @@ const BookingBill = () => {
           return;
         }
 
-        if (!isDoctor && !isPatient) {
+        if (!isDoctor && !isPatientUser) {
           toast.error("Access denied: Invalid role");
           navigate("/login");
           return;
         }
 
-        // For patients, filter their appointments after fetching
-        if (isPatient) {
-          await dispatch(
-            fetchPatientAppointments(Number(currentUserId))
+        if (isPatientUser) {
+          const result = await dispatch(
+            fetchPatientAppointments({
+              patientId: Number(currentUserId),
+              page: 0,
+              searchTerm: searchTerm,
+            })
           ).unwrap();
+          console.log("Patient appointments fetched:", result);
         } else {
           await dispatch(
             fetchAppointmentPagination({
@@ -70,16 +73,27 @@ const BookingBill = () => {
     };
 
     checkAccessAndFetchAppointments();
-  }, [dispatch, searchTerm, navigate]); // Remove pagination.currentPage from dependencies
+  }, [dispatch, searchTerm, navigate]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 0 && newPage < pagination.totalPages) {
-      dispatch(
-        fetchAppointmentPagination({
-          page: newPage,
-          searchTerm: searchTerm, // Pass the current searchTerm to maintain the search while changing pages
-        })
-      );
+      if (isPatient) {
+        const currentUserId = AuthService.getIdFromToken();
+        dispatch(
+          fetchPatientAppointments({
+            patientId: Number(currentUserId),
+            page: newPage,
+            searchTerm: searchTerm,
+          })
+        );
+      } else {
+        dispatch(
+          fetchAppointmentPagination({
+            page: newPage,
+            searchTerm: searchTerm,
+          })
+        );
+      }
     }
   };
 
@@ -89,15 +103,20 @@ const BookingBill = () => {
 
   const showPagination = !searchTerm;
 
+  // Modified filtering logic to handle both patient and doctor views
   const filteredAppointments = Array.isArray(appointments)
     ? appointments.filter((appointment) => {
+        if (!searchTerm) return true;
+        
+        const searchLower = searchTerm.toLowerCase();
         const hasPatientId = appointment?.id?.toString().includes(searchTerm);
         const hasPatientName = appointment?.patientResponseDTO?.fullName
           ?.toLowerCase()
-          .includes(searchTerm.toLowerCase());
+          .includes(searchLower);
         const hasDoctorName = appointment?.doctorName
           ?.toLowerCase()
-          .includes(searchTerm.toLowerCase());
+          .includes(searchLower);
+        
         return hasPatientId || hasPatientName || hasDoctorName;
       })
     : [];
