@@ -35,7 +35,7 @@ const DeleteDoctorModal: React.FC<DeleteModalProps> = ({
     <Dialog open={openDelete} onClose={handleClose} maxWidth="sm">
       <div className="p-6">
         <DialogTitle className="text-lg font-semibold mb-4">
-          Confirm Delete User
+          Confirm Delete Doctor
         </DialogTitle>
         <DialogContent>
           <DialogContentText className="text-gray-600">

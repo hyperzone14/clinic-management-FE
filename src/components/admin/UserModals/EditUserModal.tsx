@@ -95,7 +95,7 @@ const EditUserModal: React.FC<EditModalProps> = ({
       fullWidth
     >
       <form onSubmit={handleSubmit}>
-        <DialogTitle>Edit User</DialogTitle>
+        <DialogTitle>Edit Patient</DialogTitle>
         <DialogContent>
           <div className="grid grid-cols-2 gap-4 mt-4">
             <TextField

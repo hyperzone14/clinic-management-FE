@@ -1,26 +1,30 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, X, Send, Loader2 } from 'lucide-react';
-import { 
-  createAndJoinRoom, 
-  sendMessage, 
-  selectChat, 
-  clearChat
-} from '../../redux/slices/chatbotSlice';
-import { useAppDispatch, useAppSelector } from '../../redux/store';
+import React, { useState, useEffect, useRef } from "react";
+import { MessageCircle, X, Send, Loader2 } from "lucide-react";
+import {
+  createAndJoinRoom,
+  sendMessage,
+  selectChat,
+  clearChat,
+} from "../../redux/slices/chatbotSlice";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
 
 const Chatbot = () => {
   const dispatch = useAppDispatch();
   const chatState = useAppSelector(selectChat);
-  const { messages = [], isConnected = false, loading = false } = chatState || {};
+  const {
+    messages = [],
+    isConnected = false,
+    loading = false,
+  } = chatState || {};
   const [isOpen, setIsOpen] = useState(false);
-  const [inputMessage, setInputMessage] = useState('');
+  const [inputMessage, setInputMessage] = useState("");
   const messageAreaRef = useRef<HTMLDivElement>(null);
-  const currentUserId = localStorage.getItem('userId') || '1';
+  const currentUserId = localStorage.getItem("userId") || "1";
 
   // Helper function to clean message content
   const cleanMessageContent = (content: string | undefined) => {
-    if (!content) return '';
-    return content.replace('@bot', '').trim();
+    if (!content) return "";
+    return content.replace("@bot", "").trim();
   };
 
   useEffect(() => {
@@ -44,16 +48,18 @@ const Chatbot = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (inputMessage.trim() && isConnected) {
-      dispatch(sendMessage({
-        content: inputMessage.trim(),
-        sender: `User_${currentUserId}`
-      }));
-      setInputMessage('');
+      dispatch(
+        sendMessage({
+          content: inputMessage.trim(),
+          sender: `User_${currentUserId}`,
+        })
+      );
+      setInputMessage("");
     }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit(e as any);
     }
@@ -62,20 +68,20 @@ const Chatbot = () => {
   return (
     <div className="fixed bottom-24 right-4 z-50">
       <button
-      onClick={() => setIsOpen(!isOpen)}
-      className={` right-5 bg-[#4567b7] text-white p-3 rounded-full shadow-lg hover:bg-[#3E5CA3] transition-colors duration-300 ${
-        isOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100'
-      }`}
-      aria-label={isOpen ? 'Close chat' : 'Open chat'}
-    >
-      <MessageCircle className="h-7 w-7" />
-    </button>
+        onClick={() => setIsOpen(!isOpen)}
+        className={` right-5 bg-[#4567b7] text-white p-3 rounded-full shadow-lg hover:bg-[#3E5CA3] transition-colors duration-300 ${
+          isOpen ? "scale-0 opacity-0" : "scale-100 opacity-100"
+        }`}
+        aria-label={isOpen ? "Close chat" : "Open chat"}
+      >
+        <MessageCircle className="h-5 w-5" />
+      </button>
 
       <div
         className={`absolute bottom-0 right-0 w-96 bg-white rounded-lg shadow-xl transition-all duration-300 transform ${
-          isOpen 
-            ? 'scale-100 opacity-100 translate-y-0' 
-            : 'scale-0 opacity-0 translate-y-12'
+          isOpen
+            ? "scale-100 opacity-100 translate-y-0"
+            : "scale-0 opacity-0 translate-y-12"
         }`}
       >
         <div className="flex items-center justify-between p-4 bg-blue-500 text-white rounded-t-lg">
@@ -97,8 +103,8 @@ const Chatbot = () => {
           </button>
         </div>
 
-        <div 
-          ref={messageAreaRef} 
+        <div
+          ref={messageAreaRef}
           className="h-96 p-4 overflow-y-auto space-y-3 bg-white"
         >
           {loading ? (
@@ -108,25 +114,29 @@ const Chatbot = () => {
           ) : Array.isArray(messages) && messages.length > 0 ? (
             messages.map((msg, index) => {
               if (!msg) return null;
-              
-              if (msg.type === 'JOIN' || msg.type === 'LEAVE') return null;
+
+              if (msg.type === "JOIN" || msg.type === "LEAVE") return null;
 
               const isCurrentUser = msg.sender === `User_${currentUserId}`;
               const cleanedContent = cleanMessageContent(msg.content);
 
               return (
-                <div 
+                <div
                   key={`${msg.sender}-${index}`}
-                  className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
+                  className={`flex ${
+                    isCurrentUser ? "justify-end" : "justify-start"
+                  }`}
                 >
-                  <div 
+                  <div
                     className={`rounded-2xl px-4 py-2 max-w-[85%] ${
-                      isCurrentUser 
-                        ? 'bg-blue-500 text-white' 
-                        : 'bg-gray-50 text-gray-800'
+                      isCurrentUser
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-50 text-gray-800"
                     }`}
                   >
-                    <p className="text-[15px] leading-normal">{cleanedContent}</p>
+                    <p className="text-[15px] leading-normal">
+                      {cleanedContent}
+                    </p>
                   </div>
                 </div>
               );
@@ -145,7 +155,9 @@ const Chatbot = () => {
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder={isConnected ? "Type your message..." : "Connecting..."}
+              placeholder={
+                isConnected ? "Type your message..." : "Connecting..."
+              }
               className="flex-1 p-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500/50 bg-gray-50"
               disabled={!isConnected}
             />

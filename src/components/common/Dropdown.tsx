@@ -34,6 +34,14 @@ const Dropdown: React.FC<DropdownProps> = ({
   const [roles, setRoles] = useState<string[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const handleReduce = (data: string | null | undefined) => {
+    if (data == null) return ""; // handles both null and undefined
+    if (data.length > 10) {
+      return data.slice(0, 10) + "...";
+    }
+    return data; // return full string if 8 characters or less
+  };
+
   useEffect(() => {
     try {
       const userRoles = AuthService.getRolesFromToken();
@@ -104,8 +112,8 @@ const Dropdown: React.FC<DropdownProps> = ({
             )}
             <div className="flex flex-col">
               {/* <span className="ms-5">User name</span> */}
-              <span className="ms-5">{userName}</span>
-              <span className="ms-5">{userEmail}</span>
+              <span className="ms-5">{handleReduce(userName)}</span>
+              <span className="ms-5">{handleReduce(userEmail)}</span>
             </div>
           </div>
         </li>
@@ -121,7 +129,7 @@ const Dropdown: React.FC<DropdownProps> = ({
         >
           <div className="flex items-center my-1">
             <FaRegUser size={25} className="text-black font-bold" />
-            <span className="ms-5">Patient Profile</span>
+            <span className="ms-5">Profile</span>
           </div>
         </li>
         <li

@@ -190,7 +190,7 @@ const DoctorManagement = () => {
                 className="bg-[#6B87C7] hover:bg-[#4567B7] text-white font-bold p-2 rounded-lg transition duration-300 ease-in-out text-lg"
                 onClick={() => setOpenAdd(true)}
               >
-                + Add Patient
+                + Add Doctor
               </button>
             </div>
 

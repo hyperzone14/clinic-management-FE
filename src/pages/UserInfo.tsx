@@ -43,12 +43,34 @@ const UserInfo = () => {
     return date.toISOString().split("T")[0];
   };
 
+  // const handleDateChange = (date: Date | null) => {
+  //   setSelectedDate(date);
+  //   setFormData((prevData) => ({
+  //     ...prevData,
+  //     birthDate: date ? formatDateForBackend(date) : "",
+  //   }));
+  // };
+
   const handleDateChange = (date: Date | null) => {
-    setSelectedDate(date);
-    setFormData((prevData) => ({
-      ...prevData,
-      birthDate: date ? formatDateForBackend(date) : "",
-    }));
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (date && date < today) {
+      setSelectedDate(date);
+      setFormData((prevData) => ({
+        ...prevData,
+        birthDate: formatDateForBackend(date),
+      }));
+    } else {
+      setSelectedDate(null);
+      setFormData((prevData) => ({
+        ...prevData,
+        birthDate: "", // Clear the birth date
+      }));
+
+      // Toast notification for invalid date selection
+      toast.error("Please select a valid date");
+    }
   };
 
   const validateForm = (): ValidationErrors => {

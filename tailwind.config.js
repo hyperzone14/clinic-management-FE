@@ -3,17 +3,14 @@ export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     screens: {
-      md: "810px",
-      lg: "1440px",
-      sm: "576px",
+      md: "768px",
+      sm: "480px ",
     },
     extend: {
       fontFamily: {
         sans: ["Inter", "sans-serif"],
       },
-      plugins: [
-        require('tailwind-scrollbar'),
-      ]
+      plugins: [require("tailwind-scrollbar")],
     },
   },
   plugins: [require("@tailwindcss/typography")],

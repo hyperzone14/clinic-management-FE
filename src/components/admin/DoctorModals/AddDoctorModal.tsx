@@ -193,7 +193,7 @@ const AddDoctorModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
   return (
     <>
       <Dialog open={openAdd} onClose={handleModalClose} maxWidth="sm" fullWidth>
-        <DialogTitle>Add New User</DialogTitle>
+        <DialogTitle>Add New Doctor</DialogTitle>
         <DialogContent>
           <form onSubmit={(e) => e.preventDefault()}>
             <TextField
