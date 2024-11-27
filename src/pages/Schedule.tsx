@@ -174,58 +174,60 @@ const Schedule: React.FC = () => {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full min-h-screen bg-gray-50">
       <ToastContainer/>
       
-      <div className="flex flex-col my-5 mx-10 justify-center items-center">
-        <h1 className="text-4xl font-bold font-sans my-5">Today Schedule</h1>
+      <div className="flex flex-col my-3 sm:my-4 md:my-5 mx-4 sm:mx-6 md:mx-10 justify-center items-center">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold font-sans my-3 sm:my-4 md:my-5">
+          Today's Schedule
+        </h1>
       </div>
 
-      <div className="my-12 flex flex-col items-center">
+      <div className="my-6 sm:my-8 md:my-12 flex flex-col items-center px-4 sm:px-6 md:px-8">
         {/* Status Legend */}
-        <div className="flex gap-4 mb-6 w-9/12 flex-wrap">
+        <div className="flex flex-wrap justify-center sm:justify-start gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-5 md:mb-6 w-full sm:w-10/12 md:w-9/12">
           <div className="flex items-center">
-            <div className="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
-            <span className="text-sm text-gray-600">Check-in</span>
+            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-blue-500 mr-1.5 sm:mr-2"></div>
+            <span className="text-xs sm:text-sm text-gray-600">Check-in</span>
           </div>
           <div className="flex items-center">
-            <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
-            <span className="text-sm text-gray-600">Completed</span>
+            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-500 mr-1.5 sm:mr-2"></div>
+            <span className="text-xs sm:text-sm text-gray-600">Completed</span>
           </div>
           <div className="flex items-center">
-            <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
-            <span className="text-sm text-gray-600">Cancelled</span>
+            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-500 mr-1.5 sm:mr-2"></div>
+            <span className="text-xs sm:text-sm text-gray-600">Cancelled</span>
           </div>
           <div className="flex items-center">
-            <div className="w-3 h-3 rounded-full bg-orange-500 mr-2"></div>
-            <span className="text-sm text-gray-600">Lab Test Required</span>
+            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-orange-500 mr-1.5 sm:mr-2"></div>
+            <span className="text-xs sm:text-sm text-gray-600">Lab Test Required</span>
           </div>
           <div className="flex items-center">
-            <div className="w-3 h-3 rounded-full bg-sky-500 mr-2"></div>
-            <span className="text-sm text-gray-600">Lab Test Completed</span>
+            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-sky-500 mr-1.5 sm:mr-2"></div>
+            <span className="text-xs sm:text-sm text-gray-600">Lab Test Completed</span>
           </div>
         </div>
 
         {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+          <div className="flex justify-center items-center h-48 sm:h-56 md:h-64">
+            <div className="animate-spin rounded-full h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 border-b-2 border-gray-900"></div>
           </div>
         ) : error ? (
-          <div className="text-red-500 text-center p-4">
+          <div className="text-red-500 text-center p-3 sm:p-4">
             {error}
           </div>
         ) : (
           <div className="flex flex-col items-center w-full">
             {appointments.length === 0 ? (
-              <div className="text-center p-8 bg-gray-100 rounded-lg">
-                <p className="text-xl text-gray-600">No appointments found</p>
-                <p className="text-sm text-gray-500 mt-2">
+              <div className="text-center p-6 sm:p-7 md:p-8 bg-gray-100 rounded-lg mx-4 w-full sm:w-10/12 md:w-9/12">
+                <p className="text-lg sm:text-xl text-gray-600">No appointments found</p>
+                <p className="text-xs sm:text-sm text-gray-500 mt-2">
                   No appointments scheduled for today
                 </p>
               </div>
             ) : (
               <>
-                <div className="w-9/12 space-y-4 max-h-[70vh] pr-4 overflow-y-auto">
+                <div className="w-full sm:w-10/12 md:w-9/12 space-y-3 sm:space-y-4 max-h-[60vh] sm:max-h-[65vh] md:max-h-[70vh] pr-2 sm:pr-3 md:pr-4 overflow-y-auto">
                   {appointments.map((appointment, index) => (
                     <AppointmentCard
                       key={appointment.id}
@@ -249,19 +251,19 @@ const Schedule: React.FC = () => {
                   ))}
                 </div>
 
-                <div className="flex justify-center space-x-4 mt-10 mb-5">
+                <div className="flex justify-center space-x-2 sm:space-x-3 md:space-x-4 mt-6 sm:mt-8 md:mt-10 mb-4 sm:mb-5">
                   <button
-                    className="px-4 py-2 bg-[#34a85a] text-white rounded-lg disabled:opacity-50 hover:bg-[#2e8b46] transition duration-300 ease-in-out"
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base bg-[#34a85a] text-white rounded-lg disabled:opacity-50 hover:bg-[#2e8b46] transition duration-300 ease-in-out"
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 0}
                   >
                     Previous
                   </button>
-                  <span className="px-4 py-2">
+                  <span className="px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base">
                     Page {currentPage + 1} of {totalPages}
                   </span>
                   <button
-                    className="px-4 py-2 bg-[#6B87C7] text-[#fff] rounded-lg disabled:opacity-50 hover:bg-[#4567B7] transition duration-300 ease-in-out"
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base bg-[#6B87C7] text-[#fff] rounded-lg disabled:opacity-50 hover:bg-[#4567B7] transition duration-300 ease-in-out"
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages - 1}
                   >
