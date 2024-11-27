@@ -5,6 +5,9 @@ export default {
     screens: {
       md: "768px",
       sm: "480px ",
+      // md: "810px",
+      lg: "1440px",
+      // sm: "576px",
     },
     extend: {
       fontFamily: {
