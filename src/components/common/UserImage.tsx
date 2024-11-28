@@ -84,13 +84,13 @@ const UserImage: React.FC<UserImageProps> = ({ fullName }) => {
             />
           ) : ( */}
           <PiUserCircleLight
-            size={100}
+            size={80}
             className="bg-[#4567B7] text-white font-bold p-2 rounded-full mt-5 mb-3"
           />
           {/* )} */}
         </div>
         <div className="flex flex-col justify-center items-center">
-          <span className="text-2xl font-bold mb-5">{fullName}</span>
+          <span className="text-lg font-bold mb-5">{fullName}</span>
         </div>
         {/* <div className="flex flex-col justify-center items-center mt-2 mb-7">
           Button to upload image

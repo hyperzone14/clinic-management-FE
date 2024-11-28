@@ -6,7 +6,7 @@ interface User {
   fullName: string;
   citizenId: string;
   email: string;
-  // password: string;
+  password: string;
   gender: string;
   address: string;
   birthDate: string;
