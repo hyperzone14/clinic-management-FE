@@ -13,6 +13,17 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AuthService } from "../utils/security/services/AuthService";
 
+// Define status order for sorting
+const STATUS_ORDER: Record<StatusType, number> = {
+  'checked-in': 1,
+  'lab_test_completed': 2,
+  'lab_test_required': 3,
+  'success': 4,
+  'cancelled': 5,
+  'pending': 6,
+  'confirmed': 7
+};
+
 const Schedule: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -22,50 +33,48 @@ const Schedule: React.FC = () => {
     (state) => state.schedule
   );
 
+  // Sort appointments based on status order
+  const sortedAppointments = [...appointments].sort((a, b) => {
+    const statusOrderA = STATUS_ORDER[a.status as StatusType] || 999;
+    const statusOrderB = STATUS_ORDER[b.status as StatusType] || 999;
+    return statusOrderA - statusOrderB;
+  });
+
   useEffect(() => {
     const fetchDoctorSchedule = async () => {
       try {
-        // Check authentication first
         const doctorId = AuthService.getIdFromToken();
         const isDoctor = AuthService.hasRole('ROLE_DOCTOR');
         
         if (!doctorId || !isDoctor) {
           toast.error("Access denied: Doctor credentials required");
-          navigate('/login'); // Uncomment this to redirect to login
+          navigate('/login');
           return;
         }
 
-        // Get today's date in YYYY-MM-DD format
         const today = new Date().toISOString().split('T')[0];
+        const validatedPage = Math.max(0, currentPage);
+        const validatedSize = Math.max(1, Math.min(100, pageSize));
 
-        // Validate pagination parameters
-        const validatedPage = Math.max(0, currentPage); // Ensure page is not negative
-        const validatedSize = Math.max(1, Math.min(100, pageSize)); // Ensure size is between 1 and 100
-
-        // Fetch appointments
         await dispatch(fetchDoctorAppointments({
           doctorId: Number(doctorId),
           appointmentDate: today,
           page: validatedPage,
           size: validatedSize,
-          sort: 'timeSlot,desc' // Explicitly set sort order
+          sort: 'timeSlot,desc'
         })).unwrap();
 
       } catch (err) {
         console.error("Error fetching doctor schedule:", err);
         toast.error("Failed to load appointments. Please try again.");
         
-        // If the error is due to authentication, redirect to login
         if (err instanceof Error && err.message.includes('unauthorized')) {
           navigate('/login');
         }
       }
     };
 
-    // Execute the fetch function
     fetchDoctorSchedule();
-
-    // Include all dependencies that the effect uses
   }, [dispatch, currentPage, pageSize, navigate]);
 
   const handlePatientClick = async (appointment: Appointment, index: number) => {
@@ -123,6 +132,9 @@ const Schedule: React.FC = () => {
           break;
         case 'lab_test_completed':
           toast.info(`Lab tests have been completed for ${appointment.patientName}`);
+          break;
+        case 'lab_test_required':
+          toast.info(`Please go the lab for ${appointment.patientName} tests.`);
           break;
         default:
           toast.error(`Appointment must be checked-in to proceed.`);
@@ -184,11 +196,18 @@ const Schedule: React.FC = () => {
       </div>
 
       <div className="my-6 sm:my-8 md:my-12 flex flex-col items-center px-4 sm:px-6 md:px-8">
-        {/* Status Legend */}
         <div className="flex flex-wrap justify-center sm:justify-start gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-5 md:mb-6 w-full sm:w-10/12 md:w-9/12">
           <div className="flex items-center">
             <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-blue-500 mr-1.5 sm:mr-2"></div>
             <span className="text-xs sm:text-sm text-gray-600">Check-in</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-sky-500 mr-1.5 sm:mr-2"></div>
+            <span className="text-xs sm:text-sm text-gray-600">Lab Test Completed</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-orange-500 mr-1.5 sm:mr-2"></div>
+            <span className="text-xs sm:text-sm text-gray-600">Lab Test Required</span>
           </div>
           <div className="flex items-center">
             <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-500 mr-1.5 sm:mr-2"></div>
@@ -197,14 +216,6 @@ const Schedule: React.FC = () => {
           <div className="flex items-center">
             <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-500 mr-1.5 sm:mr-2"></div>
             <span className="text-xs sm:text-sm text-gray-600">Cancelled</span>
-          </div>
-          <div className="flex items-center">
-            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-orange-500 mr-1.5 sm:mr-2"></div>
-            <span className="text-xs sm:text-sm text-gray-600">Lab Test Required</span>
-          </div>
-          <div className="flex items-center">
-            <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-sky-500 mr-1.5 sm:mr-2"></div>
-            <span className="text-xs sm:text-sm text-gray-600">Lab Test Completed</span>
           </div>
         </div>
 
@@ -218,7 +229,7 @@ const Schedule: React.FC = () => {
           </div>
         ) : (
           <div className="flex flex-col items-center w-full">
-            {appointments.length === 0 ? (
+            {sortedAppointments.length === 0 ? (
               <div className="text-center p-6 sm:p-7 md:p-8 bg-gray-100 rounded-lg mx-4 w-full sm:w-10/12 md:w-9/12">
                 <p className="text-lg sm:text-xl text-gray-600">No appointments found</p>
                 <p className="text-xs sm:text-sm text-gray-500 mt-2">
@@ -228,7 +239,7 @@ const Schedule: React.FC = () => {
             ) : (
               <>
                 <div className="w-full sm:w-10/12 md:w-9/12 space-y-3 sm:space-y-4 max-h-[60vh] sm:max-h-[65vh] md:max-h-[70vh] pr-2 sm:pr-3 md:pr-4 overflow-y-auto">
-                  {appointments.map((appointment, index) => (
+                  {sortedAppointments.map((appointment, index) => (
                     <AppointmentCard
                       key={appointment.id}
                       appointment={{
