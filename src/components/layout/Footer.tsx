@@ -11,14 +11,14 @@ import { Link } from "react-router-dom";
 export const Footer = () => {
   return (
     <>
-      <footer className="bg-white py-8 px-4 ">
-        <div className="container mx-auto flex flex-col md:flex-row justify-between items-start">
+      <footer className="bg-white py-8 px-4 md:px-7 w-full">
+        <div className="container mx-auto max-w-screen-lg flex flex-col md:flex-row justify-between items-start md:gap-x-10">
           <div className="flex items-center">
             <Link to="/" className="inline-block">
               <img
                 src="/assets/images/medpal.png"
                 alt="MedPal"
-                className="w-24 md:w-32" // Adjust the width as needed
+                className="lg:w-32 md:w-36" // Adjust the width as needed
               />
             </Link>
           </div>
@@ -64,7 +64,7 @@ export const Footer = () => {
 
           <div>
             <h3 className="font-semibold mb-2">Social</h3>
-            <div className="flex space-x-4">
+            <div className="flex flex-wrap space-x-4 md:space-x-0 md:space-y-4 md:flex-col lg:space-x-4 lg:space-y-0 lg:flex-row ">
               <FaFacebookF className="text-gray-600 hover:text-blue-600 transition duration-50 ease-in-out" />
               <FaInstagram className="text-gray-600 hover:text-pink-600 transition duration-50 ease-in-out" />
               <FaTwitter className="text-gray-600 hover:text-blue-400 transition duration-50 ease-in-out" />
