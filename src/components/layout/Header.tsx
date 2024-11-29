@@ -115,7 +115,7 @@ export const Header = () => {
               <img
                 src="/assets/images/medpal.png"
                 alt="Medpal"
-                className="w-2/12 ms-11"
+                className="w-2/12 md:w-5/12 ms-11"
               />
             </Link>
           </div>

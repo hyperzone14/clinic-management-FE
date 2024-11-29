@@ -21,17 +21,34 @@ const Chatbot = () => {
   const messageAreaRef = useRef<HTMLDivElement>(null);
   const currentUserId = localStorage.getItem("userId") || "1";
 
-  // Helper function to clean message content
+  // Updated helper function to parse and clean JSON responses
   const cleanMessageContent = (content: string | undefined) => {
     if (!content) return "";
-    return content.replace("@bot", "").trim();
+    const cleanedContent = content.replace("@bot", "").trim();
+    
+    try {
+      const jsonContent = JSON.parse(cleanedContent);
+      // If the response has an "answer" field, return just that
+      if (jsonContent.answer) {
+        return jsonContent.answer;
+      }
+      // If it's just a string in JSON, return that
+      if (typeof jsonContent === 'string') {
+        return jsonContent;
+      }
+      // Fallback to the original cleaned content if not parseable as expected
+      return cleanedContent;
+    } catch (e) {
+      // If it's not JSON, return the cleaned content as is
+      return cleanedContent;
+    }
   };
 
   useEffect(() => {
     if (isOpen && !isConnected && !loading) {
       dispatch(createAndJoinRoom(Number(currentUserId)));
     }
-  }, [isOpen, isConnected, loading, dispatch]);
+  }, [isOpen, isConnected, loading, dispatch, currentUserId]);
 
   useEffect(() => {
     if (messageAreaRef.current) {
@@ -67,9 +84,10 @@ const Chatbot = () => {
 
   return (
     <div className="fixed bottom-24 right-4 z-50">
+      {/* Chat Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={` right-5 bg-[#4567b7] text-white p-3 rounded-full shadow-lg hover:bg-[#3E5CA3] transition-colors duration-300 ${
+        className={`right-5 bg-[#4567b7] text-white p-3 rounded-full shadow-lg hover:bg-[#3E5CA3] transition-colors duration-300 ${
           isOpen ? "scale-0 opacity-0" : "scale-100 opacity-100"
         }`}
         aria-label={isOpen ? "Close chat" : "Open chat"}
@@ -77,6 +95,7 @@ const Chatbot = () => {
         <MessageCircle className="h-5 w-5" />
       </button>
 
+      {/* Chat Window */}
       <div
         className={`absolute bottom-0 right-0 w-96 bg-white rounded-lg shadow-xl transition-all duration-300 transform ${
           isOpen
@@ -84,6 +103,7 @@ const Chatbot = () => {
             : "scale-0 opacity-0 translate-y-12"
         }`}
       >
+        {/* Chat Header */}
         <div className="flex items-center justify-between p-4 bg-blue-500 text-white rounded-t-lg">
           <div className="flex items-center space-x-2">
             <h3 className="font-medium">Chat Support</h3>
@@ -103,6 +123,7 @@ const Chatbot = () => {
           </button>
         </div>
 
+        {/* Chat Messages Area */}
         <div
           ref={messageAreaRef}
           className="h-96 p-4 overflow-y-auto space-y-3 bg-white"
@@ -114,7 +135,6 @@ const Chatbot = () => {
           ) : Array.isArray(messages) && messages.length > 0 ? (
             messages.map((msg, index) => {
               if (!msg) return null;
-
               if (msg.type === "JOIN" || msg.type === "LEAVE") return null;
 
               const isCurrentUser = msg.sender === `User_${currentUserId}`;
@@ -123,9 +143,7 @@ const Chatbot = () => {
               return (
                 <div
                   key={`${msg.sender}-${index}`}
-                  className={`flex ${
-                    isCurrentUser ? "justify-end" : "justify-start"
-                  }`}
+                  className={`flex ${isCurrentUser ? "justify-end" : "justify-start"}`}
                 >
                   <div
                     className={`rounded-2xl px-4 py-2 max-w-[85%] ${
@@ -134,7 +152,7 @@ const Chatbot = () => {
                         : "bg-gray-50 text-gray-800"
                     }`}
                   >
-                    <p className="text-[15px] leading-normal">
+                    <p className="text-[15px] leading-normal whitespace-pre-wrap">
                       {cleanedContent}
                     </p>
                   </div>
@@ -148,6 +166,7 @@ const Chatbot = () => {
           )}
         </div>
 
+        {/* Chat Input Area */}
         <div className="p-4 border-t bg-white rounded-b-lg">
           <form onSubmit={handleSubmit} className="flex items-center gap-2">
             <input

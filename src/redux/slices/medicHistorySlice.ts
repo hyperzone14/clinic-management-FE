@@ -82,6 +82,8 @@ interface MedicalHistoryState {
   selectedRecord: MedicalRecord | null;
 }
 
+
+
 const initialState: MedicalHistoryState = {
   records: [],
   filteredRecords: [],
@@ -96,6 +98,33 @@ const initialState: MedicalHistoryState = {
   error: null,
   selectedRecord: null,
 };
+// interface NestedPaginatedResponse {
+//   content: {
+//     content: MedicalRecord[];
+//     pageable: {
+//       pageNumber: number;
+//       pageSize: number;
+//       sort: {
+//         empty: boolean;
+//         sorted: boolean;
+//         unsorted: boolean;
+//       };
+//     };
+//     last: boolean;
+//     totalElements: number;
+//     totalPages: number;
+//     size: number;
+//     number: number;
+//     sort: {
+//       empty: boolean;
+//       sorted: boolean;
+//       unsorted: boolean;
+//     };
+//     first: boolean;
+//     numberOfElements: number;
+//     empty: boolean;
+//   };
+// }
 
 // Async Thunks
 export const fetchMedicalRecords = createAsyncThunk(
@@ -158,14 +187,18 @@ export const fetchMedicalRecordsByPatientId = createAsyncThunk(
   "medicHistory/fetchByPatientId",
   async (patientId: number, { rejectWithValue }) => {
     try {
-      const response = await apiService.get<MedicalRecord[]>(
-        `/medical-bills/patient-id/${patientId}`
+      const response = await apiService.get<PaginatedResponse>(
+        `/medical-bills/patient/id/${patientId}`
       );
+
+      // Extract the array of records directly from the response
+      const records = Array.isArray(response) ? response : response.content;
+
       return {
-        content: response,
-        totalPages: 1,
-        totalElements: response.length,
-        currentPage: 1,
+        content: records,
+        totalPages: 1,  // Since we're getting all records at once
+        totalElements: records.length,
+        currentPage: 1  // Default to page 1 since we're not paginating
       };
     } catch (error: any) {
       return rejectWithValue(error?.message || "Failed to fetch records by patient ID");
