@@ -33,7 +33,6 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
   onStatusChange,
   showLabTestStatusesOnly = false,
 }) => {
-  // Existing helper functions remain unchanged
   const formatTimeSlot = (timeSlot: string) => {
     const timeMap: Record<string, string> = {
       'SLOT_7_TO_8': '7am to 8am',
@@ -133,7 +132,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
       className={`
         group relative
         w-full bg-white rounded-lg shadow-md
-        p-4 sm:p-5 md:p-6
+        p-4 md:p-6
         transition-all duration-200
         border-l-4 
         ${appointment.status === 'checked-in' ? 'border-blue-500' : ''}
@@ -151,25 +150,25 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
         className={`
           absolute invisible group-hover:visible
           px-2 py-1 rounded -top-8 left-1/2 transform -translate-x-1/2
-          text-xs sm:text-sm text-white bg-gray-600 z-10
+          text-xs text-white bg-gray-600 z-10
           whitespace-nowrap
         `}
       >
         {getTooltipMessage(appointment.status)}
       </div>
 
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-0 sm:justify-between">
+      <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-0 md:justify-between">
         {/* Left side - Patient info */}
-        <div className="flex-1 w-full sm:w-auto">
+        <div className="flex-1 w-full md:w-auto">
           <div className="flex items-center">
-            <PiUserCircleLight className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-green-500" />
-            <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 ms-2 sm:ms-3">
+            <PiUserCircleLight className="w-8 h-8 md:w-12 md:h-12 text-green-500" />
+            <h2 className="text-lg md:text-2xl font-semibold text-gray-900 ms-2 md:ms-3">
               {appointment.patientName}
             </h2>
           </div>
           <span
             className={`
-              inline-block mt-2 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium
+              inline-block mt-2 px-2 md:px-3 py-1 rounded-full text-xs font-medium
               ${getBadgeStyles(appointment.status)}
             `}
           >
@@ -181,31 +180,31 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
         </div>
 
         {/* Right side - Appointment details */}
-        <div className="text-left sm:text-right w-full sm:w-auto">
-          <div className="flex items-center justify-start sm:justify-end mb-2">
-            <p className="text-base sm:text-lg font-medium text-gray-700 me-2 sm:me-3">
+        <div className="text-left md:text-right w-full md:w-auto">
+          <div className="flex items-center justify-start md:justify-end mb-2">
+            <p className="text-base md:text-lg font-medium text-gray-700 me-2 md:me-3">
               Dr. {appointment.doctorName}
             </p>
-            <FaUserDoctor className="w-5 h-5 sm:w-6 sm:h-6" />
+            <FaUserDoctor className="w-5 h-5 md:w-6 md:h-6" />
           </div>
-          <div className="flex items-center justify-start sm:justify-end mb-2">
-            <p className="text-sm sm:text-base text-gray-600 me-2 sm:me-3">
+          <div className="flex items-center justify-start md:justify-end mb-2">
+            <p className="text-xs md:text-base text-gray-600 me-2 md:me-3">
               {new Date(appointment.appointmentDate).toLocaleDateString()}
             </p>
-            <FaRegCalendarAlt className="w-5 h-5 sm:w-6 sm:h-6" />
+            <FaRegCalendarAlt className="w-5 h-5 md:w-6 md:h-6" />
           </div>
-          <div className="flex items-center justify-start sm:justify-end">
-            <p className="text-sm sm:text-base text-gray-600 me-2 sm:me-3">
+          <div className="flex items-center justify-start md:justify-end">
+            <p className="text-xs md:text-base text-gray-600 me-2 md:me-3">
               {formatTimeSlot(appointment.timeSlot)}
             </p>
-            <BsClockHistory className="w-5 h-5 sm:w-6 sm:h-6" />
+            <BsClockHistory className="w-5 h-5 md:w-6 md:h-6" />
           </div>
         </div>
 
         {/* Status Circle */}
         <div 
           onClick={(e) => e.stopPropagation()} 
-          className="flex items-center justify-end sm:justify-center w-full sm:w-auto sm:ms-5"
+          className="flex items-center justify-end md:justify-center w-full md:w-auto md:ms-5"
         >
           <StatusCircle
             status={appointment.status}

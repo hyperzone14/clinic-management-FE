@@ -156,7 +156,7 @@ const Schedule: React.FC = () => {
               toast.info(`Appointment cancelled for ${appointment.patientName}`);
               break;
             case 'checked-in':
-              toast.error(`${appointment.patientName} can not check-in by doctor`);
+              toast.success(`${appointment.patientName} has been checked in`);
               break;
             case 'lab_test_required':
               toast.info(`Lab tests required for ${appointment.patientName}`);
@@ -164,8 +164,8 @@ const Schedule: React.FC = () => {
             case 'lab_test_completed':
               toast.success(`Lab tests completed for ${appointment.patientName}`);
               break;
-            // default:
-            //   toast.info(`Appointment status updated to ${newStatus} for ${appointment.patientName}`);
+            default:
+              toast.info(`Appointment status updated to ${newStatus} for ${appointment.patientName}`);
           }
         })
         .catch((error) => {
