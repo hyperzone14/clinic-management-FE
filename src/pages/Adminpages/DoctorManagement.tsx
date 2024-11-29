@@ -7,12 +7,15 @@ import { TextField } from "@mui/material";
 import AddDoctorModal from "../../components/admin/DoctorModals/AddDoctorModal";
 import EditDoctorModal from "../../components/admin/DoctorModals/EditDoctorModal";
 import DeleteDoctorModal from "../../components/admin/DoctorModals/DeleteDoctorModal";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface Doctor {
   id: number;
   fullName: string;
   citizenId: string;
   email: string;
+  password: string;
   gender: string;
   address: string;
   birthDate: string;
@@ -103,6 +106,12 @@ const DoctorManagement = () => {
   }, [dispatch, shouldRefresh]);
 
   useEffect(() => {
+    if (error) {
+      toast.error(`Error: ${error}`);
+    }
+  }, []);
+
+  useEffect(() => {
     const filterDoctors = () => {
       const searchValue = search?.toLowerCase() || "";
 
@@ -166,11 +175,12 @@ const DoctorManagement = () => {
   };
   return (
     <>
+      <ToastContainer />
       <div className="p-4">
         <h1 className="text-3xl font-bold my-5">Doctor Management</h1>
-        {error && (
+        {/* {error && (
           <div className="text-red-500 mb-4">Error loading doctor: {error}</div>
-        )}
+        )} */}
         {loading ? (
           <div>Loading...</div>
         ) : (

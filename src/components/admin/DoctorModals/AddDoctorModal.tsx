@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { RootState, useAppDispatch } from "../../../redux/store";
+import React, { useEffect, useState } from "react";
+import { useAppDispatch } from "../../../redux/store";
 import { addDoctor } from "../../../redux/slices/doctorManageSlice";
 import {
   Dialog,
@@ -11,8 +11,8 @@ import {
   Button,
   SelectChangeEvent,
 } from "@mui/material";
-import { useSelector } from "react-redux";
-import { fetchDepartments } from "../../../redux/slices/departmentSlice";
+// import { useSelector } from "react-redux";
+// import { fetchDepartments } from "../../../redux/slices/departmentSlice";
 
 interface AddModalProps {
   openAdd: boolean;
@@ -27,21 +27,21 @@ interface DoctorData {
   gender: string;
   address: string;
   birthDate: string;
-  departmentId: string | number;
+  departmentId: string;
   workingDays: string[];
 }
 
 const AddDoctorModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
   const dispatch = useAppDispatch();
-  const department = useSelector(
-    (state: RootState) => state.department.departments
-  );
+  // const department = useSelector(
+  //   (state: RootState) => state.department.departments
+  // );
 
-  React.useEffect(() => {
-    if (openAdd) {
-      dispatch(fetchDepartments());
-    }
-  }, [openAdd, dispatch]);
+  // React.useEffect(() => {
+  //   if (openAdd) {
+  //     dispatch(fetchDepartments());
+  //   }
+  // }, [openAdd, dispatch]);
 
   const initialDoctorState: DoctorData = {
     fullName: "",
@@ -104,6 +104,11 @@ const AddDoctorModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
 
     if (!newDoctor.departmentId) {
       newErrors.departmentId = "Department is required";
+    } else {
+      const departmentId = Number(newDoctor.departmentId);
+      if (isNaN(departmentId) || departmentId < 1 || departmentId > 11) {
+        newErrors.departmentId = "Department ID must be between 1 and 11";
+      }
     }
 
     if (newDoctor.workingDays.length === 0) {
@@ -129,7 +134,7 @@ const AddDoctorModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
 
     const userToAdd = {
       ...newDoctor,
-      departmentId: newDoctor.departmentId ? Number(newDoctor.departmentId) : 0,
+      departmentId: Number(newDoctor.departmentId),
     };
 
     try {
@@ -189,6 +194,12 @@ const AddDoctorModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
       workingDays: selectedDays,
     }));
   };
+
+  useEffect(() => {
+    if (openAdd) {
+      resetForm();
+    }
+  }, []);
 
   return (
     <>
@@ -318,7 +329,6 @@ const AddDoctorModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
               }}
             />
             <TextField
-              select
               label="Department"
               name="departmentId"
               variant="outlined"
@@ -329,12 +339,16 @@ const AddDoctorModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
               error={!!errors.departmentId}
               helperText={errors.departmentId}
               required
+              inputProps={{
+                min: 0,
+                max: 11,
+              }}
             >
-              {department.map((dep) => (
+              {/* {department.map((dep) => (
                 <MenuItem key={dep.id} value={dep.id}>
                   {dep.name}
                 </MenuItem>
-              ))}
+              ))} */}
             </TextField>
             <TextField
               select

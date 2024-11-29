@@ -1,9 +1,28 @@
 // components/Dashboard/index.tsx
-import React, { useEffect } from 'react';
-import { DollarSign, Calendar, CheckCircle, TrendingUp, AlertCircle, RefreshCw } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { fetchDashboardData, updateStats, Appointment } from '../../redux/slices/dashboardSlice';
-import { useAppDispatch, useAppSelector } from '../../redux/store';
+import React, { useEffect } from "react";
+import {
+  DollarSign,
+  Calendar,
+  CheckCircle,
+  TrendingUp,
+  AlertCircle,
+  RefreshCw,
+} from "lucide-react";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
+import {
+  fetchDashboardData,
+  Appointment,
+} from "../../redux/slices/dashboardSlice";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
 
 interface ChartDataPoint {
   date: string;
@@ -59,9 +78,7 @@ const StatCard: React.FC<{
     <div className="flex items-center justify-between">
       <div>
         <p className="text-gray-500 text-sm">{title}</p>
-        <h3 className="text-2xl font-semibold text-gray-800">
-          {value}
-        </h3>
+        <h3 className="text-2xl font-semibold text-gray-800">{value}</h3>
       </div>
       <div className={`${bgColor} p-3 rounded-full`}>
         <Icon className={textColor} size={24} />
@@ -72,7 +89,9 @@ const StatCard: React.FC<{
 
 const Dashboard: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { appointments, loading, error, stats } = useAppSelector((state) => state.dashboard);
+  const { appointments, loading, error, stats } = useAppSelector(
+    (state) => state.dashboard
+  );
 
   useEffect(() => {
     handleFetchDashboardData();
@@ -93,13 +112,16 @@ const Dashboard: React.FC = () => {
   if (error) {
     return (
       <div className="p-6">
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <div
+          className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative"
+          role="alert"
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <AlertCircle className="h-4 w-4 mr-2" />
               <span>Failed to load dashboard data: {error}</span>
             </div>
-            <button 
+            <button
               onClick={handleRefresh}
               className="bg-red-100 p-2 rounded-full hover:bg-red-200 transition-colors"
             >
@@ -113,37 +135,46 @@ const Dashboard: React.FC = () => {
 
   // Group appointments by date for chart
   const chartData: ChartDataPoint[] = Object.values(
-    appointments.reduce((acc: Record<string, ChartDataPoint>, apt: Appointment) => {
-      const date = new Date(apt.appointmentDate)
-        .toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
-      
-      if (!acc[date]) {
-        acc[date] = {
-          date,
-          confirmed: 0,
-          success: 0,
-          cancelled: 0,
-          status: apt.status
-        };
-      }
+    appointments.reduce(
+      (acc: Record<string, ChartDataPoint>, apt: Appointment) => {
+        const date = new Date(apt.appointmentDate).toLocaleDateString("en-US", {
+          month: "short",
+          day: "2-digit",
+        });
 
-      const status = apt.status.toLowerCase();
-      if (['confirmed', 'checked-in'].includes(status)) {
-        acc[date].confirmed++;
-      } else if (['success', 'lab_test_completed', 'lab_test_required'].includes(status)) {
-        acc[date].success++;
-      } else if (status === 'cancelled') {
-        acc[date].cancelled++;
-      }
+        if (!acc[date]) {
+          acc[date] = {
+            date,
+            confirmed: 0,
+            success: 0,
+            cancelled: 0,
+            status: apt.status,
+          };
+        }
 
-      return acc;
-    }, {})
+        const status = apt.status.toLowerCase();
+        if (["confirmed", "checked-in"].includes(status)) {
+          acc[date].confirmed++;
+        } else if (
+          ["success", "lab_test_completed", "lab_test_required"].includes(
+            status
+          )
+        ) {
+          acc[date].success++;
+        } else if (status === "cancelled") {
+          acc[date].cancelled++;
+        }
+
+        return acc;
+      },
+      {}
+    )
   ).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND'
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
     }).format(value);
   };
 
@@ -151,7 +182,7 @@ const Dashboard: React.FC = () => {
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Dashboard Overview</h1>
-        <button 
+        <button
           onClick={handleRefresh}
           className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm hover:shadow-md transition-all"
         >
@@ -177,7 +208,13 @@ const Dashboard: React.FC = () => {
         />
         <StatCard
           title="Success Rate"
-          value={`${stats.totalAppointments ? Math.round((stats.successfulAppointments / stats.totalAppointments) * 100) : 0}%`}
+          value={`${
+            stats.totalAppointments
+              ? Math.round(
+                  (stats.successfulAppointments / stats.totalAppointments) * 100
+                )
+              : 0
+          }%`}
           icon={CheckCircle}
           bgColor="bg-yellow-100"
           textColor="text-yellow-600"
@@ -198,49 +235,49 @@ const Dashboard: React.FC = () => {
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
-                <XAxis 
-                  dataKey="date" 
+                <XAxis
+                  dataKey="date"
                   tick={{ fontSize: 12 }}
                   tickLine={false}
                 />
-                <YAxis 
+                <YAxis
                   tick={{ fontSize: 12 }}
                   tickLine={false}
                   axisLine={false}
                 />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                    border: 'none',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "rgba(255, 255, 255, 0.9)",
+                    border: "none",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
                   }}
                 />
                 <Legend />
-                <Area 
-                  type="monotone" 
-                  dataKey="confirmed" 
+                <Area
+                  type="monotone"
+                  dataKey="confirmed"
                   stackId="1"
-                  stroke="#4ade80" 
-                  fill="#4ade80" 
+                  stroke="#4ade80"
+                  fill="#4ade80"
                   fillOpacity={0.6}
                   name="Confirmed"
                 />
-                <Area 
-                  type="monotone" 
-                  dataKey="success" 
+                <Area
+                  type="monotone"
+                  dataKey="success"
                   stackId="1"
-                  stroke="#60a5fa" 
-                  fill="#60a5fa" 
+                  stroke="#60a5fa"
+                  fill="#60a5fa"
                   fillOpacity={0.6}
                   name="Success"
                 />
-                <Area 
-                  type="monotone" 
-                  dataKey="cancelled" 
+                <Area
+                  type="monotone"
+                  dataKey="cancelled"
                   stackId="1"
-                  stroke="#f87171" 
-                  fill="#f87171" 
+                  stroke="#f87171"
+                  fill="#f87171"
                   fillOpacity={0.6}
                   name="Cancelled"
                 />
@@ -253,22 +290,44 @@ const Dashboard: React.FC = () => {
           <h3 className="text-lg font-semibold mb-6">Appointment Status</h3>
           <div className="space-y-6">
             {[
-              { label: 'Confirmed', count: stats.confirmedAppointments, color: 'bg-green-500' },
-              { label: 'Success', count: stats.successfulAppointments, color: 'bg-blue-500' },
-              { label: 'Cancelled', count: stats.cancelledAppointments, color: 'bg-red-500' }
+              {
+                label: "Confirmed",
+                count: stats.confirmedAppointments,
+                color: "bg-green-500",
+              },
+              {
+                label: "Success",
+                count: stats.successfulAppointments,
+                color: "bg-blue-500",
+              },
+              {
+                label: "Cancelled",
+                count: stats.cancelledAppointments,
+                color: "bg-red-500",
+              },
             ].map(({ label, count, color }) => (
               <div key={label} className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 font-medium">{label}</span>
+                  <span className="text-sm text-gray-600 font-medium">
+                    {label}
+                  </span>
                   <span className="text-sm font-semibold">
-                    {count} ({stats.totalAppointments ? Math.round((count / stats.totalAppointments) * 100) : 0}%)
+                    {count} (
+                    {stats.totalAppointments
+                      ? Math.round((count / stats.totalAppointments) * 100)
+                      : 0}
+                    %)
                   </span>
                 </div>
                 <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-                  <div 
+                  <div
                     className={`${color} h-2 rounded-full transition-all duration-500`}
-                    style={{ 
-                      width: `${stats.totalAppointments ? (count / stats.totalAppointments) * 100 : 0}%`,
+                    style={{
+                      width: `${
+                        stats.totalAppointments
+                          ? (count / stats.totalAppointments) * 100
+                          : 0
+                      }%`,
                     }}
                   />
                 </div>

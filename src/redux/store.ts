@@ -19,6 +19,7 @@ import chatReducer from "./slices/chatbotSlice";
 import auth from "./slices/authSlice";
 import signinProfileReducer from "./slices/signinProfileSlice";
 import doctorManageReducer from "./slices/doctorManageSlice";
+import paymentReducer from "./slices/paymentSlice";
 
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { thunk } from "redux-thunk";
@@ -47,6 +48,7 @@ const rootReducer = combineReducers({
   signinProfile: signinProfileReducer,
   dashboard: dashboardReducer,
   doctorManage: doctorManageReducer,
+  payment: paymentReducer,
 });
 
 const store = configureStore({

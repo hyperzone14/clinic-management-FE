@@ -6,6 +6,7 @@ interface Doctor {
   fullName: string;
   citizenId: string;
   email: string;
+  password: string;
   gender: string;
   address: string;
   birthDate: string;
@@ -107,30 +108,30 @@ export const fetchDoctors = createAsyncThunk(
 export const addDoctor = createAsyncThunk(
   "doctorManage/addDoctor",
   async (doctorData: NewDoctor) => {
-    const response = await apiService.post<Doctor, NewDoctor>(
+    const response = await apiService.post<{ result: Doctor }>(
       "/doctor",
       doctorData
     );
-    return response;
+    return response.result;
   }
 );
 
 export const updateDoctor = createAsyncThunk(
   "doctorManage/updateDoctor",
   async (doctorData: Doctor) => {
-    const response = await apiService.put<Doctor, Doctor>(
+    const response = await apiService.put<{ result: Doctor }>(
       `/doctor/${doctorData.id}`,
       doctorData
     );
-    return response;
+    return response.result;
   }
 );
 
 export const getDoctorById = createAsyncThunk(
   "doctorManage/getDoctorById",
   async (id: number) => {
-    const response = await apiService.get<Doctor>(`/doctor/${id}`);
-    return response;
+    const response = await apiService.get<{ result: Doctor }>(`/doctor/${id}`);
+    return response.result;
   }
 );
 
@@ -148,6 +149,9 @@ const doctorManageSlice = createSlice({
       state.doctors = state.doctors.filter(
         (doctor) => doctor.id !== action.payload
       );
+    },
+    clearDoctor: (state) => {
+      state.doctors = [];
     },
   },
   extraReducers: (builder) => {
@@ -223,6 +227,6 @@ const doctorManageSlice = createSlice({
   },
 });
 
-export const { setPageSize, setCurrentPage, deleteDoctor } =
+export const { setPageSize, setCurrentPage, deleteDoctor, clearDoctor } =
   doctorManageSlice.actions;
 export default doctorManageSlice.reducer;

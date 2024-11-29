@@ -1,14 +1,18 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { AuthService } from "../services/AuthService";
 import { pageRoutes, Routes } from "../../../utils/pageRoutes";
 
 interface ProtectedRouteProps {
   redirectPath?: string;
+  roles?: string[];
+  children?: ReactNode;
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   redirectPath = "/login",
+  children,
+  roles,
 }) => {
   const location = useLocation();
   const token = AuthService.getToken();
@@ -21,7 +25,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     location.pathname === "/user-information" ||
     location.pathname === redirectPath
   ) {
-    return <Outlet />;
+    return children ? <>{children}</> : <Outlet />;
   }
 
   // Redirect to login if not authenticated for any other route
@@ -29,7 +33,22 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to={redirectPath} replace state={{ from: location }} />;
   }
 
-  // User is authenticated - check role-based access
+  // Role-based access restrictions for ROLE_ADMIN
+  if (currentRole === "ROLE_ADMIN") {
+    // Define restricted routes for ROLE_ADMIN
+    const restrictedRoutes = [
+      "/admin/patient-management",
+      "/admin/drug-management",
+      "/admin/doctor-management",
+    ];
+
+    // Redirect to /admin/not-permitted if accessing restricted routes
+    if (restrictedRoutes.some((route) => location.pathname.startsWith(route))) {
+      return <Navigate to="/admin/not-permitted" replace />;
+    }
+  }
+
+  // Role-based access control for other roles
   const getCurrentRoute = (path: string): Routes | undefined => {
     const normalizedPath = path.split("/")[1];
     return pageRoutes.find((route) => route.path === `/${normalizedPath}`);
@@ -39,7 +58,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // If route requires specific roles
   if (currentRoute?.roles) {
-    const hasRequiredRole = currentRoute.roles.some((role) =>
+    const requiredRoles = currentRoute?.roles || roles || [];
+    const hasRequiredRole = requiredRoles.some((role) =>
       role.split(", ").includes(currentRole)
     );
 
@@ -48,5 +68,5 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     }
   }
 
-  return <Outlet />;
+  return children ? <>{children}</> : <Outlet />;
 };

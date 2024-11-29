@@ -105,7 +105,7 @@ export const pageRoutes: Routes[] = [
     id: 6,
     path: "/admin",
     location: "Admin",
-    roles: ["ROLE_DOCTOR"],
+    roles: ["ROLE_ADMIN, ROLE_CLIENT_OWNER"],
   },
   {
     id: 7,
@@ -140,8 +140,9 @@ export const pageRoutes: Routes[] = [
   },
   {
     id: 9,
-    path: "/payment-callback",
-    location: "PaymentCallBack",
+    path: "/payment-success",
+    location: "PaymentSuccess",
+    roles: ["ROLE_PATIENT"],
   },
   {
     id: 10,
@@ -190,11 +191,6 @@ export const bookingRoutes: Routes[] = [
     path: "finish",
     location: "Finish",
   },
-  {
-    id: 5,
-    path: "payment-callback",
-    location: "PaymentCallBack",
-  },
 ];
 
 export const prescriptionRoutes: Routes[] = [
@@ -215,20 +211,32 @@ export const adminRoutes: Routes[] = [
     id: 1,
     path: "",
     location: "Dashboard",
+    roles: ["ROLE_ADMIN, ROLE_CLIENT_OWNER"],
+    // roles: ["ROLE_DOCTOR"],
   },
   {
     id: 2,
     path: "patient-management",
     location: "PatientManagement",
+    // roles: ["ROLE_DOCTOR"],
+    roles: ["ROLE_CLIENT_OWNER"],
   },
   {
     id: 3,
     path: "drug-management",
     location: "DrugManagement",
+    roles: ["ROLE_CLIENT_OWNER"],
   },
   {
     id: 4,
     path: "doctor-management",
     location: "DoctorManagement",
+    roles: ["ROLE_CLIENT_OWNER"],
   },
+  // {
+  //   id: 5,
+  //   path: "not-permitted",
+  //   location: "NotPermitted",
+  //   // roles: ["ROLE_ADMIN"], // Both roles can access
+  // },
 ];

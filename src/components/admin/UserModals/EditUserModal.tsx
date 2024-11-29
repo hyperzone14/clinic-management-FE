@@ -23,7 +23,7 @@ interface Data {
   fullName: string;
   citizenId: string;
   email: string;
-  // password: string;
+  password: string;
   gender: string;
   address: string;
   birthDate: string;
@@ -100,6 +100,7 @@ const EditUserModal: React.FC<EditModalProps> = ({
           <div className="grid grid-cols-2 gap-4 mt-4">
             <TextField
               name="fullName"
+              type="text"
               label="Full Name"
               value={formData.fullName}
               onChange={handleChange}
@@ -107,13 +108,24 @@ const EditUserModal: React.FC<EditModalProps> = ({
             />
             <TextField
               name="email"
+              type="email"
               label="Email"
               value={formData.email}
+              onChange={handleChange}
+              fullWidth
+              disabled
+            />
+            <TextField
+              name="password"
+              type="password"
+              label="Password"
+              value={formData.password}
               onChange={handleChange}
               fullWidth
             />
             <TextField
               name="citizenId"
+              type="text"
               label="Citizen ID"
               value={formData.citizenId}
               onChange={handleChange}
@@ -134,6 +146,7 @@ const EditUserModal: React.FC<EditModalProps> = ({
             </FormControl>
             <TextField
               name="address"
+              type="text"
               label="Address"
               value={formData.address}
               onChange={handleChange}
