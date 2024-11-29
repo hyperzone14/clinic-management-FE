@@ -27,6 +27,7 @@ import Prescription from "./pages/Prescription";
 import AdminSideBar from "./components/layout/AdminSideBar";
 import Chatbot from "./components/layout/Chatbot";
 import { ProtectedRoute } from "./utils/security/components/ProtectedRoute";
+import NotPermitted from "./pages/Adminpages/NotPermitted";
 
 // Layout wrapper component for pages that need header and footer
 const MainLayout: React.FC = () => {
@@ -94,15 +95,27 @@ function App() {
                       key={route.id}
                       path={route.path}
                       element={
-                        <Suspense fallback={<div>Loading admin page...</div>}>
-                          <AdminComponent />
-                        </Suspense>
+                        <ProtectedRoute roles={route.roles}>
+                          <Suspense fallback={<div>Loading admin page...</div>}>
+                            <AdminComponent />
+                          </Suspense>
+                        </ProtectedRoute>
                       }
                     />
                   );
                 })}
               </Route>
             </Route>
+
+            {/* Not Permitted Route */}
+            <Route
+              path="/admin/not-permitted"
+              element={
+                <Suspense fallback={<div>Loading...</div>}>
+                  <NotPermitted />
+                </Suspense>
+              }
+            />
 
             {/* Auth Routes */}
             <Route element={<AuthLayout />}>

@@ -153,6 +153,9 @@ const userManageSlice = createSlice({
     deleteUser(state, action: PayloadAction<number>) {
       state.users = state.users.filter((user) => user.id !== action.payload);
     },
+    clearUser(state) {
+      state.users = [];
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -236,6 +239,6 @@ const userManageSlice = createSlice({
   },
 });
 
-export const { setPageSize, setCurrentPage, deleteUser } =
+export const { setPageSize, setCurrentPage, deleteUser, clearUser } =
   userManageSlice.actions;
 export default userManageSlice.reducer;

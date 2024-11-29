@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import DatePicker from "react-datepicker";
@@ -6,10 +6,12 @@ import "react-datepicker/dist/react-datepicker.css";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "../../redux/store";
 import {
+  clearDoctor,
   getDoctorById,
   updateDoctor,
 } from "../../redux/slices/doctorManageSlice";
 import { Button } from "@mui/material";
+// import { clearUser, getUserById } from "../../redux/slices/userManageSlice";
 
 const WEEKDAYS = [
   "MONDAY",
@@ -67,11 +69,18 @@ const DoctorProfile: React.FC<DoctorProfileProps> = ({ id }) => {
     {}
   );
 
-  useEffect(() => {
+  const fetchDoctorData = useCallback(() => {
+    // Clear previous user data before fetching new data
+    dispatch(clearDoctor());
+
     if (id) {
       dispatch(getDoctorById(Number(id)));
     }
   }, [id, dispatch]);
+
+  useEffect(() => {
+    fetchDoctorData();
+  }, [fetchDoctorData]);
 
   useEffect(() => {
     // Update form data when user data is fetched

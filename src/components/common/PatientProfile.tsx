@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import DatePicker from "react-datepicker";
 
@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
 import {
+  clearUser,
   getUserById,
   updateUserAsync,
 } from "../../redux/slices/userManageSlice";
@@ -46,12 +47,18 @@ const PatientProfile: React.FC<PatientProfileProps> = ({ id }) => {
     {}
   );
 
-  useEffect(() => {
-    // Fetch user data when component mounts or id changes
+  const fetchUserData = useCallback(() => {
+    // Clear previous user data before fetching new data
+    dispatch(clearUser());
+
     if (id) {
       dispatch(getUserById(Number(id)));
     }
   }, [id, dispatch]);
+
+  useEffect(() => {
+    fetchUserData();
+  }, [fetchUserData]);
 
   useEffect(() => {
     // Update form data when user data is fetched
@@ -129,7 +136,7 @@ const PatientProfile: React.FC<PatientProfileProps> = ({ id }) => {
     // Convert Date to string format for Redux
     setFormData((prevData) => ({
       ...prevData,
-      DoB: date ? date.toUTCString() : null,
+      birthDate: date ? date.toUTCString() : null,
     }));
     setErrors((prev) => ({ ...prev, birthDate: "" }));
   };
@@ -247,8 +254,8 @@ const PatientProfile: React.FC<PatientProfileProps> = ({ id }) => {
                       Date of birth
                     </label>
                     <DatePicker
-                      id="DoB"
-                      name="DoB"
+                      id="birthDate"
+                      name="birthDate"
                       selected={selectedDate}
                       onChange={handleDateChange}
                       dateFormat="dd/MM/yyyy"

@@ -150,6 +150,9 @@ const doctorManageSlice = createSlice({
         (doctor) => doctor.id !== action.payload
       );
     },
+    clearDoctor: (state) => {
+      state.doctors = [];
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -224,6 +227,6 @@ const doctorManageSlice = createSlice({
   },
 });
 
-export const { setPageSize, setCurrentPage, deleteDoctor } =
+export const { setPageSize, setCurrentPage, deleteDoctor, clearDoctor } =
   doctorManageSlice.actions;
 export default doctorManageSlice.reducer;
