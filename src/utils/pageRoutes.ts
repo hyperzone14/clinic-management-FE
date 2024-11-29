@@ -140,8 +140,9 @@ export const pageRoutes: Routes[] = [
   },
   {
     id: 9,
-    path: "/payment-callback",
-    location: "PaymentCallBack",
+    path: "/payment-success",
+    location: "PaymentSuccess",
+    roles: ["ROLE_PATIENT"],
   },
   {
     id: 10,
@@ -189,11 +190,6 @@ export const bookingRoutes: Routes[] = [
     id: 4,
     path: "finish",
     location: "Finish",
-  },
-  {
-    id: 5,
-    path: "payment-callback",
-    location: "PaymentCallBack",
   },
 ];
 
