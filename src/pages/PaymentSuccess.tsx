@@ -90,11 +90,11 @@ const PaymentSuccess = () => {
   const amount = searchParams.get("vnp_Amount") || "0";
   const orderInfo = searchParams.get("vnp_OrderInfo") || "Unknown Order";
   const responseCode = searchParams.get("vnp_ResponseCode") || "Unknown";
-  const transactionStatus =
-    searchParams.get("vnp_TransactionStatus") || "Unknown";
+  // const transactionStatus =
+  //   searchParams.get("vnp_TransactionStatus") || "Unknown";
 
   // Determine if payment was successful
-  const isSuccess = responseCode === "00" && transactionStatus === "00";
+  const isSuccess = responseCode === "00";
 
   return (
     <div className=" flex items-center justify-center p-4 my-2">
@@ -140,10 +140,10 @@ const PaymentSuccess = () => {
                   <span className="font-medium">Response Code:</span>{" "}
                   {responseCode}
                 </p>
-                <p className="text-md">
+                {/* <p className="text-md">
                   <span className="font-medium">Transaction Status:</span>{" "}
                   {transactionStatus}
-                </p>
+                </p> */}
               </div>
             </>
           )}
