@@ -14,7 +14,7 @@ export const Specialties = [
   {
     id: 3,
     specialty: "Endocrinology",
-    desc: "Deals with hormones, glands, diabetes, and thyroid issues.",
+    desc: "Deals with hormones, glands, diabetes, and thyroid.",
     icon: "FaLungs",
   },
   {

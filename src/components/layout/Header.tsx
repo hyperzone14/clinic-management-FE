@@ -109,19 +109,19 @@ export const Header = () => {
       }`}
     >
       <nav>
-        <div className="flex justify-between items-center w-full py-5 px-16">
+        <div className="flex justify-between items-center w-full py-5 md:px-10 lg:px-16">
           <div className="logo">
             <Link to="/">
               <img
                 src="/assets/images/medpal.png"
                 alt="Medpal"
-                className="lg:w-2/12 md:w-2/12 ms-11"
+                className="md:w-3/12 lg:w-2/12 ms-11"
               />
             </Link>
           </div>
 
           <div className="flex justify-center">
-            <ul className="flex gap-10 me-10">
+            <ul className="flex gap-10 md:pe-10 md:me-3 lg:pe-0 lg:me-10">
               {headerRoutes.map((route) => (
                 <li key={route.id}>
                   <Link
@@ -139,7 +139,7 @@ export const Header = () => {
             </ul>
           </div>
 
-          <div className="mx-8" ref={dropdownRef}>
+          <div className="md:ms-2 md:me-14 lg:mx-8" ref={dropdownRef}>
             {isAuthenticated ? (
               <>
                 <PiUserCircleLight
