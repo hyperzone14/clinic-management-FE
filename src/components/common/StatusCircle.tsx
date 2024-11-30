@@ -94,7 +94,7 @@ const StatusCircle: React.FC<StatusCircleProps> = ({
   const getAvailableStatuses = (): StatusType[] => {
     if (showLabTestStatusesOnly) {
       const labTestTransitions: Record<StatusType, StatusType[]> = {
-        lab_test_required: ["lab_test_completed", "cancelled"],
+        lab_test_required: [ "cancelled"],
         lab_test_completed: ["lab_test_required"],
         cancelled: [],
         success: ["lab_test_required", "lab_test_completed"],
