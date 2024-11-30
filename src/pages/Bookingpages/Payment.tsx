@@ -302,7 +302,7 @@ const Payment: React.FC = () => {
       await dispatch(
         updateAppointmentStatus({
           id: currentAppointment.id,
-          status: "CHECKED_IN",
+          status: "PENDING",
         })
       ).unwrap();
 
@@ -325,7 +325,7 @@ const Payment: React.FC = () => {
         checkPaymentStatus(currentAppointment.id.toString())
       ).unwrap();
 
-      if (result === "CONFIRMED" || result === "CHECKED_IN") {
+      if (result === "CONFIRMED") {
         goToNextStep();
       } else {
         toast.info(
