@@ -20,15 +20,14 @@ interface userInfoProps {
   birthDate: string;
 }
 
-interface ValidationErrors {
-  [key: string]: string;
-}
-
 const UserInfo = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const userInfo = useSelector((state: RootState) => state.signinProfile);
   const [selectedDate, setSelectedDate] = React.useState<Date | null>(null);
+  const [errors, setErrors] = React.useState<
+    Partial<Record<keyof userInfoProps, string>>
+  >({});
   const [formData, setFormData] = React.useState<userInfoProps>({
     fullName: userInfo.fullName ? userInfo.fullName : "",
     citizenId: "",
@@ -73,52 +72,57 @@ const UserInfo = () => {
     }
   };
 
-  const validateForm = (): ValidationErrors => {
-    const errors: ValidationErrors = {};
+  const validateForm = (): boolean => {
+    const newErrors: Partial<Record<keyof userInfoProps, string>> = {};
 
     // Validate full name
     if (!formData.fullName.trim()) {
-      errors.fullName = "Full name is required";
+      newErrors.fullName = "Full name is required";
     } else if (formData.fullName.length < 2) {
-      errors.fullName = "Full name must be at least 2 characters long";
+      newErrors.fullName = "Full name must be at least 2 characters long";
     }
 
     // Validate citizen ID
     if (!formData.citizenId.trim()) {
-      errors.citizenId = "Citizen ID is required";
+      newErrors.citizenId = "Citizen ID is required";
     }
 
     // Validate email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email.trim()) {
-      errors.email = "Email is required";
+      newErrors.email = "Email is required";
     } else if (!emailRegex.test(formData.email)) {
-      errors.email = "Please enter a valid email address";
+      newErrors.email = "Please enter a valid email address";
     }
 
     // Validate password
     if (!formData.password) {
-      errors.password = "Password is required";
+      newErrors.password = "Password is required";
     }
 
     // Validate gender
     if (!formData.gender) {
-      errors.gender = "Please select a gender";
+      newErrors.gender = "Please select a gender";
     }
 
     // Validate birth date
     if (!selectedDate) {
-      errors.birthDate = "Date of birth is required";
+      newErrors.birthDate = "Date of birth is required";
     }
 
     // Validate address
     if (!formData.address.trim()) {
-      errors.address = "Address is required";
+      newErrors.address = "Address is required";
     } else if (formData.address.length < 10) {
-      errors.address = "Please enter a complete address";
+      newErrors.address = "Please enter a complete address";
     }
 
-    return errors;
+    if (!/^\d{10}$/.test(formData.citizenId)) {
+      newErrors.citizenId = "Citizen ID must be exactly 10 digits";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -133,27 +137,44 @@ const UserInfo = () => {
     });
   };
 
-  const handleSave = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  // const handleSave = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  //   e.preventDefault();
+  //   const errors = errors;
+  //   if (Object.keys(errors).length > 0) {
+  //     Object.values(errors).forEach((error) => {
+  //       toast.error(error);
+  //     });
+  //   }
+
+  //   try {
+  //     const resultPayload = await dispatch(addUserAsync(formData));
+
+  //     if (resultPayload) {
+  //       toast.success("User information saved successfully");
+  //       navigate("/login");
+  //     } else {
+  //       toast.error("Error saving user information");
+  //     }
+  //   } catch {
+  //     toast.error("An error occurred while saving the profile.");
+  //   }
+  // };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const errors = validateForm();
-    if (Object.keys(errors).length > 0) {
-      Object.values(errors).forEach((error) => {
-        toast.error(error);
-      });
-    }
 
-    try {
-      const resultPayload = await dispatch(addUserAsync(formData));
+    if (!validateForm()) return;
 
-      if (resultPayload) {
-        toast.success("User information saved successfully");
-        navigate("/login");
-      } else {
-        toast.error("Error saving user information");
-      }
-    } catch {
-      toast.error("An error occurred while saving the profile.");
-    }
+    const userData = {
+      ...formData,
+      birthDate: formData.birthDate
+        ? formData.birthDate.split("/").reverse().join("-")
+        : "",
+    };
+
+    dispatch(addUserAsync(userData));
+    navigate("/login");
+    toast.success("Profile is saved!");
   };
 
   return (
@@ -170,7 +191,7 @@ const UserInfo = () => {
             <div className="my-5">
               <h1 className="text-3xl font-bold text-center">Profile</h1>
               <div className="mt-3">
-                <form className="m-8">
+                <form className="m-8" onSubmit={handleSubmit}>
                   <fieldset className="grid grid-cols-2 gap-x-8 gap-y-5">
                     <div className=" col-span-1">
                       <div className="flex flex-col">
@@ -185,9 +206,9 @@ const UserInfo = () => {
                           placeholder="Enter your name..."
                           required
                         />
-                        {validateForm().fullName && (
+                        {errors.fullName && (
                           <span className="text-red-500 text-sm">
-                            {validateForm().fullName}
+                            {errors.fullName}
                           </span>
                         )}
                       </div>
@@ -235,9 +256,9 @@ const UserInfo = () => {
                             OTHER
                           </label>
                         </div>
-                        {validateForm().gender && (
+                        {errors.gender && (
                           <span className="text-red-500 text-sm">
-                            {validateForm().gender}
+                            {errors.gender}
                           </span>
                         )}
                       </div>
@@ -258,9 +279,9 @@ const UserInfo = () => {
                           isClearable
                           required
                         />
-                        {validateForm().birthDate && (
+                        {errors.birthDate && (
                           <span className="text-red-500 text-sm">
-                            {validateForm().birthDate}
+                            {errors.birthDate}
                           </span>
                         )}
                       </div>
@@ -289,9 +310,9 @@ const UserInfo = () => {
                             required
                           />
                         </div>
-                        {validateForm()[field.name] && (
+                        {errors[field.name as keyof userInfoProps] && (
                           <span className="text-red-500 text-sm">
-                            {validateForm()[field.name]}
+                            {errors[field.name as keyof userInfoProps]}
                           </span>
                         )}
                       </div>
@@ -311,24 +332,24 @@ const UserInfo = () => {
                           placeholder="Enter your Address..."
                           required
                         />
-                        {validateForm().address && (
+                        {errors.address && (
                           <span className="text-red-500 text-sm">
-                            {validateForm().address}
+                            {errors.address}
                           </span>
                         )}
                       </div>
                     </div>
                   </fieldset>
+                  <div className="mt-5 mb-5 flex justify-end">
+                    <button
+                      className="bg-[#34a85a] hover:bg-[#309C54] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out me-8"
+                      type="submit"
+                    >
+                      Save Information
+                    </button>
+                  </div>
                 </form>
               </div>
-            </div>
-            <div className="mt-5 mb-5 flex justify-end">
-              <button
-                className="bg-[#34a85a] hover:bg-[#309C54] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out me-8"
-                onClick={handleSave}
-              >
-                Save Information
-              </button>
             </div>
           </div>
         </div>
