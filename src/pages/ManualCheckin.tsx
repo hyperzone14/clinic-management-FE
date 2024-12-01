@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../redux/store";
 import { searchAppointmentsCriteria } from "../redux/slices/appointmentSlice";
@@ -19,11 +19,11 @@ import { AuthService } from "../utils/security/services/AuthService";
 enum AppointmentStatus {
   CHECKED_IN = "CHECKED_IN",
   PENDING = "PENDING",
-  SUCCESS = "SUCCESS",
+  // SUCCESS = "SUCCESS",
   CANCELLED = "CANCELLED",
   CONFIRMED = "CONFIRMED",
-  LAB_TEST_REQUIRED = "LAB_TEST_REQUIRED",    
-  LAB_TEST_COMPLETED="LAB_TEST_COMPLETED",
+  // LAB_TEST_REQUIRED = "LAB_TEST_REQUIRED",
+  // LAB_TEST_COMPLETED="LAB_TEST_COMPLETED",
 }
 
 interface ApiErrorResponse {
@@ -129,10 +129,11 @@ const ManualCheckin = () => {
     error,
   } = useSelector((state: RootState) => state.appointment);
   const [currentFilters, setCurrentFilters] = useState<SearchFilters>({});
+  const appointmentsContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const isDoctor = AuthService.hasRole('ROLE_DOCTOR');
-    if ( !isDoctor) {
+    const isDoctor = AuthService.hasRole("ROLE_DOCTOR");
+    if (!isDoctor) {
       toast.error("Access denied: Doctor credentials required");
       return;
     }
@@ -151,6 +152,8 @@ const ManualCheckin = () => {
     );
   };
 
+  // console.log(appointmentsContainerRef.current);
+
   const handlePageChange = (newPage: number) => {
     if (newPage >= 0 && newPage < pagination.totalPages) {
       dispatch(
@@ -161,6 +164,23 @@ const ManualCheckin = () => {
           sort: "timeSlot,asc",
         })
       );
+
+      // if (appointmentsContainerRef.current)
+      //   appointmentsContainerRef.current?.scrollTo({
+      //     top: 0,
+      //     behavior: "smooth",
+      //   });
+
+      // Check if the container ref is not null
+      if (appointmentsContainerRef.current) {
+        appointmentsContainerRef.current.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      } else {
+        console.warn("appointmentsContainerRef is null");
+      }
+
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
@@ -238,7 +258,10 @@ const ManualCheckin = () => {
                 </div>
               ) : (
                 <>
-                  <div className="w-9/12 space-y-4 max-h-[70vh] pr-4 overflow-y-auto">
+                  <div
+                    className="w-9/12 space-y-4 max-h-[70vh] pr-4 overflow-y-auto"
+                    ref={appointmentsContainerRef}
+                  >
                     {appointments.map((appointment, index) => (
                       <ManualCheckinCard
                         key={`${appointment.id}-${appointment.appointmentStatus}`}

@@ -110,7 +110,15 @@ export const fetchAppointmentPagination = createAsyncThunk(
 
 export const fetchPatientAppointments = createAsyncThunk(
   "appointment/fetchPatientAppointments",
-  async ({ page, searchTerm, patientId }: { page: number; searchTerm?: string; patientId: number  }) => {
+  async ({
+    page,
+    searchTerm,
+    patientId,
+  }: {
+    page: number;
+    searchTerm?: string;
+    patientId: number;
+  }) => {
     let url = `/appointment/patient/${patientId}?page=${page}`;
 
     // When searching, set a large page size to effectively get all results
@@ -249,11 +257,17 @@ export const searchAppointmentsCriteria = createAsyncThunk(
 
     const response = await apiService.get<ApiResponsePagination>(url);
 
+    const filteredAppointments = response.result.content.filter(
+      (appointment) =>
+        appointment.appointmentStatus !== "LAB_TEST_REQUIRED" &&
+        appointment.appointmentStatus !== "LAB_TEST_COMPLETED"
+    );
+
     return {
-      appointments: response.result.content,
+      appointments: filteredAppointments,
       page,
       totalPages: response.result.totalPages,
-      totalElements: response.result.totalElements,
+      totalElements: filteredAppointments.length,
       pageSize: response.result.size,
     };
   }
@@ -500,12 +514,12 @@ const appointmentSlice = createSlice({
           action.error.message || "Failed to reschedule appointment";
       })
       .addCase(fetchPatientAppointments.pending, (state) => {
-        console.log('Patient appointments fetch pending');
+        console.log("Patient appointments fetch pending");
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchPatientAppointments.fulfilled, (state, action) => {
-        console.log('Patient appointments fetch fulfilled:', action.payload);
+        console.log("Patient appointments fetch fulfilled:", action.payload);
         state.loading = false;
         state.appointments = action.payload.appointments;
         state.pagination = {
@@ -516,11 +530,11 @@ const appointmentSlice = createSlice({
         };
       })
       .addCase(fetchPatientAppointments.rejected, (state, action) => {
-        console.log('Patient appointments fetch rejected:', action.error);
+        console.log("Patient appointments fetch rejected:", action.error);
         state.loading = false;
-        state.error = action.error.message || "Failed to fetch patient appointments";
+        state.error =
+          action.error.message || "Failed to fetch patient appointments";
       });
-      
   },
 });
 
