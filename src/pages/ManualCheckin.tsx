@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../redux/store";
 import { searchAppointmentsCriteria } from "../redux/slices/appointmentSlice";
@@ -129,7 +129,6 @@ const ManualCheckin = () => {
     error,
   } = useSelector((state: RootState) => state.appointment);
   const [currentFilters, setCurrentFilters] = useState<SearchFilters>({});
-  const appointmentsContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const isDoctor = AuthService.hasRole("ROLE_DOCTOR");
@@ -152,10 +151,13 @@ const ManualCheckin = () => {
     );
   };
 
-  // console.log(appointmentsContainerRef.current);
-
   const handlePageChange = (newPage: number) => {
     if (newPage >= 0 && newPage < pagination.totalPages) {
+      const scrollContainer = document.querySelector(".overflow-y-auto");
+      if (scrollContainer) {
+        scrollContainer.scrollTop = 0;
+      }
+
       dispatch(
         searchAppointmentsCriteria({
           ...currentFilters,
@@ -164,22 +166,6 @@ const ManualCheckin = () => {
           sort: "timeSlot,asc",
         })
       );
-
-      // if (appointmentsContainerRef.current)
-      //   appointmentsContainerRef.current?.scrollTo({
-      //     top: 0,
-      //     behavior: "smooth",
-      //   });
-
-      // Check if the container ref is not null
-      if (appointmentsContainerRef.current) {
-        appointmentsContainerRef.current.scrollTo({
-          top: 0,
-          behavior: "smooth",
-        });
-      } else {
-        console.warn("appointmentsContainerRef is null");
-      }
 
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -258,10 +244,7 @@ const ManualCheckin = () => {
                 </div>
               ) : (
                 <>
-                  <div
-                    className="w-9/12 space-y-4 max-h-[70vh] pr-4 overflow-y-auto"
-                    ref={appointmentsContainerRef}
-                  >
+                  <div className="w-9/12 space-y-4 max-h-[70vh] pr-4 overflow-y-auto">
                     {appointments.map((appointment, index) => (
                       <ManualCheckinCard
                         key={`${appointment.id}-${appointment.appointmentStatus}`}
