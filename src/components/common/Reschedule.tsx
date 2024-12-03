@@ -34,6 +34,8 @@ interface RescheduleProps {
   handleCloseReschedule: () => void;
   appointmentId: number | undefined;
   doctorId: number | undefined;
+  bookingDate: string | undefined;
+  timeSlot: string | undefined;
 }
 
 const Reschedule: React.FC<RescheduleProps> = ({
@@ -41,6 +43,8 @@ const Reschedule: React.FC<RescheduleProps> = ({
   handleCloseReschedule,
   appointmentId,
   doctorId,
+  bookingDate,
+  timeSlot,
 }) => {
   const dispatch = useAppDispatch();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -101,7 +105,7 @@ const Reschedule: React.FC<RescheduleProps> = ({
     }
   };
 
-  console.log("currentDoctor", currentDoctor);
+  // console.log("currentDoctor", currentDoctor);
 
   const tileDisabled = ({ date }: { date: Date }) => {
     const todayDate = new Date();
@@ -157,24 +161,34 @@ const Reschedule: React.FC<RescheduleProps> = ({
   };
 
   const getSlotStyle = (slotId: string): string => {
+    const isOriginalSlot =
+      selectedDate &&
+      bookingDate &&
+      formatDateForApi(selectedDate) === bookingDate &&
+      slotId === timeSlot;
+
     const isAvailable = isSlotAvailable(slotId);
+
+    if (isOriginalSlot) {
+      return "my-3 w-fit h-fit p-3 rounded-lg bg-gray-400 text-gray-600 cursor-not-allowed";
+    }
+
     return isAvailable
       ? "my-3 w-fit h-fit p-3 rounded-lg bg-[#BAE3F3] hover:bg-[#87ceeb] cursor-pointer text-[#1F3658] hover:text-[#fff] hover:shadow-lg transition duration-200 ease-in-out"
       : "my-3 w-fit h-fit p-3 rounded-lg bg-gray-400 text-gray-600 cursor-not-allowed";
   };
 
   const handleTimeSlotClick = (time: string, slotId: string) => {
-    if (isSlotAvailable(slotId)) {
+    const isOriginalSlot =
+      selectedDate &&
+      bookingDate &&
+      formatDateForApi(selectedDate) === bookingDate &&
+      slotId === timeSlot;
+
+    if (!isOriginalSlot && isSlotAvailable(slotId)) {
       setSelectedTime(time);
     }
   };
-
-  // const getTimeSlotString = (slotNumber: number | undefined): string => {
-  //   if (typeof slotNumber === 'number' && slotNumber >= 0 && slotNumber < TIME_SLOTS.length) {
-  //     return TIME_SLOTS[slotNumber].time;
-  //   }
-  //   return "Unknown Time";
-  // };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

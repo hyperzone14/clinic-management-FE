@@ -11,6 +11,15 @@ import "react-toastify/dist/ReactToastify.css";
 import Reschedule from "../components/common/Reschedule";
 import { AuthService } from "../utils/security/services/AuthService";
 
+const TIME_SLOTS = [
+  { id: 1, time: "7AM-8AM", slot: 0, timeSlot: "SLOT_7_TO_8" },
+  { id: 2, time: "8AM-9AM", slot: 1, timeSlot: "SLOT_8_TO_9" },
+  { id: 3, time: "9AM-10AM", slot: 2, timeSlot: "SLOT_9_TO_10" },
+  { id: 4, time: "1PM-2PM", slot: 3, timeSlot: "SLOT_13_TO_14" },
+  { id: 5, time: "2PM-3PM", slot: 4, timeSlot: "SLOT_14_TO_15" },
+  { id: 6, time: "3PM-4PM", slot: 5, timeSlot: "SLOT_15_TO_16" },
+] as const;
+
 const BookingDetail = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
@@ -236,7 +245,12 @@ const BookingDetail = () => {
                   <div className="mt-7 col-span-1 flex">
                     <p className="font-bold text-2xl">Time Slot: </p>
                     <span className="ms-12 text-2xl text-[#A9A9A9]">
-                      {currentAppointment.timeSlot}
+                      {
+                        TIME_SLOTS.find(
+                          (slot) =>
+                            slot.timeSlot === currentAppointment.timeSlot
+                        )?.time
+                      }
                     </span>
                   </div>
                   <div className="mt-7 col-span-1 flex">
@@ -281,6 +295,8 @@ const BookingDetail = () => {
             handleCloseReschedule={handleCloseReschedule}
             appointmentId={appointmentId}
             doctorId={currentAppointment.doctorId}
+            bookingDate={currentAppointment.appointmentDate}
+            timeSlot={currentAppointment.timeSlot}
           />
         )}
       </div>
