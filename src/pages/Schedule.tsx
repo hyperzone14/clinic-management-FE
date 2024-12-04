@@ -34,7 +34,9 @@ const Schedule: React.FC = () => {
   );
 
   // Sort appointments based on status order
-  const sortedAppointments = [...appointments].sort((a, b) => {
+  const sortedAppointments = [...appointments]
+  .filter(appointment => appointment.status !== 'pending')  // Filter out pending appointments
+  .sort((a, b) => {
     const statusOrderA = STATUS_ORDER[a.status as StatusType] || 999;
     const statusOrderB = STATUS_ORDER[b.status as StatusType] || 999;
     return statusOrderA - statusOrderB;
