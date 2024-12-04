@@ -409,6 +409,7 @@ const EditDoctorModal: React.FC<EditModalProps> = ({
     ...doctor,
     departmentId: String(doctor.departmentId),
     birthDate: formatDateForDisplay(doctor.birthDate),
+    workingDays: doctor.workingDays || [],
   });
   const [errors, setErrors] = useState<
     Partial<Record<keyof DoctorData, string>>
@@ -420,9 +421,34 @@ const EditDoctorModal: React.FC<EditModalProps> = ({
       ...prev,
       departmentId: String(doctor.departmentId),
       birthDate: formatDateForDisplay(doctor.birthDate),
+      workingDays: doctor.workingDays || [],
     }));
   }, [doctor]);
 
+  // const handleChange = (
+  //   e:
+  //     | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  //     | SelectChangeEvent<string | string[]>
+  // ) => {
+  //   const { name, value } = e.target as {
+  //     name: string;
+  //     value: string | string[];
+  //   };
+
+  //   // Special handling for birthDate to ensure consistent formatting
+  //   const processedValue =
+  //     name === "birthDate" ? formatDateForDisplay(value as string) : value;
+
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     [name]:
+  //       name === "departmentId" || name === "workingDays"
+  //         ? Array.isArray(value)
+  //           ? value.map(String)
+  //           : String(value)
+  //         : processedValue || null,
+  //   }));
+  // };
   const handleChange = (
     e:
       | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -433,18 +459,18 @@ const EditDoctorModal: React.FC<EditModalProps> = ({
       value: string | string[];
     };
 
-    // Special handling for birthDate to ensure consistent formatting
     const processedValue =
-      name === "birthDate" ? formatDateForDisplay(value as string) : value;
+      name === "birthDate"
+        ? formatDateForDisplay(value as string)
+        : name === "departmentId"
+        ? String(value)
+        : name === "workingDays"
+        ? (value as string[]).map(String)
+        : value;
 
     setFormData((prev) => ({
       ...prev,
-      [name]:
-        name === "departmentId" || name === "workingDays"
-          ? Array.isArray(value)
-            ? value.map(String)
-            : String(value)
-          : processedValue || null,
+      [name]: processedValue || null,
     }));
   };
 
@@ -497,8 +523,8 @@ const EditDoctorModal: React.FC<EditModalProps> = ({
       newErrors.departmentId = "Department is required";
     } else {
       const departmentId = Number(formData.departmentId);
-      if (isNaN(departmentId) || departmentId < 1 || departmentId > 11) {
-        newErrors.departmentId = "Department ID must be between 1 and 11";
+      if (isNaN(departmentId) || departmentId < 1 || departmentId > 12) {
+        newErrors.departmentId = "Department ID must be between 1 and 12";
       }
     }
 
@@ -656,8 +682,9 @@ const EditDoctorModal: React.FC<EditModalProps> = ({
                 fullWidth
                 SelectProps={{
                   multiple: true,
-                  value: formData.workingDays,
-                  onChange: handleChange,
+                  value: formData.workingDays || [], // Ensure it's always an array
+                  onChange: (event) =>
+                    handleChange(event as SelectChangeEvent<string | string[]>),
                 }}
                 error={!!errors.workingDays}
                 helperText={errors.workingDays}

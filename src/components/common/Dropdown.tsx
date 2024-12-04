@@ -55,6 +55,8 @@ const Dropdown: React.FC<DropdownProps> = ({
     }
   }, []);
 
+  // console.log("roles: ", roles);
+
   useEffect(() => {
     if (isOpen) {
       setShouldRender(true);

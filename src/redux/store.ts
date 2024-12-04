@@ -20,6 +20,7 @@ import auth from "./slices/authSlice";
 import signinProfileReducer from "./slices/signinProfileSlice";
 import doctorManageReducer from "./slices/doctorManageSlice";
 import paymentReducer from "./slices/paymentSlice";
+import appointmentManageReducer from "./slices/appointmentManageSlice";
 
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { thunk } from "redux-thunk";
@@ -49,6 +50,7 @@ const rootReducer = combineReducers({
   dashboard: dashboardReducer,
   doctorManage: doctorManageReducer,
   payment: paymentReducer,
+  appointmentManage: appointmentManageReducer,
 });
 
 const store = configureStore({

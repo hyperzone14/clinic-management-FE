@@ -148,6 +148,7 @@ const DoctorManagement = () => {
     // Convert back to User format with potentially null fields
     const originalDoctor: Doctor = {
       ...user,
+      departmentId: user.departmentId,
       status: user.status === "-" ? null : user.status,
     };
     setSelectedDoctor(originalDoctor);

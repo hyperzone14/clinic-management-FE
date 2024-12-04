@@ -32,7 +32,31 @@ export interface AdminTableProps<T> {
   getRowClassName?: (item: T) => string;
   statusField?: keyof T;
   isUserManage?: boolean;
+  isAppointmentManage?: boolean;
 }
+
+// Status badge styles
+const getBadgeStyles = (status: string) => {
+  switch (status.toLowerCase()) {
+    case "checked-in":
+      return "bg-blue-100 text-blue-800";
+    case "pending":
+      return "bg-yellow-100 text-yellow-800";
+    case "active":
+    case "success":
+      return "bg-green-100 text-green-800";
+    case "cancelled":
+      return "bg-red-100 text-red-800";
+    case "confirmed":
+      return "bg-purple-100 text-purple-800";
+    case "lab_test_required":
+      return "bg-orange-100 text-orange-800";
+    case "lab_test_completed":
+      return "bg-sky-100 text-sky-800";
+    default:
+      return "bg-gray-100 text-gray-800";
+  }
+};
 
 const AdminTable = <T extends { id: number | string; role?: string }>({
   data,
@@ -43,6 +67,7 @@ const AdminTable = <T extends { id: number | string; role?: string }>({
   getRowClassName,
   statusField,
   isUserManage = false,
+  isAppointmentManage = false,
 }: AdminTableProps<T>) => {
   const dispatch = useDispatch();
   const { currentPage, rowsPerPage, roleFilter } = useSelector(
@@ -115,7 +140,7 @@ const AdminTable = <T extends { id: number | string; role?: string }>({
                   {column.label}
                 </TableCell>
               ))}
-              {showActions && (
+              {showActions && !isAppointmentManage && (
                 <TableCell sx={{ fontWeight: "bold" }}>Actions</TableCell>
               )}
             </TableRow>
@@ -131,11 +156,9 @@ const AdminTable = <T extends { id: number | string; role?: string }>({
                   <TableCell key={`${row.id}-${column.id}`}>
                     {statusField && column.id === statusField ? (
                       <span
-                        className={`px-2 py-1 rounded-full text-sm ${
-                          row[statusField] === "ACTIVE"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
+                        className={`px-2 py-1 rounded-full text-sm ${getBadgeStyles(
+                          String(row[statusField])
+                        )}`}
                       >
                         {column.render(row)}
                       </span>
@@ -144,7 +167,7 @@ const AdminTable = <T extends { id: number | string; role?: string }>({
                     )}
                   </TableCell>
                 ))}
-                {showActions && (
+                {showActions && !isAppointmentManage && (
                   <TableCell>
                     <div className="flex items-center">
                       {onEdit && (
