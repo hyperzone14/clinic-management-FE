@@ -39,9 +39,27 @@ const MedicalService: React.FC = () => {
   const hasLabTests = examinationDetailRequestDTOS.length > 0;
   const hasPrescriptions = prescribedDrugRequestDTOS.length > 0;
 
+  const validatePrescriptions = () => {
+    if (prescribedDrugRequestDTOS.length === 0) return false;
+    
+    return prescribedDrugRequestDTOS.every(drug => 
+      drug.drugId !== 0 && 
+      drug.dosage > 0 && 
+      drug.duration > 0 && 
+      drug.frequency.trim() !== ""
+    );
+  };
+
+  const validateLabTests = () => {
+    if (examinationDetailRequestDTOS.length === 0) return false;
+    
+    return examinationDetailRequestDTOS.every(test => 
+      test.examinationType.trim() !== ""
+    );
+  };
+
   useEffect(() => {
     if (!patientInfo.patientId) {
-      
       return;
     }
     dispatch(fetchDrugs());
@@ -56,16 +74,33 @@ const MedicalService: React.FC = () => {
   }, [hasLabTests, hasPrescriptions]);
 
   const handleSubmit = async () => {
+    // Validate syndrome
     if (!syndrome.trim()) {
       toast.error('Please enter syndrome');
       return;
     }
-  
-    if (!hasLabTests && prescribedDrugRequestDTOS.length === 0) {
-      toast.error('Please add at least one prescribed drug or lab test');
+
+    // Validate that either lab tests or prescriptions are present and valid
+    const hasValidPrescriptions = validatePrescriptions();
+    const hasValidLabTests = validateLabTests();
+
+    if (!hasValidLabTests && !hasValidPrescriptions) {
+      toast.error('Please add and complete either lab tests or prescriptions');
       return;
     }
-  
+
+    // Validate prescription details if prescriptions are present
+    if (hasPrescriptions && !hasValidPrescriptions) {
+      toast.error('Please complete all prescription fields (medicine, quantity, duration, and frequency)');
+      return;
+    }
+
+    // Validate lab test details if lab tests are present
+    if (hasLabTests && !hasValidLabTests) {
+      toast.error('Please enter all lab test types');
+      return;
+    }
+
     try {
       await dispatch(submitTreatment()).unwrap();
       toast.success(hasLabTests ? 'Lab test request submitted successfully' : 'Medical bill created successfully');
@@ -125,7 +160,6 @@ const MedicalService: React.FC = () => {
       </div>
     );
   }
-
   return (
     <div className="w-full min-h-screen bg-gray-50 pb-20">
       <ToastContainer />
