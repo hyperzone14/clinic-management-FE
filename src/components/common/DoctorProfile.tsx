@@ -331,7 +331,12 @@ const DoctorProfile: React.FC<DoctorProfileProps> = ({ id }) => {
                 </div>
                 {[
                   { label: "Citizen ID", name: "citizenId", type: "text" },
-                  { label: "Email", name: "email", type: "email" },
+                  {
+                    label: "Email",
+                    name: "email",
+                    type: "email",
+                    disabled: true,
+                  },
                   { label: "Password", name: "password", type: "password" },
                   {
                     label: "Department ID",
@@ -351,6 +356,7 @@ const DoctorProfile: React.FC<DoctorProfileProps> = ({ id }) => {
                         onChange={handleChange}
                         className="w-full h-10 bg-[#d9d9d9] rounded-md p-2"
                         placeholder={`Enter your ${field.label.toLowerCase()}...`}
+                        disabled={field.disabled}
                         required
                       />
                       {errors[field.name as keyof Profile] && (

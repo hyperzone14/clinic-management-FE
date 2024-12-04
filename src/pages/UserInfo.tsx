@@ -25,6 +25,7 @@ const UserInfo = () => {
   const navigate = useNavigate();
   const userInfo = useSelector((state: RootState) => state.signinProfile);
   const [selectedDate, setSelectedDate] = React.useState<Date | null>(null);
+  // const { error } = useSelector((state: RootState) => state.userManage);
   const [errors, setErrors] = React.useState<
     Partial<Record<keyof userInfoProps, string>>
   >({});
@@ -41,14 +42,6 @@ const UserInfo = () => {
   const formatDateForBackend = (date: Date): string => {
     return date.toISOString().split("T")[0];
   };
-
-  // const handleDateChange = (date: Date | null) => {
-  //   setSelectedDate(date);
-  //   setFormData((prevData) => ({
-  //     ...prevData,
-  //     birthDate: date ? formatDateForBackend(date) : "",
-  //   }));
-  // };
 
   const handleDateChange = (date: Date | null) => {
     const today = new Date();
@@ -137,44 +130,37 @@ const UserInfo = () => {
     });
   };
 
-  // const handleSave = async (e: React.MouseEvent<HTMLButtonElement>) => {
-  //   e.preventDefault();
-  //   const errors = errors;
-  //   if (Object.keys(errors).length > 0) {
-  //     Object.values(errors).forEach((error) => {
-  //       toast.error(error);
-  //     });
-  //   }
-
-  //   try {
-  //     const resultPayload = await dispatch(addUserAsync(formData));
-
-  //     if (resultPayload) {
-  //       toast.success("User information saved successfully");
-  //       navigate("/login");
-  //     } else {
-  //       toast.error("Error saving user information");
-  //     }
-  //   } catch {
-  //     toast.error("An error occurred while saving the profile.");
-  //   }
-  // };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!validateForm()) return;
 
-    const userData = {
-      ...formData,
-      birthDate: formData.birthDate
-        ? formData.birthDate.split("/").reverse().join("-")
-        : "",
-    };
+    try {
+      const userData = {
+        ...formData,
+        birthDate: formData.birthDate
+          ? formData.birthDate.split("/").reverse().join("-")
+          : "",
+      };
 
-    dispatch(addUserAsync(userData));
-    navigate("/login");
-    toast.success("Profile is saved!");
+      const result = await dispatch(addUserAsync(userData));
+
+      // Check if there's an error in the result
+      if (result.meta.requestStatus === "rejected") {
+        toast.error(
+          "Your email has already been registered, please change your email."
+        );
+      } else {
+        // Navigate to the login page and display a success message
+        navigate("/login");
+        toast.success("Profile is saved!");
+      }
+    } catch (err) {
+      // Handle any other errors that may occur
+      toast.error(
+        (err as Error).message || "An error occurred while saving the profile."
+      );
+    }
   };
 
   return (
@@ -342,7 +328,7 @@ const UserInfo = () => {
                   </fieldset>
                   <div className="mt-5 mb-5 flex justify-end">
                     <button
-                      className="bg-[#34a85a] hover:bg-[#309C54] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out me-8"
+                      className="bg-[#34a85a] hover:bg-[#309C54] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out"
                       type="submit"
                     >
                       Save Information
