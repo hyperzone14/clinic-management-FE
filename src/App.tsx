@@ -70,6 +70,7 @@ const AdminLayout: React.FC = () => {
 const SignIn = lazy(() => import("./pages/Auth/SignIn"));
 const Login = lazy(() => import("./pages/Auth/LogIn"));
 const ForgotPassword = lazy(() => import("./pages/Auth/ForgetPassword"));
+const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
 
 // Automatically import all page components
 const pageComponents = import.meta.glob(["./pages/*.tsx", "./pages/**/*.tsx"]);
@@ -140,6 +141,14 @@ function App() {
                 element={
                   <Suspense fallback={<div>Loading...</div>}>
                     <ForgotPassword />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/payment-success"
+                element={
+                  <Suspense fallback={<div>Loading...</div>}>
+                    <PaymentSuccess />
                   </Suspense>
                 }
               />

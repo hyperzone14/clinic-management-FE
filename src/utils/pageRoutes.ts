@@ -216,27 +216,27 @@ export const adminRoutes: Routes[] = [
   },
   {
     id: 2,
-    path: "patient-management",
+    path: "patient",
     location: "PatientManagement",
     // roles: ["ROLE_DOCTOR"],
     roles: ["ROLE_CLIENT_OWNER"],
   },
   {
     id: 3,
-    path: "drug-management",
+    path: "drug",
     location: "DrugManagement",
     roles: ["ROLE_CLIENT_OWNER"],
   },
   {
     id: 4,
-    path: "doctor-management",
+    path: "doctor",
     location: "DoctorManagement",
     roles: ["ROLE_CLIENT_OWNER"],
   },
-  // {
-  //   id: 5,
-  //   path: "not-permitted",
-  //   location: "NotPermitted",
-  //   // roles: ["ROLE_ADMIN"], // Both roles can access
-  // },
+  {
+    id: 5,
+    path: "appointment",
+    location: "AppointmentManagement",
+    roles: ["ROLE_CLIENT_OWNER"],
+  },
 ];
