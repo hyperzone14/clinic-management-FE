@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { MessageCircle, X, Send, Loader2 } from "lucide-react";
+import ReactMarkdown from 'react-markdown';
 import {
   createAndJoinRoom,
   sendMessage,
@@ -21,41 +22,51 @@ const Chatbot = () => {
   const messageAreaRef = useRef<HTMLDivElement>(null);
   const currentUserId = localStorage.getItem("userId") || "1";
 
-  // Updated helper function to parse and clean JSON responses
+  // Helper function to handle both JSON and Markdown responses
   const cleanMessageContent = (content: string | undefined) => {
     if (!content) return "";
     const cleanedContent = content.replace("@bot", "").trim();
     
     try {
       const jsonContent = JSON.parse(cleanedContent);
-      // If the response has an "answer" field, return just that
+      // Handle response with "answer" field
       if (jsonContent.answer) {
         return jsonContent.answer;
       }
-      // If it's just a string in JSON, return that
+      // Handle response with message and data fields
+      if (jsonContent.message && jsonContent.data) {
+        const dataStr = Object.entries(jsonContent.data)
+          .map(([key, value]) => `- **${key}**: ${value}`)
+          .join('\n');
+        return `**Message**: ${jsonContent.message}\n\n**Data**:\n${dataStr}`;
+      }
+      // Handle simple string JSON
       if (typeof jsonContent === 'string') {
         return jsonContent;
       }
-      // Fallback to the original cleaned content if not parseable as expected
+      // Return cleaned content if JSON parsing succeeds but format is unexpected
       return cleanedContent;
     } catch (e) {
-      // If it's not JSON, return the cleaned content as is
+      // If not JSON, return cleaned content as is (might be plain text or Markdown)
       return cleanedContent;
     }
   };
 
+  // Connect to chat when opened
   useEffect(() => {
     if (isOpen && !isConnected && !loading) {
       dispatch(createAndJoinRoom(Number(currentUserId)));
     }
   }, [isOpen, isConnected, loading, dispatch, currentUserId]);
 
+  // Auto-scroll to latest messages
   useEffect(() => {
     if (messageAreaRef.current) {
       messageAreaRef.current.scrollTop = messageAreaRef.current.scrollHeight;
     }
   }, [messages]);
 
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       dispatch(clearChat());
@@ -80,6 +91,24 @@ const Chatbot = () => {
       e.preventDefault();
       handleSubmit(e as any);
     }
+  };
+
+  // Custom components for Markdown rendering
+  const MarkdownComponents = {
+    p: ({ children }) => <p className="mb-2">{children}</p>,
+    strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+    ul: ({ children }) => <ul className="list-disc ml-4 mb-2">{children}</ul>,
+    ol: ({ children }) => <ol className="list-decimal ml-4 mb-2">{children}</ol>,
+    li: ({ children }) => <li className="mb-1">{children}</li>,
+    code: ({ inline, children }) => 
+      inline ? (
+        <code className="bg-gray-100 px-1 rounded">{children}</code>
+      ) : (
+        <pre className="bg-gray-100 p-2 rounded mb-2 overflow-x-auto">
+          <code>{children}</code>
+        </pre>
+      ),
+    // Add more custom components as needed
   };
 
   return (
@@ -152,9 +181,12 @@ const Chatbot = () => {
                         : "bg-gray-50 text-gray-800"
                     }`}
                   >
-                    <p className="text-[15px] leading-normal whitespace-pre-wrap">
+                    <ReactMarkdown 
+                      components={MarkdownComponents}
+                      className="text-[15px] leading-normal"
+                    >
                       {cleanedContent}
-                    </p>
+                    </ReactMarkdown>
                   </div>
                 </div>
               );
