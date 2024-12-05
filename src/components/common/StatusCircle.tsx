@@ -106,7 +106,7 @@ const StatusCircle: React.FC<StatusCircleProps> = ({
     }
 
     const statusTransitions: Record<StatusType, StatusType[]> = {
-      pending: ["confirmed", "cancelled"],
+      pending: ["confirmed","checked-in", "cancelled"],
       confirmed: ["checked-in", "cancelled"],
       "checked-in": ["cancelled"],
       lab_test_required: ["cancelled"],
