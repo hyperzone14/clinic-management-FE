@@ -9,6 +9,12 @@ import {
 } from "../../redux/slices/chatbotSlice";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 
+// Define TypeScript interfaces
+interface MarkdownComponentProps {
+  children: React.ReactNode;
+  inline?: boolean;
+}
+
 const Chatbot = () => {
   const dispatch = useAppDispatch();
   const chatState = useAppSelector(selectChat);
@@ -29,44 +35,36 @@ const Chatbot = () => {
     
     try {
       const jsonContent = JSON.parse(cleanedContent);
-      // Handle response with "answer" field
       if (jsonContent.answer) {
         return jsonContent.answer;
       }
-      // Handle response with message and data fields
       if (jsonContent.message && jsonContent.data) {
         const dataStr = Object.entries(jsonContent.data)
           .map(([key, value]) => `- **${key}**: ${value}`)
           .join('\n');
         return `**Message**: ${jsonContent.message}\n\n**Data**:\n${dataStr}`;
       }
-      // Handle simple string JSON
       if (typeof jsonContent === 'string') {
         return jsonContent;
       }
-      // Return cleaned content if JSON parsing succeeds but format is unexpected
       return cleanedContent;
     } catch (e) {
-      // If not JSON, return cleaned content as is (might be plain text or Markdown)
       return cleanedContent;
     }
   };
 
-  // Connect to chat when opened
   useEffect(() => {
     if (isOpen && !isConnected && !loading) {
       dispatch(createAndJoinRoom(Number(currentUserId)));
     }
   }, [isOpen, isConnected, loading, dispatch, currentUserId]);
 
-  // Auto-scroll to latest messages
   useEffect(() => {
     if (messageAreaRef.current) {
       messageAreaRef.current.scrollTop = messageAreaRef.current.scrollHeight;
     }
   }, [messages]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       dispatch(clearChat());
@@ -93,8 +91,8 @@ const Chatbot = () => {
     }
   };
 
-  // Custom components for Markdown rendering
-  const MarkdownComponents = {
+  // Properly typed Markdown components
+  const MarkdownComponents: Record<string, React.FC<MarkdownComponentProps>> = {
     p: ({ children }) => <p className="mb-2">{children}</p>,
     strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
     ul: ({ children }) => <ul className="list-disc ml-4 mb-2">{children}</ul>,
@@ -108,7 +106,6 @@ const Chatbot = () => {
           <code>{children}</code>
         </pre>
       ),
-    // Add more custom components as needed
   };
 
   return (
