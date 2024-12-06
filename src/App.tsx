@@ -28,6 +28,13 @@ import AdminSideBar from "./components/layout/AdminSideBar";
 import Chatbot from "./components/layout/Chatbot";
 import { ProtectedRoute } from "./utils/security/components/ProtectedRoute";
 import NotPermitted from "./pages/Adminpages/NotPermitted";
+import { AuthService } from "./utils/security/services/AuthService";
+
+const ConditionalChatbot: React.FC = () => {
+  const userRole = AuthService.getRolesFromToken();
+  const hasPatientRole = userRole.includes("ROLE_PATIENT");
+  return hasPatientRole ? <Chatbot /> : null;
+};
 
 // Layout wrapper component for pages that need header and footer
 const MainLayout: React.FC = () => {
@@ -37,7 +44,7 @@ const MainLayout: React.FC = () => {
       <main className="flex-grow mx-[11rem]">
         <Outlet />
       </main>
-      <Chatbot />
+      <ConditionalChatbot />
       <BackToTop />
       <Footer />
     </div>
