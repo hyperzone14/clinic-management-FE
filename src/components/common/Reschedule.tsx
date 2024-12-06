@@ -179,7 +179,13 @@ const Reschedule: React.FC<RescheduleProps> = ({
   };
 
   const handleTimeSlotClick = (time: string, slotId: string) => {
-    if (isSlotAvailable(slotId)) {
+    const isOriginalSlot =
+      selectedDate &&
+      bookingDate &&
+      formatDateForApi(selectedDate) === bookingDate &&
+      slotId === timeSlot;
+
+    if (isSlotAvailable(slotId) && !isOriginalSlot) {
       setSelectedTime(time);
     }
   };

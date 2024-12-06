@@ -81,6 +81,16 @@ const BookingDetail = () => {
       return;
     }
 
+    if (
+      currentAppointment.appointmentStatus !== "COMPLETED" &&
+      currentAppointment.appointmentStatus !== "PENDING"
+    ) {
+      toast.error(
+        "Appointments can only be rescheduled when they are in COMPLETED or PENDING status"
+      );
+      return;
+    }
+
     const daysDifference = getDaysDifference(
       currentAppointment.appointmentDate
     );
