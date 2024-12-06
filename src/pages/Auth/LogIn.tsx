@@ -13,7 +13,7 @@ import { AppDispatch } from "../../redux/store";
 import { setCredentials } from "../../redux/slices/authSlice";
 import { AuthService } from "../../utils/security/services/AuthService";
 import { FormHelperText } from "@mui/material";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { JwtUtils } from "../../utils/security/jwt/JwtUtils";
 
@@ -82,16 +82,19 @@ const LogIn: React.FC = () => {
         );
         navigate("/");
       } else {
-        setError(response.message || "Login failed");
+        const errorMessage = response.message || "Login failed";
+        setError(errorMessage);
       }
     } catch (err) {
-      toast.error(
-        err.response?.data?.message || "An error occurred during login"
-      );
+      const errorMessage =
+        err instanceof Error ? err.message : "An error occurred during login";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
+
+  console.log(error);
   return (
     <>
       <ToastContainer />
@@ -112,7 +115,7 @@ const LogIn: React.FC = () => {
                   {/* {error && (
                     <div className="text-red-500 text-center mb-4">{error}</div>
                   )} */}
-                  <div className="mt-10 space-y-4 px-16">
+                  <div className="mt-8 space-y-4 px-16">
                     <FormControl fullWidth variant="outlined" error={!!error}>
                       <InputLabel htmlFor="email">Email</InputLabel>
                       <OutlinedInput
