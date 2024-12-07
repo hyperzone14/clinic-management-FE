@@ -82,7 +82,7 @@ const BookingDetail = () => {
     }
 
     if (
-      currentAppointment.appointmentStatus !== "COMPLETED" &&
+      currentAppointment.appointmentStatus !== "CONFIRMED" &&
       currentAppointment.appointmentStatus !== "PENDING"
     ) {
       toast.error(
