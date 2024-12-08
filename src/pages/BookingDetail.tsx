@@ -86,7 +86,7 @@ const BookingDetail = () => {
       currentAppointment.appointmentStatus !== "PENDING"
     ) {
       toast.error(
-        "Appointments can only be rescheduled when they are in COMPLETED or PENDING status"
+        "Appointments can only be rescheduled when they are in CONFIRMED or PENDING status"
       );
       return;
     }
