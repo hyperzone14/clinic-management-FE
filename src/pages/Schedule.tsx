@@ -79,7 +79,7 @@ const Schedule: React.FC = () => {
     fetchDoctorSchedule();
   }, [dispatch, currentPage, pageSize, navigate]);
 
-  const handlePatientClick = async (appointment: Appointment, index: number) => {
+  const handlePatientClick = async (appointment: Appointment) => {
     if (appointment.status === 'checked-in') {
       try {
         if (!appointment.patientId || !appointment.doctorId) {
