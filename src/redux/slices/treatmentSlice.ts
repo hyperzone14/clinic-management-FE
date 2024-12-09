@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { apiService } from "../../utils/axios-config";
-import { updateAppointmentStatus, fetchAppointments } from './scheduleSlice';
+import { fetchAppointments } from './scheduleSlice';
 import { Gender } from './scheduleSlice';
 import { toast } from "react-toastify";
 import axios from 'axios';
@@ -385,7 +385,7 @@ const treatmentSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(submitTreatment.fulfilled, (state) => {
+      .addCase(submitTreatment.fulfilled, () => {
         return initialState;
       })
       .addCase(submitTreatment.rejected, (state, action) => {
