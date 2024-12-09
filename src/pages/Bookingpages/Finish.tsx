@@ -168,7 +168,7 @@ const Finish: React.FC = () => {
             <div className="my-10 mx-16">
               <Title id={6} />
               <div className="mt-10 mx-16 px-3">
-                <div className="flex grid grid-cols-2 justify-between">
+                <div className="grid grid-cols-2 justify-between">
                   <div className="col-span-1 flex">
                     <p className="font-bold text-2xl">Service: </p>
                     <div className="ms-5 flex">

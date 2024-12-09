@@ -514,12 +514,12 @@ const appointmentSlice = createSlice({
           action.error.message || "Failed to reschedule appointment";
       })
       .addCase(fetchPatientAppointments.pending, (state) => {
-        console.log("Patient appointments fetch pending");
+        // console.log("Patient appointments fetch pending");
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchPatientAppointments.fulfilled, (state, action) => {
-        console.log("Patient appointments fetch fulfilled:", action.payload);
+        // console.log("Patient appointments fetch fulfilled:", action.payload);
         state.loading = false;
         state.appointments = action.payload.appointments;
         state.pagination = {

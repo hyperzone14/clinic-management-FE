@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useOutletContext, useNavigate } from "react-router-dom";
+import { useOutletContext } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../../redux/store";
 import { Search, Plus, Trash2 } from "lucide-react";
 import {
@@ -14,9 +14,7 @@ interface PrescriptionStepProps {
 }
 
 const PrescriptionList: React.FC = () => {
-  const { goToNextStep, goToPreviousStep } =
-    useOutletContext<PrescriptionStepProps>();
-  const navigate = useNavigate();
+  const { goToNextStep } = useOutletContext<PrescriptionStepProps>();
   const dispatch = useAppDispatch();
   const prescribeDrugs = useAppSelector(
     (state) => state.predrug.prescribeDrugs

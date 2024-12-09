@@ -32,7 +32,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   const [shouldRender, setShouldRender] = useState(isOpen);
 
   const [roles, setRoles] = useState<string[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  // const [error, setError] = useState<string | null>(null);
 
   const handleReduce = (data: string | null | undefined) => {
     if (data == null) return ""; // handles both null and undefined
@@ -47,11 +47,17 @@ const Dropdown: React.FC<DropdownProps> = ({
       const userRoles = AuthService.getRolesFromToken();
       setRoles(userRoles);
       if (!userRoles) {
-        setError("No roles found or user is not authenticated");
+        toast.error("No roles found or user is not authenticated");
+        // Or use toast more specifically
+        toast.error("Unable to retrieve user roles");
       }
     } catch (err) {
-      setError("Error fetching roles");
-      toast.error("Error fetching roles:", err);
+      console.error("Error fetching roles:", err);
+      toast.error(
+        `Error fetching roles: ${
+          err instanceof Error ? err.message : "Unknown error"
+        }`
+      );
     }
   }, []);
 

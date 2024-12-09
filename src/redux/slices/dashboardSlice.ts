@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // redux/slices/dashboardSlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { apiService } from "../../utils/axios-config";
 import { toast } from "react-toastify";
 
 // Types
-export type StatusType = 
+export type StatusType =
   | "success"
   | "checked-in"
   | "pending"
@@ -13,14 +14,14 @@ export type StatusType =
   | "lab_test_required"
   | "lab_test_completed";
 
-export type Gender = 'Male' | 'Female' | 'Other';
+export type Gender = "Male" | "Female" | "Other";
 
 export interface PatientResponseDTO {
   id: number;
   fullName: string;
   citizenId: string;
   email: string;
-  gender: Gender;  
+  gender: Gender;
   address: string;
   birthDate: string;
   role: string | null;
@@ -85,19 +86,21 @@ const REVENUE_PER_APPOINTMENT = 70000;
 // Helper Functions
 const mapStatus = (backendStatus: string): StatusType => {
   const statusMap: Record<string, StatusType> = {
-    'PENDING': 'pending',
-    'CONFIRMED': 'confirmed',
-    'CHECKED_IN': 'checked-in',
-    'CANCELLED': 'cancelled',
-    'SUCCESS': 'success',
-    'LAB_TEST_REQUIRED': 'lab_test_required',
-    'LAB_TEST_COMPLETED': 'lab_test_completed'
+    PENDING: "pending",
+    CONFIRMED: "confirmed",
+    CHECKED_IN: "checked-in",
+    CANCELLED: "cancelled",
+    SUCCESS: "success",
+    LAB_TEST_REQUIRED: "lab_test_required",
+    LAB_TEST_COMPLETED: "lab_test_completed",
   };
-  const normalizedStatus = backendStatus?.toUpperCase() || 'PENDING';
-  return statusMap[normalizedStatus] || 'pending';
+  const normalizedStatus = backendStatus?.toUpperCase() || "PENDING";
+  return statusMap[normalizedStatus] || "pending";
 };
 
-const transformAppointmentData = (apt: AppointmentResponseItem): Appointment => ({
+const transformAppointmentData = (
+  apt: AppointmentResponseItem
+): Appointment => ({
   id: apt.id,
   appointmentDate: apt.appointmentDate,
   doctorName: apt.doctorName,
@@ -111,29 +114,30 @@ const transformAppointmentData = (apt: AppointmentResponseItem): Appointment => 
   appointmentType: apt.timeSlot,
   status: mapStatus(apt.appointmentStatus),
   gender: apt.patientResponseDTO.gender,
-  birthDate: apt.patientResponseDTO.birthDate
+  birthDate: apt.patientResponseDTO.birthDate,
 });
 
 const calculateStats = (appointments: Appointment[]): DashboardStats => {
-  const confirmedAppointments = appointments.filter(apt => 
-    ['confirmed', 'checked-in'].includes(apt.status)
+  const confirmedAppointments = appointments.filter((apt) =>
+    ["confirmed", "checked-in"].includes(apt.status)
   ).length;
-  
-  const successfulAppointments = appointments.filter(apt => 
-    ['success', 'lab_test_completed', 'lab_test_required'].includes(apt.status)
+
+  const successfulAppointments = appointments.filter((apt) =>
+    ["success", "lab_test_completed", "lab_test_required"].includes(apt.status)
   ).length;
-  
-  const cancelledAppointments = appointments.filter(apt => 
-    apt.status === 'cancelled'
+
+  const cancelledAppointments = appointments.filter(
+    (apt) => apt.status === "cancelled"
   ).length;
 
   const uniqueDates = new Set(
-    appointments.map(apt => apt.appointmentDate.split('T')[0])
+    appointments.map((apt) => apt.appointmentDate.split("T")[0])
   );
   const numberOfDays = uniqueDates.size || 1;
 
   // Each successful or confirmed appointment generates revenue
-  const revenueGeneratingAppointments = confirmedAppointments + successfulAppointments;
+  const revenueGeneratingAppointments =
+    confirmedAppointments + successfulAppointments;
   const totalRevenue = revenueGeneratingAppointments * REVENUE_PER_APPOINTMENT;
   const averageRevenuePerDay = totalRevenue / numberOfDays;
 
@@ -143,7 +147,7 @@ const calculateStats = (appointments: Appointment[]): DashboardStats => {
     successfulAppointments,
     cancelledAppointments,
     totalRevenue,
-    averageRevenuePerDay
+    averageRevenuePerDay,
   };
 };
 
@@ -158,8 +162,8 @@ const initialState: DashboardState = {
     successfulAppointments: 0,
     cancelledAppointments: 0,
     totalRevenue: 0,
-    averageRevenuePerDay: 0
-  }
+    averageRevenuePerDay: 0,
+  },
 };
 
 // Thunks
@@ -170,10 +174,13 @@ export const fetchDashboardData = createAsyncThunk(
       const response = await apiService.get<AppointmentResponse>(
         "/appointment?size=1000000"
       );
-      
+
       return response.result.content.map(transformAppointmentData);
     } catch (error: any) {
-      const errorMessage = error?.response?.data?.message || error?.message || "Failed to fetch dashboard data";
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to fetch dashboard data";
       toast.error(errorMessage);
       return rejectWithValue(errorMessage);
     }
@@ -187,7 +194,7 @@ const dashboardSlice = createSlice({
   reducers: {
     updateStats: (state) => {
       state.stats = calculateStats(state.appointments);
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -195,12 +202,15 @@ const dashboardSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchDashboardData.fulfilled, (state, action: PayloadAction<Appointment[]>) => {
-        state.loading = false;
-        state.appointments = action.payload;
-        state.stats = calculateStats(action.payload);
-        state.error = null;
-      })
+      .addCase(
+        fetchDashboardData.fulfilled,
+        (state, action: PayloadAction<Appointment[]>) => {
+          state.loading = false;
+          state.appointments = action.payload;
+          state.stats = calculateStats(action.payload);
+          state.error = null;
+        }
+      )
       .addCase(fetchDashboardData.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;

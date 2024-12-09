@@ -1,5 +1,5 @@
 import React from "react";
-import { Clock, Calendar, UserRound } from "lucide-react";
+import { Calendar, UserRound } from "lucide-react";
 import { PiUserCircleLight } from "react-icons/pi";
 import { ExaminationDetail } from "../../redux/slices/medicHistorySlice";
 

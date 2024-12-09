@@ -4,7 +4,6 @@ import { AppDispatch, RootState } from "../redux/store";
 import {
   fetchAppointmentPagination,
   fetchPatientAppointments,
-  getAppointmentById,
   setSearchTerm,
 } from "../redux/slices/appointmentSlice";
 import { BsClockHistory } from "react-icons/bs";
@@ -107,7 +106,7 @@ const BookingBill = () => {
   const filteredAppointments = Array.isArray(appointments)
     ? appointments.filter((appointment) => {
         if (!searchTerm) return true;
-        
+
         const searchLower = searchTerm.toLowerCase();
         const hasPatientId = appointment?.id?.toString().includes(searchTerm);
         const hasPatientName = appointment?.patientResponseDTO?.fullName
@@ -116,7 +115,7 @@ const BookingBill = () => {
         const hasDoctorName = appointment?.doctorName
           ?.toLowerCase()
           .includes(searchLower);
-        
+
         return hasPatientId || hasPatientName || hasDoctorName;
       })
     : [];

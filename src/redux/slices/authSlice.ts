@@ -61,22 +61,18 @@ export const login = createAsyncThunk(
     },
     { rejectWithValue }
   ) => {
-    try {
-      const response = await apiService.post<{
-        code: number;
-        result: { id: string; token: string };
-      }>("/auth/login", { email, password });
+    const response = await apiService.post<{
+      code: number;
+      result: { id: string; token: string };
+    }>("/auth/login", { email, password });
 
-      if (response.code === 200) {
-        const { id, token } = response.result;
-        JwtUtils.setToken(token, rememberMe); // Use the updated setToken method
-        return { id, token, email };
-      }
-
-      return rejectWithValue("Invalid credentials");
-    } catch (error) {
-      return rejectWithValue(error.response?.data?.message || "Login failed");
+    if (response.code === 200) {
+      const { id, token } = response.result;
+      JwtUtils.setToken(token, rememberMe); // Use the updated setToken method
+      return { id, token, email };
     }
+
+    return rejectWithValue("Invalid credentials");
   }
 );
 

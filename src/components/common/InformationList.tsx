@@ -41,7 +41,7 @@ const InformationList: React.FC<InformationListProps> = ({ patientId }) => {
         })
       );
     }
-  }, [infoList.patientId, users, dispatch, infoList.name]);
+  }, [infoList.patientId, users, dispatch, infoList.name, patientId, infoList]);
 
   // Format price with dots for thousands
   const formatPrice = (price: string | undefined): string => {
@@ -104,7 +104,7 @@ const InformationList: React.FC<InformationListProps> = ({ patientId }) => {
         })
       );
     }
-  }, [generateNote, infoList.note]);
+  }, [dispatch, generateNote, infoList, infoList.note]);
 
   return (
     <div className="w-[430px] h-fit bg-gray-50 rounded-md shadow-md">

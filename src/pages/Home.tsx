@@ -1,4 +1,3 @@
-import React from "react";
 import { Specialties } from "../utils/Specialties";
 import { GiKidneys, GiStomach, GiWaterDrop, GiNoseSide } from "react-icons/gi";
 import {

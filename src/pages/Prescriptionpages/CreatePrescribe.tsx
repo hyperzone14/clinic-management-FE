@@ -19,8 +19,7 @@ interface PrescriptionStepProps {
 
 const CreatePrescribe: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { goToNextStep, goToPreviousStep } =
-    useOutletContext<PrescriptionStepProps>();
+  const { goToPreviousStep } = useOutletContext<PrescriptionStepProps>();
 
   // Get selected drug from Redux store
   const selectedDrug = useAppSelector((state) => state.predrug.selectedDrug);
