@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../redux/store';
 import Title from '../components/common/Title';
-import { User, Calendar, Loader2, Image as ImageIcon } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { fetchRecordById } from '../redux/slices/medicHistorySlice';
 
 const API_BASE_URL = "http://localhost:8080/api";

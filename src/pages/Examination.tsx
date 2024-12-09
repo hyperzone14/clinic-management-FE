@@ -40,12 +40,11 @@ const Examination: React.FC = () => {
       sort: 'timeSlot,desc',
     }));
   };
-
   useEffect(() => {
     fetchAppointments();
   }, [currentPage, pageSize]); 
 
-  const handlePatientClick = (appointment: Appointment, index: number) => {
+  const handlePatientClick = (appointment: Appointment) => {
     console.log('Clicked appointment:', appointment);
     console.log('Current status:', appointment.status);
     
