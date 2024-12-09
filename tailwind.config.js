@@ -5,6 +5,7 @@ export default {
     screens: {
       md: "1024px",
       lg: "1440px",
+      xl: "1702px",
     },
     extend: {
       fontFamily: {
