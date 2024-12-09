@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useAppDispatch } from "../../../redux/store";
 import { addDoctor } from "../../../redux/slices/doctorManageSlice";
 import {
@@ -194,12 +194,6 @@ const AddDoctorModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
       workingDays: selectedDays,
     }));
   };
-
-  useEffect(() => {
-    if (openAdd) {
-      resetForm();
-    }
-  }, []);
 
   return (
     <>
