@@ -1,336 +1,3 @@
-// import React, { useState } from "react";
-// import {
-//   Dialog,
-//   DialogTitle,
-//   DialogContent,
-//   DialogActions,
-//   TextField,
-//   Button,
-//   FormControl,
-//   InputLabel,
-//   Select,
-//   MenuItem,
-//   SelectChangeEvent,
-//   FormHelperText,
-// } from "@mui/material";
-// import { useAppDispatch } from "../../../redux/store";
-// import { updateDoctor } from "../../../redux/slices/doctorManageSlice";
-// // import { useSelector } from "react-redux";
-// import { toast, ToastContainer } from "react-toastify";
-// import "react-toastify/dist/ReactToastify.css";
-
-// interface doctorData {
-//   id: number;
-//   fullName: string;
-//   citizenId: string;
-//   email: string;
-//   password: string;
-//   gender: string;
-//   address: string;
-//   birthDate: string;
-//   departmentId: string;
-//   workingDays: string[];
-// }
-
-// interface EditModalProps {
-//   openEdit: boolean;
-//   handleClose: () => void;
-//   doctor: doctorData;
-// }
-
-// const dayMapping: { [key: string]: string } = {
-//   "1": "MONDAY",
-//   "2": "TUESDAY",
-//   "3": "WEDNESDAY",
-//   "4": "THURSDAY",
-//   "5": "FRIDAY",
-// };
-
-// const EditDoctorModal: React.FC<EditModalProps> = ({
-//   openEdit,
-//   handleClose,
-//   doctor,
-// }) => {
-//   const dispatch = useAppDispatch();
-//   const [formData, setFormData] = useState<doctorData>({
-//     ...doctor,
-//     departmentId: String(doctor.departmentId), // Ensure it's always a string
-//   });
-//   const [errors, setErrors] = useState<
-//     Partial<Record<keyof doctorData, string>>
-//   >({});
-
-//   const handleChange = (
-//     e:
-//       | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-//       | SelectChangeEvent<string | string[]>
-//   ) => {
-//     const { name, value } = e.target as {
-//       name: string;
-//       value: string | string[];
-//     };
-
-//     setFormData((prev) => ({
-//       ...prev,
-//       [name]: name === "departmentId" ? String(value) : value || null,
-//     }));
-//   };
-
-//   const handleCancel = (e: React.MouseEvent<HTMLButtonElement>) => {
-//     e.preventDefault();
-//     handleClose();
-//   };
-
-//   const validateEmail = (email: string): boolean => {
-//     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-//     return regex.test(email);
-//   };
-
-//   const validateForm = (): boolean => {
-//     const newErrors: Partial<Record<keyof doctorData, string>> = {};
-
-//     if (!formData.fullName) {
-//       newErrors.fullName = "Full name is required";
-//     }
-
-//     if (!formData.citizenId) {
-//       newErrors.citizenId = "Citizen ID is required";
-//     }
-
-//     if (!formData.email) {
-//       newErrors.email = "Email is required";
-//     } else if (!validateEmail(formData.email)) {
-//       newErrors.email = "Invalid email";
-//     }
-
-//     if (!formData.password) {
-//       newErrors.password = "Password is required";
-//     }
-
-//     if (!formData.address) {
-//       newErrors.address = "Address is required";
-//     }
-
-//     if (!formData.birthDate) {
-//       newErrors.birthDate = "Birth date is required";
-//     }
-
-//     if (!formData.departmentId) {
-//       newErrors.departmentId = "Department is required";
-//     } else {
-//       const departmentId = Number(formData.departmentId);
-//       if (isNaN(departmentId) || departmentId < 1 || departmentId > 11) {
-//         newErrors.departmentId = "Department ID must be between 1 and 11";
-//       }
-//     }
-
-//     if (formData.workingDays.length === 0) {
-//       newErrors.workingDays = "Working days are required";
-//     }
-
-//     if (!/^\d{10}$/.test(formData.citizenId)) {
-//       newErrors.citizenId = "Citizen ID must be exactly 10 digits";
-//     }
-
-//     if (!validateEmail(formData.email)) {
-//       newErrors.email = "Please enter a valid email address";
-//     }
-
-//     setErrors(newErrors);
-//     return Object.keys(newErrors).length === 0;
-//   };
-
-//   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-//     e.preventDefault();
-
-//     if (!validateForm()) {
-//       toast.error("Invalid input, please check again");
-//     }
-
-//     const updatedData = {
-//       ...formData,
-//       birthDate: formData.birthDate.split("/").reverse().join("-"),
-//       departmentId: Number(formData.departmentId),
-//     };
-
-//     dispatch(updateDoctor(updatedData));
-//     handleClose();
-//   };
-
-//   return (
-//     <>
-//       <ToastContainer />
-//       <Dialog
-//         open={openEdit}
-//         onClose={(_e, reason: string) => {
-//           if (reason !== "backdropClick") {
-//             handleClose();
-//           }
-//         }}
-//         maxWidth="sm"
-//         fullWidth
-//       >
-//         <form onSubmit={handleSubmit}>
-//           <DialogTitle>Edit Doctor</DialogTitle>
-//           <DialogContent>
-//             <div className="grid grid-cols-2 gap-4 mt-4">
-//               <TextField
-//                 name="fullName"
-//                 type="text"
-//                 label="Full Name"
-//                 value={formData.fullName}
-//                 onChange={handleChange}
-//                 fullWidth
-//                 required
-//                 error={!!errors.fullName}
-//                 helperText={errors.fullName}
-//               />
-//               <TextField
-//                 name="email"
-//                 type="email"
-//                 label="Email"
-//                 value={formData.email}
-//                 onChange={handleChange}
-//                 fullWidth
-//                 disabled
-//               />
-//               <TextField
-//                 name="password"
-//                 type="password"
-//                 label="Password"
-//                 value={formData.password}
-//                 onChange={handleChange}
-//                 fullWidth
-//                 required
-//                 error={!!errors.password}
-//                 helperText={errors.password}
-//               />
-//               <TextField
-//                 name="citizenId"
-//                 type="text"
-//                 label="Citizen ID"
-//                 value={formData.citizenId}
-//                 onChange={handleChange}
-//                 fullWidth
-//                 required
-//                 error={!!errors.citizenId}
-//                 helperText={errors.citizenId}
-//               />
-//               <FormControl fullWidth error={!!errors.gender}>
-//                 <InputLabel>Gender</InputLabel>
-//                 <Select
-//                   name="gender"
-//                   value={formData.gender}
-//                   onChange={handleChange}
-//                   label="Gender"
-//                 >
-//                   <MenuItem value="MALE">MALE</MenuItem>
-//                   <MenuItem value="FEMALE">FEMALE</MenuItem>
-//                   <MenuItem value="OTHER">OTHER</MenuItem>
-//                 </Select>
-//               </FormControl>
-//               <TextField
-//                 name="address"
-//                 type="text"
-//                 label="Address"
-//                 value={formData.address}
-//                 onChange={handleChange}
-//                 fullWidth
-//                 required
-//                 error={!!errors.address}
-//                 helperText={errors.address}
-//               />
-//               <TextField
-//                 label="Date of Birth"
-//                 name="birthDate"
-//                 variant="outlined"
-//                 fullWidth
-//                 value={formData.birthDate?.split("-").reverse().join("/")}
-//                 onChange={handleChange}
-//                 type="text"
-//                 placeholder="DD/MM/YYYY"
-//                 required
-//                 error={!!errors.birthDate}
-//                 helperText={errors.birthDate}
-//               />
-//               {/* <FormControl fullWidth error={!!errors.departmentId}>
-//                 <InputLabel>DepartmentId</InputLabel>
-//                 <TextField
-//                   name="departmentId"
-//                   value={formData.departmentId || ""}
-//                   onChange={handleChange}
-//                   label="Department Id"
-//                   fullWidth
-//                   type="text"
-//                   inputProps={{
-//                     min: 1,
-//                     max: 11,
-//                   }}
-//                 ></TextField>
-//               </FormControl> */}
-//               <FormControl fullWidth error={!!errors.departmentId}>
-//                 <InputLabel id="department-label">Department</InputLabel>
-//                 <Select
-//                   labelId="department-label"
-//                   name="departmentId"
-//                   value={formData.departmentId || ""}
-//                   onChange={handleChange}
-//                   label="Department"
-//                 >
-//                   <MenuItem value="">Select Department</MenuItem>
-//                   <MenuItem value="1">1</MenuItem>
-//                   <MenuItem value="2">2</MenuItem>
-//                   <MenuItem value="3">3</MenuItem>
-//                   <MenuItem value="4">4</MenuItem>
-//                   <MenuItem value="5">5</MenuItem>
-//                   <MenuItem value="6">6</MenuItem>
-//                   <MenuItem value="7">7</MenuItem>
-//                   <MenuItem value="8">8</MenuItem>
-//                   <MenuItem value="9">9</MenuItem>
-//                   <MenuItem value="10">10</MenuItem>
-//                   <MenuItem value="11">11</MenuItem>
-//                 </Select>
-//                 {errors.departmentId && (
-//                   <FormHelperText>{errors.departmentId}</FormHelperText>
-//                 )}
-//               </FormControl>
-//               <FormControl fullWidth error={!!errors.workingDays}>
-//                 <InputLabel>Working Days</InputLabel>
-//                 <Select
-//                   name="workingDays"
-//                   multiple
-//                   value={formData.workingDays}
-//                   onChange={handleChange}
-//                   renderValue={(selected) =>
-//                     (selected as string[])
-//                       .map((day) => dayMapping[day])
-//                       .join(", ")
-//                   }
-//                   label="Working Days"
-//                 >
-//                   {Object.entries(dayMapping).map(([value, day]) => (
-//                     <MenuItem key={value} value={value}>
-//                       {day}
-//                     </MenuItem>
-//                   ))}
-//                 </Select>
-//               </FormControl>
-//             </div>
-//           </DialogContent>
-//           <DialogActions>
-//             <Button onClick={handleCancel}>Cancel</Button>
-//             <Button type="submit" variant="contained" color="primary">
-//               Save Changes
-//             </Button>
-//           </DialogActions>
-//         </form>
-//       </Dialog>
-//     </>
-//   );
-// };
-
-// export default EditDoctorModal;
-
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -359,7 +26,7 @@ interface DoctorData {
   gender: string;
   address: string;
   birthDate: string;
-  departmentId: string;
+  departmentId: number;
   workingDays: string[];
 }
 
@@ -370,11 +37,11 @@ interface EditModalProps {
 }
 
 const dayMapping: { [key: string]: string } = {
-  MONDAY: "1",
-  TUESDAY: "2",
-  WEDNESDAY: "3",
-  THURSDAY: "4",
-  FRIDAY: "5",
+  MONDAY: "MONDAY",
+  TUESDAY: "TUESDAY",
+  WEDNESDAY: "WEDNESDAY",
+  THURSDAY: "THURSDAY",
+  FRIDAY: "FRIDAY",
 };
 
 const formatDateForDisplay = (dateString: string): string => {
@@ -407,8 +74,14 @@ const EditDoctorModal: React.FC<EditModalProps> = ({
   const dispatch = useAppDispatch();
   const [formData, setFormData] = useState<DoctorData>({
     ...doctor,
-    departmentId: String(doctor.departmentId),
-    birthDate: formatDateForDisplay(doctor.birthDate),
+    fullName: doctor.fullName || "",
+    citizenId: doctor.citizenId || "",
+    email: doctor.email || "",
+    password: doctor.password || "",
+    gender: doctor.gender || "",
+    address: doctor.address || "",
+    departmentId: doctor.departmentId || 1, // Provide a default value
+    birthDate: formatDateForDisplay(doctor.birthDate || ""),
     workingDays: doctor.workingDays || [],
   });
   const [errors, setErrors] = useState<
@@ -419,8 +92,14 @@ const EditDoctorModal: React.FC<EditModalProps> = ({
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
-      departmentId: String(doctor.departmentId),
-      birthDate: formatDateForDisplay(doctor.birthDate),
+      fullName: doctor.fullName || "",
+      citizenId: doctor.citizenId || "",
+      email: doctor.email || "",
+      password: doctor.password || "",
+      gender: doctor.gender || "",
+      address: doctor.address || "",
+      departmentId: doctor.departmentId || 1,
+      birthDate: formatDateForDisplay(doctor.birthDate || ""),
       workingDays: doctor.workingDays || [],
     }));
   }, [doctor]);
@@ -459,14 +138,27 @@ const EditDoctorModal: React.FC<EditModalProps> = ({
       value: string | string[];
     };
 
-    const processedValue =
-      name === "birthDate"
-        ? formatDateForDisplay(value as string)
-        : name === "departmentId"
-        ? String(value)
-        : name === "workingDays"
-        ? (value as string[]).map(String)
-        : value;
+    // const processedValue =
+    //   name === "birthDate"
+    //     ? formatDateForDisplay(value as string)
+    //     : name === "departmentId"
+    //     ? Number(value)
+    //     : name === "workingDays"
+    //     ? (value as string[])
+    //     : value;
+
+    let processedValue;
+
+    if (name === "birthDate") {
+      processedValue = formatDateForDisplay(value as string);
+    } else if (name === "departmentId") {
+      processedValue = Number(value);
+    } else if (name === "workingDays") {
+      // For workingDays, directly use the new selection without combining with previous values
+      processedValue = Array.isArray(value) ? value : [value];
+    } else {
+      processedValue = value;
+    }
 
     setFormData((prev) => ({
       ...prev,
@@ -522,8 +214,7 @@ const EditDoctorModal: React.FC<EditModalProps> = ({
     if (!formData.departmentId) {
       newErrors.departmentId = "Department is required";
     } else {
-      const departmentId = Number(formData.departmentId);
-      if (isNaN(departmentId) || departmentId < 1 || departmentId > 12) {
+      if (formData.departmentId < 1 || formData.departmentId > 12) {
         newErrors.departmentId = "Department ID must be between 1 and 12";
       }
     }
@@ -555,7 +246,7 @@ const EditDoctorModal: React.FC<EditModalProps> = ({
     const updatedData = {
       ...formData,
       birthDate: formatDateForSubmission(formData.birthDate),
-      departmentId: Number(formData.departmentId),
+      // departmentId: Number(formData.departmentId),
     };
 
     dispatch(updateDoctor(updatedData));
@@ -583,7 +274,7 @@ const EditDoctorModal: React.FC<EditModalProps> = ({
                 name="fullName"
                 type="text"
                 label="Full Name"
-                value={formData.fullName}
+                value={formData.fullName || ""}
                 onChange={handleChange}
                 fullWidth
                 required
@@ -603,7 +294,7 @@ const EditDoctorModal: React.FC<EditModalProps> = ({
                 name="password"
                 type="password"
                 label="Password"
-                value={formData.password}
+                value={formData.password || ""}
                 onChange={handleChange}
                 fullWidth
                 required
@@ -614,7 +305,7 @@ const EditDoctorModal: React.FC<EditModalProps> = ({
                 name="citizenId"
                 type="text"
                 label="Citizen ID"
-                value={formData.citizenId}
+                value={formData.citizenId || ""}
                 onChange={handleChange}
                 fullWidth
                 required
@@ -625,7 +316,7 @@ const EditDoctorModal: React.FC<EditModalProps> = ({
                 <InputLabel>Gender</InputLabel>
                 <Select
                   name="gender"
-                  value={formData.gender}
+                  value={formData.gender || ""}
                   onChange={handleChange}
                   label="Gender"
                 >
@@ -638,7 +329,7 @@ const EditDoctorModal: React.FC<EditModalProps> = ({
                 name="address"
                 type="text"
                 label="Address"
-                value={formData.address}
+                value={formData.address || ""}
                 onChange={handleChange}
                 fullWidth
                 required
@@ -650,7 +341,7 @@ const EditDoctorModal: React.FC<EditModalProps> = ({
                 name="birthDate"
                 variant="outlined"
                 fullWidth
-                value={formData.birthDate}
+                value={formData.birthDate || ""}
                 onChange={handleChange}
                 type="text"
                 placeholder="DD/MM/YYYY"
@@ -663,7 +354,7 @@ const EditDoctorModal: React.FC<EditModalProps> = ({
                 label="Department"
                 variant="outlined"
                 fullWidth
-                value={formData.departmentId}
+                value={formData.departmentId || ""}
                 onChange={handleChange}
                 required
                 error={!!errors.departmentId}

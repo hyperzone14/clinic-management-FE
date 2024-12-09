@@ -7,7 +7,7 @@ import { TextField } from "@mui/material";
 import AddDoctorModal from "../../components/admin/DoctorModals/AddDoctorModal";
 import EditDoctorModal from "../../components/admin/DoctorModals/EditDoctorModal";
 import DeleteDoctorModal from "../../components/admin/DoctorModals/DeleteDoctorModal";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 interface Doctor {
@@ -38,7 +38,7 @@ const DoctorManagement = () => {
     (state: RootState) => state.doctorManage.doctors || []
   );
   const loading = useSelector((state: RootState) => state.doctorManage.loading);
-  const error = useSelector((state: RootState) => state.doctorManage.error);
+  // const error = useSelector((state: RootState) => state.doctorManage.error);
   const dispatch = useDispatch<AppDispatch>();
   const [search, setSearch] = useState("");
   const [filteredData, setFilteredData] = useState<TableData[]>([]);
@@ -104,12 +104,6 @@ const DoctorManagement = () => {
   useEffect(() => {
     dispatch(fetchDoctors());
   }, [dispatch, shouldRefresh]);
-
-  useEffect(() => {
-    if (error) {
-      toast.error(`Error: ${error}`);
-    }
-  }, []);
 
   useEffect(() => {
     const filterDoctors = () => {

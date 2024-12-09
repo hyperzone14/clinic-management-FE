@@ -58,13 +58,14 @@ interface PaginatedResponse {
       pageSize: number;
       paged: boolean;
       sort: Sort;
-      unpaged: boolean;
     };
-    size: number;
-    sort: Sort;
+    // size: number;
+    // sort: Sort;
     totalElements: number;
     totalPages: number;
   };
+  code: number;
+  message: string;
 }
 
 interface ApiError {
@@ -185,7 +186,11 @@ const doctorManageSlice = createSlice({
         state.error = action.error.message || "Failed to fetch all doctors";
       })
 
-      .addCase(addDoctor.fulfilled, (state, action) => {
+      .addCase(addDoctor.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(addDoctor.fulfilled, (state, action: PayloadAction<Doctor>) => {
         state.loading = false;
         state.doctors.push(action.payload);
       })
@@ -194,15 +199,19 @@ const doctorManageSlice = createSlice({
         state.error = action.error.message || "Failed to add doctor";
       })
 
-      .addCase(updateDoctor.fulfilled, (state, action) => {
-        const updatedDoctor = action.payload;
-        const index = state.doctors.findIndex(
-          (doctor) => doctor.id === updatedDoctor.id
-        );
-        if (index !== -1) {
-          state.doctors[index] = updatedDoctor;
+      .addCase(
+        updateDoctor.fulfilled,
+        (state, action: PayloadAction<Doctor>) => {
+          // const updatedDoctor = action.payload;
+          state.loading = false;
+          const index = state.doctors.findIndex(
+            (doctor) => doctor.id === action.payload.id
+          );
+          if (index !== -1) {
+            state.doctors[index] = action.payload;
+          }
         }
-      })
+      )
       .addCase(updateDoctor.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Failed to update doctor";
