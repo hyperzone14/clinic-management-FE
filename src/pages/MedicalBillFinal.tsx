@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../redux/store';
 import Title from '../components/common/Title';
-import { Plus, Trash2, ClipboardList, UserCircle, Calendar, Pill } from 'lucide-react';
+import { Plus, Trash2, ClipboardList, Pill } from 'lucide-react';
 import {
   fetchLatestMedicalBillByPatientId,
   addDrugsToMedicalBill,
@@ -31,7 +31,7 @@ const MedicalBillFinal: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { currentBill, availableDrugs, loading, error } = useAppSelector(state => state.medicalBill);
+  const { currentBill, availableDrugs, loading } = useAppSelector(state => state.medicalBill);
   const state = location.state as LocationState;
 
   // State for drug form

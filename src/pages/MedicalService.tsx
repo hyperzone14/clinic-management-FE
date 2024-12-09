@@ -27,7 +27,6 @@ const MedicalService: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'prescription' | 'labtest' | null>(null);
   const {
     patientInfo,
-    doctorInfo,
     syndrome,
     note,
     prescribedDrugRequestDTOS,

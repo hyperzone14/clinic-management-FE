@@ -93,14 +93,6 @@ interface AppointmentResponse {
   message: string;
 }
 
-// Search Parameters Interface
-interface SearchParams {
-  doctorId?: number;
-  appointmentDate: string;
-  page?: number;
-  size?: number;
-  sort?: string;
-}
 
 // State Interface
 interface ScheduleState {
@@ -115,14 +107,7 @@ interface ScheduleState {
 }
 
 // Helper Functions
-const formatDate = (date: Date): string => {
-  return date.toISOString().split('T')[0];
-};
 
-const mapGender = (backendGender: string): Gender => {
-  const normalizedGender = backendGender?.toUpperCase() || 'MALE';
-  return normalizedGender === 'MALE' ? 'Male' : 'Female';
-};
 
 const handleError = (error: any): string => {
   if (error?.response?.data?.message) {
