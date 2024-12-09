@@ -8,16 +8,24 @@ interface ProgressBarProps {
 const steps = [
   {
     label: "Select Service",
-    dotPos: "left-[20rem]",
-    wordPos: "ms-[-4.25rem]",
+    dotPos: "md:left-[5rem] lg:left-[16.75rem] xl:left-[20rem]",
+    wordPos: "xl:ms-[-4.25rem] lg:ms-[-4.25rem] md:ms-[-3.75rem]",
   },
   {
     label: "Pick Date & Time",
-    dotPos: "left-[41.5rem]",
-    wordPos: "ms-[10rem]",
+    dotPos: "xl:left-[41.5rem] lg:left-[34.5rem] md:left-[40.5rem]",
+    wordPos: "lg:ms-[10rem] md:ms-[6.75rem]",
   },
-  { label: "Purchase", dotPos: "right-[41.5rem]", wordPos: "ms-[11rem]" },
-  { label: "Finish", dotPos: "right-[19.75rem] ", wordPos: "ms-[16.25rem]" },
+  {
+    label: "Purchase",
+    dotPos: "xl:right-[41.5rem] lg:right-[34.25rem] md:right-[40.5rem]",
+    wordPos: "ms-[11rem]",
+  },
+  {
+    label: "Finish",
+    dotPos: "xl:right-[19.75rem] lg:right-[16.75rem] md:right-[5rem]",
+    wordPos: "xl:ms-[16.25rem] lg:ms-[6.75rem] md:ms-[12rem]",
+  },
 ];
 
 const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep }) => {
@@ -25,7 +33,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep }) => {
     <>
       <div className="z-[-10]">
         <div className="flex my-16">
-          <div className="w-[1050px] border-2 border-[#d9d9d9] relative"></div>
+          <div className="xl:w-[1050px] lg:w-[900px] md:w-[850px] border-2 border-[#d9d9d9] relative"></div>
           {steps.map((step, index) => (
             <div key={index}>
               <CircleDot
@@ -40,9 +48,9 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep }) => {
           {steps.map((step, index) => (
             <span
               key={index}
-              className={`font-bold text-2xl ${step.wordPos} ${
-                currentStep === index ? "text-[#6B87C7]" : "text-[#d9d9d9]"
-              }`}
+              className={`font-bold lg:text-2xl md:text-xl md:text-center ${
+                step.wordPos
+              } ${currentStep === index ? "text-[#6B87C7]" : "text-[#d9d9d9]"}`}
             >
               {step.label}
             </span>
