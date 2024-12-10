@@ -3,7 +3,6 @@ import bookingReducer from "./slices/bookingSlice";
 import infoListReducer from "./slices/infoListSlice";
 import profileReducer from "./slices/profileSlice";
 import scheduleReducer from "./slices/scheduleSlice";
-import predrugReducer from "./slices/predrugSlice";
 import userManageReducer from "./slices/userManageSlice";
 import tableReducer from "./slices/tableSlice";
 import medicHistoryReducer from "./slices/medicHistorySlice";
@@ -31,7 +30,6 @@ const rootReducer = combineReducers({
   bookingInfo: bookingReducer,
   infoList: infoListReducer,
   profile: profileReducer,
-  predrug: predrugReducer,
   medicHistory: medicHistoryReducer,
   userManage: userManageReducer,
   schedule: scheduleReducer,

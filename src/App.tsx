@@ -14,7 +14,6 @@ import {
   pageRoutes,
   bookingRoutes,
   // dashboardRoutes,
-  prescriptionRoutes,
   adminRoutes,
 } from "./utils/pageRoutes";
 import React, { Suspense, lazy } from "react";
@@ -23,7 +22,6 @@ import NotFound from "./pages/error/NotFound";
 // import Dashboard from "./pages/Dashboard";
 import { Provider } from "react-redux";
 import store from "./redux/store";
-import Prescription from "./pages/Prescription";
 import AdminSideBar from "./components/layout/AdminSideBar";
 import Chatbot from "./components/layout/Chatbot";
 import { ProtectedRoute } from "./utils/security/components/ProtectedRoute";
@@ -270,42 +268,6 @@ function App() {
                       );
                     })}
                   </Route>
-                </Route>
-
-                {/* Prescription Routes */}
-                <Route
-                  path="/prescription"
-                  element={<Prescription steps={prescriptionRoutes} />}
-                >
-                  <Route
-                    index
-                    element={
-                      <Navigate
-                        to={`/prescription/${prescriptionRoutes[0].path
-                          .split("/")
-                          .pop()}`}
-                        replace
-                      />
-                    }
-                  />
-                  {prescriptionRoutes.map((step) => {
-                    const StepComponent = lazy(() => {
-                      return pageComponents[
-                        `./pages/Prescriptionpages/${step.location}.tsx`
-                      ]() as Promise<{ default: React.ComponentType<unknown> }>;
-                    });
-                    return (
-                      <Route
-                        key={step.id}
-                        path={step.path.split("/").pop()}
-                        element={
-                          <Suspense fallback={<div>Loading step...</div>}>
-                            <StepComponent />
-                          </Suspense>
-                        }
-                      />
-                    );
-                  })}
                 </Route>
 
                 {/* Not Found Route */}
