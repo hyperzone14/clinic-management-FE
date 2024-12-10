@@ -1,16 +1,6 @@
 {
   "rewrites": [
-    { "source": "/payment-success", "destination": "/" },
-    { "source": "/booking/:path*", "destination": "/" },
-    { "source": "/schedule/:path*", "destination": "/" },
-    { "source": "/profile", "destination": "/" },
-    { "source": "/medical-history/:path*", "destination": "/" },
-    { "source": "/admin/:path*", "destination": "/" },
-    { "source": "/booking-bill/:path*", "destination": "/" },
-    { "source": "/manual-checkin", "destination": "/" },
-    { "source": "/examination/:path*", "destination": "/" },
-    { "source": "/medical-bill-final", "destination": "/" },
-    { "source": "/user-information", "destination": "/" },
+    { "source": "/api/(.*)", "destination": "https://clinic-management-vdb.onrender.com/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
