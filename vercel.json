@@ -1,3 +1,16 @@
 {
-  "rewrites": [{ "source": "/payment-success", "destination": "/" }]
+  "rewrites": [
+    { "source": "/payment-success", "destination": "/" },
+    { "source": "/booking/:path*", "destination": "/" },
+    { "source": "/schedule/:path*", "destination": "/" },
+    { "source": "/profile", "destination": "/" },
+    { "source": "/medical-history/:path*", "destination": "/" },
+    { "source": "/admin/:path*", "destination": "/" },
+    { "source": "/booking-bill/:path*", "destination": "/" },
+    { "source": "/manual-checkin", "destination": "/" },
+    { "source": "/examination/:path*", "destination": "/" },
+    { "source": "/medical-bill-final", "destination": "/" },
+    { "source": "/user-information", "destination": "/" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
