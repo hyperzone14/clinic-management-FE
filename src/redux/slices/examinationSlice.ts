@@ -1,7 +1,7 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { apiService } from '../../utils/axios-config';
-import { toast } from 'react-toastify';
-import axios from 'axios';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { apiService } from "../../utils/axios-config";
+import { toast } from "react-toastify";
+import axios from "axios";
 
 // Interfaces
 interface ImageInfo {
@@ -88,15 +88,17 @@ const initialState: ExaminationState = {
   error: null,
   imageInfo: {},
   examResults: {},
-  uploadedResults: []
+  uploadedResults: [],
 };
 
 // Async Thunks
 export const fetchMedicalBillByPatientId = createAsyncThunk(
-  'examination/fetchMedicalBill',
+  "examination/fetchMedicalBill",
   async (patientId: number, { rejectWithValue }) => {
     try {
-      const response = await apiService.get<MedicalBill>(`/medical-bills/top/patient/${patientId}`);
+      const response = await apiService.get<MedicalBill>(
+        `/medical-bills/top/patient/${patientId}`
+      );
       return response;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -104,57 +106,66 @@ export const fetchMedicalBillByPatientId = createAsyncThunk(
         toast.error(message);
         return rejectWithValue(message);
       }
-      return rejectWithValue('Failed to fetch medical bill');
+      return rejectWithValue("Failed to fetch medical bill");
     }
   }
 );
 
 export const uploadLabResults = createAsyncThunk(
-  'examination/uploadResults',
-  async ({ medicalBill, appointmentId }: { medicalBill: MedicalBill; appointmentId: string }, { getState, rejectWithValue }) => {
+  "examination/uploadResults",
+  async (
+    {
+      medicalBill,
+      appointmentId,
+    }: { medicalBill: MedicalBill; appointmentId: string },
+    { getState, rejectWithValue }
+  ) => {
     try {
       const state = getState() as { examination: ExaminationState };
       const formData = new FormData();
 
       // Create the request DTO with the correct structure
-      const requestData: ExaminationDetailUploadImgRequestDTO[] = medicalBill.examinationDetails.map(detail => {
-        const actualFiles = FileManager.getFiles(Number(detail.id));
-        return {
-          id: detail.id,
-          examinationType: detail.examinationType,
-          examinationResult: state.examination.examResults[detail.id] || '',
-          imagesCount: actualFiles.length
-        };
-      });
+      const requestData: ExaminationDetailUploadImgRequestDTO[] =
+        medicalBill.examinationDetails.map((detail) => {
+          const actualFiles = FileManager.getFiles(Number(detail.id));
+          return {
+            id: detail.id,
+            examinationType: detail.examinationType,
+            examinationResult: state.examination.examResults[detail.id] || "",
+            imagesCount: actualFiles.length,
+          };
+        });
 
       // Add the request DTO with the correct key
       formData.append(
-        'examinationDetailUploadImgRequestDTO',
-        new Blob([JSON.stringify(requestData)], { type: 'application/json' })
+        "examinationDetailUploadImgRequestDTO",
+        new Blob([JSON.stringify(requestData)], { type: "application/json" })
       );
 
       // Add all files
-      medicalBill.examinationDetails.forEach(detail => {
+      medicalBill.examinationDetails.forEach((detail) => {
         const actualFiles = FileManager.getFiles(Number(detail.id));
-        actualFiles.forEach(file => {
-          formData.append('files', file);
+        actualFiles.forEach((file) => {
+          formData.append("files", file);
         });
       });
 
       // Log formData for debugging
-      console.log('Request Data:', JSON.stringify(requestData, null, 2));
+      console.log("Request Data:", JSON.stringify(requestData, null, 2));
       for (let pair of formData.entries()) {
-        console.log('FormData:', pair[0], pair[1]);
+        console.log("FormData:", pair[0], pair[1]);
       }
 
       const response = await axios.post(
-        'http://localhost:8080/api/examination_detail/images',
+        "http://localhost:8080/api/examination_detail/images",
         formData,
         {
           headers: {
-            'Content-Type': 'multipart/form-data',
-            ...(localStorage.getItem('token') ? { 'Authorization': `Bearer ${localStorage.getItem('token')}` } : {})
-          }
+            "Content-Type": "multipart/form-data",
+            ...(localStorage.getItem("token")
+              ? { Authorization: `Bearer ${localStorage.getItem("token")}` }
+              : {}),
+          },
         }
       );
 
@@ -163,43 +174,55 @@ export const uploadLabResults = createAsyncThunk(
         "LAB_TEST_COMPLETED"
       );
       FileManager.clear();
-      
-      toast.success('Lab results uploaded successfully');
+
+      toast.success("Lab results uploaded successfully");
       return response.data;
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error("Upload error:", error);
       if (axios.isAxiosError(error)) {
         const message = error.response?.data?.message || error.message;
         toast.error(message);
         return rejectWithValue(message);
       }
-      toast.error('Failed to upload results');
-      return rejectWithValue('Failed to upload results');
+      toast.error("Failed to upload results");
+      return rejectWithValue("Failed to upload results");
     }
   }
 );
 
 // Slice
 const examinationSlice = createSlice({
-  name: 'examination',
+  name: "examination",
   initialState,
   reducers: {
-    clearExamination: (state) => {
+    clearExamination: () => {
       FileManager.clear();
       return initialState;
     },
-    updateImageInfo: (state, action: PayloadAction<{ examId: number; fileInfo: ImageInfo[] }>) => {
+    updateImageInfo: (
+      state,
+      action: PayloadAction<{ examId: number; fileInfo: ImageInfo[] }>
+    ) => {
       state.imageInfo[action.payload.examId] = action.payload.fileInfo;
     },
-    updateExamResult: (state, action: PayloadAction<{ examId: number; result: string }>) => {
+    updateExamResult: (
+      state,
+      action: PayloadAction<{ examId: number; result: string }>
+    ) => {
       state.examResults[action.payload.examId] = action.payload.result;
     },
-    initializeExamResults: (state, action: PayloadAction<ExaminationDetail[]>) => {
-      state.examResults = action.payload.reduce((acc, exam) => ({
-        ...acc,
-        [exam.id]: exam.examinationResult || ''
-      }), {});
-    }
+    initializeExamResults: (
+      state,
+      action: PayloadAction<ExaminationDetail[]>
+    ) => {
+      state.examResults = action.payload.reduce(
+        (acc, exam) => ({
+          ...acc,
+          [exam.id]: exam.examinationResult || "",
+        }),
+        {}
+      );
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -214,7 +237,7 @@ const examinationSlice = createSlice({
           state.examResults = action.payload.examinationDetails.reduce(
             (acc, exam) => ({
               ...acc,
-              [exam.id]: exam.examinationResult || ''
+              [exam.id]: exam.examinationResult || "",
             }),
             {}
           );
@@ -232,14 +255,14 @@ const examinationSlice = createSlice({
       .addCase(uploadLabResults.fulfilled, (state, action) => {
         state.loading = false;
         state.uploadedResults = action.payload;
-        toast.success('Lab results uploaded successfully');
+        toast.success("Lab results uploaded successfully");
       })
       .addCase(uploadLabResults.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-        toast.error(state.error || 'Failed to upload lab results');
+        toast.error(state.error || "Failed to upload lab results");
       });
-  }
+  },
 });
 
 // Actions
@@ -247,11 +270,12 @@ export const {
   clearExamination,
   updateImageInfo,
   updateExamResult,
-  initializeExamResults
+  initializeExamResults,
 } = examinationSlice.actions;
 
 // Selectors
-export const selectExamination = (state: { examination: ExaminationState }) => state.examination;
+export const selectExamination = (state: { examination: ExaminationState }) =>
+  state.examination;
 
 // Reducer
 export default examinationSlice.reducer;
