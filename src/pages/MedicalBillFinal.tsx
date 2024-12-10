@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useAppSelector, useAppDispatch } from '../redux/store';
-import Title from '../components/common/Title';
-import { Plus, Trash2, ClipboardList, Pill } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAppSelector, useAppDispatch } from "../redux/store";
+import Title from "../components/common/Title";
+import { Plus, Trash2, ClipboardList, Pill } from "lucide-react";
 import {
   fetchLatestMedicalBillByPatientId,
   addDrugsToMedicalBill,
   PrescribedDrugRequest,
-  fetchDrugs
-} from '../redux/slices/medicalBillSlice';
-import { toast, ToastContainer } from 'react-toastify';
-import { AuthService } from '../utils/security/services/AuthService';
+  fetchDrugs,
+} from "../redux/slices/medicalBillSlice";
+import { toast, ToastContainer } from "react-toastify";
+import { AuthService } from "../utils/security/services/AuthService";
 
 interface LocationState {
   patientId: number;
@@ -21,17 +21,19 @@ interface LocationState {
   appointmentDate: string;
 }
 
-const API_BASE_URL = "http://localhost:8080/api";
+const API_BASE_URL = "https://clinic-management-vdb.onrender.com/api"; //https://clinic-management-vdb.onrender.com
 
 const handleImageView = (imageId: number) => {
-  window.open(`${API_BASE_URL}/images/download/${imageId}`, '_blank');
+  window.open(`${API_BASE_URL}/images/download/${imageId}`, "_blank");
 };
 
 const MedicalBillFinal: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { currentBill, availableDrugs, loading } = useAppSelector(state => state.medicalBill);
+  const { currentBill, availableDrugs, loading } = useAppSelector(
+    (state) => state.medicalBill
+  );
   const state = location.state as LocationState;
 
   // State for drug form
@@ -40,24 +42,24 @@ const MedicalBillFinal: React.FC = () => {
       drugId: 0,
       dosage: 0,
       duration: 0,
-      frequency: '',
-      specialInstructions: ''
-    }
+      frequency: "",
+      specialInstructions: "",
+    },
   ]);
 
   // Check doctor access on component mount
   useEffect(() => {
     const checkDoctorAccess = () => {
-      const isDoctor = AuthService.hasRole('ROLE_DOCTOR');
+      const isDoctor = AuthService.hasRole("ROLE_DOCTOR");
       if (!isDoctor) {
         toast.error("Access denied: Only doctors can access this page");
-        navigate('/login');
+        navigate("/login");
         return;
       }
 
       if (!state?.patientId || !state?.doctorId) {
         toast.error("Invalid access: Missing required information");
-        navigate('/schedule');
+        navigate("/schedule");
         return;
       }
     };
@@ -72,23 +74,30 @@ const MedicalBillFinal: React.FC = () => {
     }
   }, [dispatch, state?.patientId]);
 
-  const handleDrugChange = (index: number, field: keyof PrescribedDrugRequest, value: string | number) => {
+  const handleDrugChange = (
+    index: number,
+    field: keyof PrescribedDrugRequest,
+    value: string | number
+  ) => {
     const newDrugs = [...drugs];
     newDrugs[index] = {
       ...newDrugs[index],
-      [field]: value
+      [field]: value,
     };
     setDrugs(newDrugs);
   };
 
   const addDrugField = () => {
-    setDrugs([...drugs, {
-      drugId: 0,
-      dosage: 0,
-      duration: 0,
-      frequency: '',
-      specialInstructions: ''
-    }]);
+    setDrugs([
+      ...drugs,
+      {
+        drugId: 0,
+        dosage: 0,
+        duration: 0,
+        frequency: "",
+        specialInstructions: "",
+      },
+    ]);
   };
 
   const removeDrugField = (index: number) => {
@@ -100,41 +109,43 @@ const MedicalBillFinal: React.FC = () => {
 
   const handleSubmitTreatment = async () => {
     if (!currentBill || !state?.appointmentId) {
-      toast.error('Missing required information');
+      toast.error("Missing required information");
       return;
     }
 
     // Validate drugs
-    const invalidDrugs = drugs.some(drug =>
-      !drug.drugId || !drug.dosage || !drug.specialInstructions
+    const invalidDrugs = drugs.some(
+      (drug) => !drug.drugId || !drug.dosage || !drug.specialInstructions
     );
 
     if (invalidDrugs) {
-      toast.error('Please fill in all required drug information');
+      toast.error("Please fill in all required drug information");
       return;
     }
 
     try {
-      await dispatch(addDrugsToMedicalBill({
-        medicalBillId: currentBill.id,
-        drugs: drugs,
-        appointmentId: state.appointmentId
-      })).unwrap();
+      await dispatch(
+        addDrugsToMedicalBill({
+          medicalBillId: currentBill.id,
+          drugs: drugs,
+          appointmentId: state.appointmentId,
+        })
+      ).unwrap();
 
-      toast.success('Treatment submitted successfully');
-      navigate('/schedule');
+      toast.success("Treatment submitted successfully");
+      navigate("/schedule");
     } catch (error) {
-      toast.error('Failed to submit treatment');
-      console.error('Failed to submit treatment:', error);
+      toast.error("Failed to submit treatment");
+      console.error("Failed to submit treatment:", error);
     }
   };
 
   const formatDate = (dateString: string) => {
     try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
+      return new Date(dateString).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
       });
     } catch {
       return dateString;
@@ -152,14 +163,14 @@ const MedicalBillFinal: React.FC = () => {
   // Error or missing state
   if (!state) {
     toast.error("Missing required information");
-    navigate('/schedule');
+    navigate("/schedule");
     return null;
   }
 
   // Missing bill
   if (!currentBill) {
     toast.error(`No medical bill found for patient: ${state.patientName}`);
-    navigate('/schedule');
+    navigate("/schedule");
     return null;
   }
 
@@ -193,7 +204,12 @@ const MedicalBillFinal: React.FC = () => {
               </div>
               <div className="col-span-1 flex justify-end">
                 <button
-                  onClick={() => window.open(`/medical-history?id=${currentBill.patientId}`, '_blank')}
+                  onClick={() =>
+                    window.open(
+                      `/medical-history?id=${currentBill.patientId}`,
+                      "_blank"
+                    )
+                  }
                   className="flex items-center px-6 py-3 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
                 >
                   <ClipboardList className="h-5 w-5 mr-2" />
@@ -243,7 +259,9 @@ const MedicalBillFinal: React.FC = () => {
           <div className="mt-8 bg-white rounded-2xl shadow-sm p-8">
             <div className="space-y-6">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-semibold text-gray-800">Add New Prescriptions</h3>
+                <h3 className="text-xl font-semibold text-gray-800">
+                  Add New Prescriptions
+                </h3>
                 <button
                   onClick={addDrugField}
                   className="flex items-center px-4 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors"
@@ -257,21 +275,40 @@ const MedicalBillFinal: React.FC = () => {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Medicine Name</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Quantity</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Duration</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Frequency</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Instructions</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">
+                        Medicine Name
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">
+                        Quantity
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">
+                        Duration
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">
+                        Frequency
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">
+                        Instructions
+                      </th>
                       <th className="w-20"></th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {drugs.map((drug, index) => (
-                      <tr key={index} className="hover:bg-gray-50 transition-colors">
+                      <tr
+                        key={index}
+                        className="hover:bg-gray-50 transition-colors"
+                      >
                         <td className="px-6 py-4">
                           <select
                             value={drug.drugId}
-                            onChange={(e) => handleDrugChange(index, 'drugId', parseInt(e.target.value))}
+                            onChange={(e) =>
+                              handleDrugChange(
+                                index,
+                                "drugId",
+                                parseInt(e.target.value)
+                              )
+                            }
                             className="w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           >
                             <option value="">Select Medicine</option>
@@ -286,7 +323,13 @@ const MedicalBillFinal: React.FC = () => {
                           <input
                             type="number"
                             value={drug.dosage}
-                            onChange={(e) => handleDrugChange(index, 'dosage', parseInt(e.target.value))}
+                            onChange={(e) =>
+                              handleDrugChange(
+                                index,
+                                "dosage",
+                                parseInt(e.target.value)
+                              )
+                            }
                             className="w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             placeholder="Quantity"
                           />
@@ -295,7 +338,13 @@ const MedicalBillFinal: React.FC = () => {
                           <input
                             type="number"
                             value={drug.duration}
-                            onChange={(e) => handleDrugChange(index, 'duration', parseInt(e.target.value))}
+                            onChange={(e) =>
+                              handleDrugChange(
+                                index,
+                                "duration",
+                                parseInt(e.target.value)
+                              )
+                            }
                             className="w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             placeholder="Days"
                           />
@@ -304,7 +353,13 @@ const MedicalBillFinal: React.FC = () => {
                           <input
                             type="text"
                             value={drug.frequency}
-                            onChange={(e) => handleDrugChange(index, 'frequency', e.target.value)}
+                            onChange={(e) =>
+                              handleDrugChange(
+                                index,
+                                "frequency",
+                                e.target.value
+                              )
+                            }
                             className="w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             placeholder="e.g., Twice a day"
                           />
@@ -313,7 +368,13 @@ const MedicalBillFinal: React.FC = () => {
                           <input
                             type="text"
                             value={drug.specialInstructions}
-                            onChange={(e) => handleDrugChange(index, 'specialInstructions', e.target.value)}
+                            onChange={(e) =>
+                              handleDrugChange(
+                                index,
+                                "specialInstructions",
+                                e.target.value
+                              )
+                            }
                             className="w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             placeholder="Take after meals"
                           />
@@ -338,68 +399,75 @@ const MedicalBillFinal: React.FC = () => {
         </div>
 
         {/* Examination Details */}
-        {currentBill.examinationDetails && currentBill.examinationDetails.length > 0 && (
-          <div className="mb-12">
-            <Title id={6} />
-            <div className="mt-10 mx-16 px-3">
-              <p className="font-bold text-2xl mb-4">Examination Details</p>
-              <div className="space-y-6">
-                {currentBill.examinationDetails.map((exam) => (
-                  <div key={exam.id} className="border rounded-lg p-6">
-                    <div className="grid grid-cols-2 gap-6">
-                      {exam.examinationType && (
-                        <div className="flex">
-                          <p className="font-bold text-2xl">Test Type: </p>
-                          <span className="ms-4 text-2xl text-[#A9A9A9]">
-                            {exam.examinationType}
-                          </span>
-                        </div>
-                      )}
-                      {exam.examinationResult && (
-                        <div className="flex">
-                          <p className="font-bold text-2xl">Result: </p>
-                          <span className="ms-4 text-2xl text-[#A9A9A9]">
-                            {exam.examinationResult}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {exam.imageResponseDTO && exam.imageResponseDTO.length > 0 && (
-                      <div className="mt-6">
-                        <p className="font-bold text-2xl mb-4">Examination Images</p>
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                          {exam.imageResponseDTO.map((image) => (
-                            <div key={image.id} className="relative group">
-                              <div 
-                                className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
-                                onClick={() => handleImageView(image.id)}
-                              >
-                                <img 
-                                  src={`${API_BASE_URL}/images/download/${image.id}`}
-                                  alt={image.fileName}
-                                  className="object-cover w-full h-full"
-                                  onError={(e) => {
-                                    const target = e.target as HTMLImageElement;
-                                    target.src = '/placeholder-image.png';
-                                    target.onerror = null;
-                                  }}
-                                />
-                              </div>
-                              <div className="mt-2">
-                                <span className="text-xl text-[#A9A9A9] truncate">{image.fileName}</span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
+        {currentBill.examinationDetails &&
+          currentBill.examinationDetails.length > 0 && (
+            <div className="mb-12">
+              <Title id={6} />
+              <div className="mt-10 mx-16 px-3">
+                <p className="font-bold text-2xl mb-4">Examination Details</p>
+                <div className="space-y-6">
+                  {currentBill.examinationDetails.map((exam) => (
+                    <div key={exam.id} className="border rounded-lg p-6">
+                      <div className="grid grid-cols-2 gap-6">
+                        {exam.examinationType && (
+                          <div className="flex">
+                            <p className="font-bold text-2xl">Test Type: </p>
+                            <span className="ms-4 text-2xl text-[#A9A9A9]">
+                              {exam.examinationType}
+                            </span>
+                          </div>
+                        )}
+                        {exam.examinationResult && (
+                          <div className="flex">
+                            <p className="font-bold text-2xl">Result: </p>
+                            <span className="ms-4 text-2xl text-[#A9A9A9]">
+                              {exam.examinationResult}
+                            </span>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                ))}
+
+                      {exam.imageResponseDTO &&
+                        exam.imageResponseDTO.length > 0 && (
+                          <div className="mt-6">
+                            <p className="font-bold text-2xl mb-4">
+                              Examination Images
+                            </p>
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                              {exam.imageResponseDTO.map((image) => (
+                                <div key={image.id} className="relative group">
+                                  <div
+                                    className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                                    onClick={() => handleImageView(image.id)}
+                                  >
+                                    <img
+                                      src={`${API_BASE_URL}/images/download/${image.id}`}
+                                      alt={image.fileName}
+                                      className="object-cover w-full h-full"
+                                      onError={(e) => {
+                                        const target =
+                                          e.target as HTMLImageElement;
+                                        target.src = "/placeholder-image.png";
+                                        target.onerror = null;
+                                      }}
+                                    />
+                                  </div>
+                                  <div className="mt-2">
+                                    <span className="text-xl text-[#A9A9A9] truncate">
+                                      {image.fileName}
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
         {/* Doctor Note */}
         {currentBill.note && currentBill.note.trim() !== "" && (
@@ -408,18 +476,23 @@ const MedicalBillFinal: React.FC = () => {
             <div className="mt-10 mx-16 px-3">
               <p className="font-bold text-2xl mb-4">Doctor Note</p>
               <div className="p-4 rounded-md">
-                <p className="text-2xl text-[#A9A9A9] whitespace-pre-wrap">{currentBill.note}</p>
+                <p className="text-2xl text-[#A9A9A9] whitespace-pre-wrap">
+                  {currentBill.note}
+                </p>
               </div>
             </div>
           </div>
         )}
 
-
-         {/* Action Buttons */}
-         <div className="flex justify-center space-x-4">
+        {/* Action Buttons */}
+        <div className="flex justify-center space-x-4">
           <button
             onClick={() => {
-              if (window.confirm('Are you sure you want to discard all changes? This action cannot be undone.')) {
+              if (
+                window.confirm(
+                  "Are you sure you want to discard all changes? This action cannot be undone."
+                )
+              ) {
                 navigate(-1);
               }
             }}
@@ -435,7 +508,6 @@ const MedicalBillFinal: React.FC = () => {
             Submit Treatment
           </button>
         </div>
-
       </div>
     </div>
   );
