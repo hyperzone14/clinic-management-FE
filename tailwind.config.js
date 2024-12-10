@@ -1,5 +1,8 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+import tailwindScrollbar from "tailwind-scrollbar";
+import typography from "@tailwindcss/typography";
+
+export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     screens: {
@@ -13,5 +16,5 @@ module.exports = {
       },
     },
   },
-  plugins: [require("tailwind-scrollbar"), require("@tailwindcss/typography")],
+  plugins: [tailwindScrollbar, typography],
 };
