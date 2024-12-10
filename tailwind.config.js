@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     screens: {
@@ -11,8 +11,7 @@ export default {
       fontFamily: {
         sans: ["Inter", "sans-serif"],
       },
-      plugins: [require("tailwind-scrollbar")],
     },
   },
-  plugins: [require("@tailwindcss/typography")],
+  plugins: [require("tailwind-scrollbar"), require("@tailwindcss/typography")],
 };
