@@ -21,7 +21,7 @@
     "@tailwindcss/typography": "^0.5.15",
     "@types/react-notifications-component": "^3.1.4",
     "@types/react-router-dom": "^5.3.3",
-    "axios": "^1.7.7",
+    "axios": "^1.7.9",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "framer-motion": "^11.11.17",
@@ -45,6 +45,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.11.1",
+    "@types/axios": "^0.9.36",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.9.0",
     "@types/react": "^18.3.11",
