@@ -195,7 +195,7 @@ const examinationSlice = createSlice({
   name: "examination",
   initialState,
   reducers: {
-    clearExamination: (state) => {
+    clearExamination: () => {
       FileManager.clear();
       return initialState;
     },

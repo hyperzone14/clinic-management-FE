@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 import ProgressBar from "../../components/common/ProgressBar";
@@ -156,7 +156,7 @@ const Service: React.FC = () => {
   const departments = useSelector(
     (state: RootState) => state.department.departments || []
   );
-  const [workingDays, setWorkingDays] = React.useState<string[]>([]);
+  const [, setWorkingDays] = React.useState<string[]>([]);
   const [serviceType, setServiceType] = React.useState<string>("");
   const [type, setType] = React.useState<string>("");
   const [searchTerm, setSearchTerm] = React.useState<string>("");
