@@ -3,7 +3,7 @@ import axios from "axios";
 
 // Create axios instance with custom config
 const api = axios.create({
-  baseURL: "http://localhost:8080/api",
+  baseURL: "https://clinic-management-vdb.onrender.com/api", //https://clinic-management-vdb.onrender.com/api/doctor
   headers: {
     "Content-Type": "application/json",
   },
