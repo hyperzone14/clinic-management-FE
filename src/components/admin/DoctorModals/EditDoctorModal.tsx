@@ -227,10 +227,6 @@ const EditDoctorModal: React.FC<EditModalProps> = ({
       newErrors.citizenId = "Citizen ID must be exactly 10 digits";
     }
 
-    if (!validateEmail(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -360,8 +356,8 @@ const EditDoctorModal: React.FC<EditModalProps> = ({
                 error={!!errors.departmentId}
                 helperText={errors.departmentId}
                 inputProps={{
-                  min: 0,
-                  max: 11,
+                  min: 1,
+                  max: 12,
                 }}
               />
               <TextField
