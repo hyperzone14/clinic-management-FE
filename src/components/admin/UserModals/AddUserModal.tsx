@@ -10,6 +10,8 @@ import {
 } from "@mui/material";
 import { useAppDispatch } from "../../../redux/store";
 import { addUserAsync } from "../../../redux/slices/userManageSlice";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface AddModalProps {
   openAdd: boolean;
@@ -111,6 +113,15 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
 
     try {
       const resultAction = await dispatch(addUserAsync(userToAdd));
+
+      if (resultAction.meta.requestStatus === "rejected") {
+        const errorMessage = resultAction.payload
+          ? (resultAction.payload as { message: string }).message
+          : "An error occurred while saving the profile.";
+
+        toast.error(errorMessage);
+      }
+
       if (addUserAsync.fulfilled.match(resultAction)) {
         // If the action was successful
         resetForm();
@@ -162,132 +173,134 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
   }, [openAdd]);
 
   return (
-    <Dialog open={openAdd} onClose={handleModalClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Add New Patient</DialogTitle>
-      <DialogContent>
-        <form onSubmit={(e) => e.preventDefault()}>
-          <TextField
-            label="Name"
-            name="fullName"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={newUser.fullName}
-            onChange={handleChange}
-            error={!!errors.fullName}
-            helperText={errors.fullName}
-            required
-          />
-          <TextField
-            label="Citizen ID"
-            name="citizenId"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={newUser.citizenId}
-            onChange={handleChange}
-            error={!!errors.citizenId}
-            helperText={errors.citizenId}
-            required
-          />
-          <TextField
-            label="Email"
-            name="email"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={newUser.email}
-            onChange={handleChange}
-            error={!!errors.email}
-            helperText={errors.email}
-            type="email"
-            required
-          />
-          <TextField
-            label="Password"
-            name="password"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={newUser.password}
-            onChange={handleChange}
-            error={!!errors.password}
-            helperText={errors.password}
-            type="password"
-            required
-          />
-          <TextField
-            select
-            label="Gender"
-            name="gender"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={newUser.gender}
-            onChange={handleChange}
-            error={!!errors.gender}
-            helperText={errors.gender}
-            required
-          >
-            <MenuItem value="MALE">Male</MenuItem>
-            <MenuItem value="FEMALE">Female</MenuItem>
-            <MenuItem value="OTHER">Other</MenuItem>
-          </TextField>
-          <TextField
-            label="Address"
-            name="address"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={newUser.address}
-            onChange={handleChange}
-            error={!!errors.address}
-            helperText={errors.address}
-            required
-          />
-          <TextField
-            label="Date of Birth"
-            name="birthDate"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            type="date"
-            value={newUser.birthDate}
-            onChange={handleDateChange}
-            error={!!errors.birthDate}
-            helperText={errors.birthDate}
-            required
-            sx={{
-              "& .MuiInputBase-root": {
-                borderRadius: "8px",
-              },
-              "& .MuiOutlinedInput-input": {
-                padding: "12px 14px",
-              },
-              "& .MuiInputLabel-root": {
-                transform: "translate(14px, -9px) scale(0.75)",
-                background: "white",
-                padding: "0 4px",
-              },
-              "& .MuiInputLabel-shrink": {
-                transform: "translate(14px, -9px) scale(0.75)",
-              },
-            }}
-            inputProps={{
-              placeholder: "dd/mm/yyyy",
-              min: "1900-01-01",
-              max: new Date().toISOString().split("T")[0],
-            }}
-            InputLabelProps={{
-              shrink: true,
-              sx: {
-                position: "absolute",
-                background: "white",
-                px: 1,
-              },
-            }}
-          />
-          {/* <TextField
+    <>
+      <ToastContainer />
+      <Dialog open={openAdd} onClose={handleModalClose} maxWidth="sm" fullWidth>
+        <DialogTitle>Add New Patient</DialogTitle>
+        <DialogContent>
+          <form onSubmit={(e) => e.preventDefault()}>
+            <TextField
+              label="Name"
+              name="fullName"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={newUser.fullName}
+              onChange={handleChange}
+              error={!!errors.fullName}
+              helperText={errors.fullName}
+              required
+            />
+            <TextField
+              label="Citizen ID"
+              name="citizenId"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={newUser.citizenId}
+              onChange={handleChange}
+              error={!!errors.citizenId}
+              helperText={errors.citizenId}
+              required
+            />
+            <TextField
+              label="Email"
+              name="email"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={newUser.email}
+              onChange={handleChange}
+              error={!!errors.email}
+              helperText={errors.email}
+              type="email"
+              required
+            />
+            <TextField
+              label="Password"
+              name="password"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={newUser.password}
+              onChange={handleChange}
+              error={!!errors.password}
+              helperText={errors.password}
+              type="password"
+              required
+            />
+            <TextField
+              select
+              label="Gender"
+              name="gender"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={newUser.gender}
+              onChange={handleChange}
+              error={!!errors.gender}
+              helperText={errors.gender}
+              required
+            >
+              <MenuItem value="MALE">Male</MenuItem>
+              <MenuItem value="FEMALE">Female</MenuItem>
+              <MenuItem value="OTHER">Other</MenuItem>
+            </TextField>
+            <TextField
+              label="Address"
+              name="address"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={newUser.address}
+              onChange={handleChange}
+              error={!!errors.address}
+              helperText={errors.address}
+              required
+            />
+            <TextField
+              label="Date of Birth"
+              name="birthDate"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              type="date"
+              value={newUser.birthDate}
+              onChange={handleDateChange}
+              error={!!errors.birthDate}
+              helperText={errors.birthDate}
+              required
+              sx={{
+                "& .MuiInputBase-root": {
+                  borderRadius: "8px",
+                },
+                "& .MuiOutlinedInput-input": {
+                  padding: "12px 14px",
+                },
+                "& .MuiInputLabel-root": {
+                  transform: "translate(14px, -9px) scale(0.75)",
+                  background: "white",
+                  padding: "0 4px",
+                },
+                "& .MuiInputLabel-shrink": {
+                  transform: "translate(14px, -9px) scale(0.75)",
+                },
+              }}
+              inputProps={{
+                placeholder: "dd/mm/yyyy",
+                min: "1900-01-01",
+                max: new Date().toISOString().split("T")[0],
+              }}
+              InputLabelProps={{
+                shrink: true,
+                sx: {
+                  position: "absolute",
+                  background: "white",
+                  px: 1,
+                },
+              }}
+            />
+            {/* <TextField
             select
             label="Status"
             name="status"
@@ -303,22 +316,23 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
             <MenuItem value="ACTIVE">Active</MenuItem>
             <MenuItem value="INACTIVE">Inactive</MenuItem>
           </TextField> */}
-        </form>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleModalClose} color="secondary">
-          Cancel
-        </Button>
-        <Button
-          onClick={handleSave}
-          color="primary"
-          variant="contained"
-          type="button"
-        >
-          Save
-        </Button>
-      </DialogActions>
-    </Dialog>
+          </form>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleModalClose} color="secondary">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSave}
+            color="primary"
+            variant="contained"
+            type="button"
+          >
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };
 

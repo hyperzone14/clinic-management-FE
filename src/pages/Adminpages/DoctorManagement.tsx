@@ -116,10 +116,12 @@ const DoctorManagement = () => {
               // Add null/undefined checks
               const fullName = item.fullName || "";
               const email = item.email || "";
+              const departmentId = item.departmentId || "";
 
               return (
                 fullName.toLowerCase().trim().includes(searchValue) ||
-                email.toLowerCase().includes(searchValue)
+                email.toLowerCase().includes(searchValue) ||
+                departmentId.toString().includes(searchValue)
               );
             })
             .map(transformDoctor)

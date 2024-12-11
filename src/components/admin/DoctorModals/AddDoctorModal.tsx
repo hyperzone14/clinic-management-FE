@@ -11,6 +11,8 @@ import {
   Button,
   SelectChangeEvent,
 } from "@mui/material";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 // import { useSelector } from "react-redux";
 // import { fetchDepartments } from "../../../redux/slices/departmentSlice";
 
@@ -139,6 +141,15 @@ const AddDoctorModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
 
     try {
       const resultAction = await dispatch(addDoctor(userToAdd));
+
+      if (resultAction.meta.requestStatus === "rejected") {
+        const errorMessage = resultAction.payload
+          ? (resultAction.payload as { message: string }).message
+          : "An error occurred while saving the profile.";
+
+        toast.error(errorMessage);
+      }
+
       if (addDoctor.fulfilled.match(resultAction)) {
         resetForm();
         handleClose(true);
@@ -197,6 +208,7 @@ const AddDoctorModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
 
   return (
     <>
+      <ToastContainer />
       <Dialog open={openAdd} onClose={handleModalClose} maxWidth="sm" fullWidth>
         <DialogTitle>Add New Doctor</DialogTitle>
         <DialogContent>
