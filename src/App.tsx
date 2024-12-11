@@ -84,7 +84,11 @@ function App() {
   return (
     <Provider store={store}>
       <BrowserRouter>
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense
+          fallback={
+            <div className="flex items-center justify-center">Loading...</div>
+          }
+        >
           <Routes>
             {/* Admin Routes */}
             <Route element={<ProtectedRoute />}>
