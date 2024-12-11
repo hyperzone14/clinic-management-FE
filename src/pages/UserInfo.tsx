@@ -147,9 +147,21 @@ const UserInfo = () => {
 
       // Check if there's an error in the result
       if (result.meta.requestStatus === "rejected") {
-        toast.error(
-          "Your email has already been registered, please change your email."
-        );
+        // if (result.error.message.includes("Duplicate entry")) {
+        //   toast.error(
+        //     "Email address already registered. Please use a different email."
+        //   );
+        // } else {
+        //   toast.error(
+        //     result.error.message ||
+        //       "An error occurred while saving the profile."
+        //   );
+        // }
+        const errorMessage = result.payload
+          ? (result.payload as { message: string }).message
+          : "An error occurred while saving the profile.";
+
+        toast.error(errorMessage);
       } else {
         // Navigate to the login page and display a success message
         navigate("/login");
