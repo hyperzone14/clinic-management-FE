@@ -11,6 +11,7 @@ import {
 } from "../redux/slices/medicalBillSlice";
 import { toast, ToastContainer } from "react-toastify";
 import { AuthService } from "../utils/security/services/AuthService";
+import { fetchMedicalRecordsByPatientId } from "../redux/slices/medicHistorySlice";
 
 interface LocationState {
   patientId: number;
@@ -204,12 +205,10 @@ const MedicalBillFinal: React.FC = () => {
               </div>
               <div className="col-span-1 flex justify-end">
                 <button
-                  onClick={() =>
-                    window.open(
-                      `/medical-history?id=${currentBill.patientId}`,
-                      "_blank"
-                    )
-                  }
+                  onClick={() => {
+                    dispatch(fetchMedicalRecordsByPatientId(currentBill.patientId));
+                    window.open(`/medical-history?patientId=${currentBill.patientId}`, '_blank');
+                  }}
                   className="flex items-center px-6 py-3 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
                 >
                   <ClipboardList className="h-5 w-5 mr-2" />

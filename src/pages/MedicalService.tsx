@@ -20,6 +20,7 @@ import {
 
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { fetchMedicalRecordsByPatientId } from "../redux/slices/medicHistorySlice";
 
 const MedicalService: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -204,7 +205,10 @@ const MedicalService: React.FC = () => {
 
             {/* View History Button */}
             <button
-              onClick={() => window.open(`/medical-history?id=${patientInfo.patientId}`, '_blank')}
+              onClick={() => {
+                dispatch(fetchMedicalRecordsByPatientId(patientInfo.patientId));
+                window.open(`/medical-history?patientId=${patientInfo.patientId}`, '_blank');
+              }}
               className="flex items-center px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors whitespace-nowrap ml-auto"
             >
               <ClipboardList className="h-5 w-5 mr-2" />
