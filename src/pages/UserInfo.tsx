@@ -147,19 +147,28 @@ const UserInfo = () => {
 
       // Check if there's an error in the result
       if (result.meta.requestStatus === "rejected") {
-        // if (result.error.message.includes("Duplicate entry")) {
-        //   toast.error(
-        //     "Email address already registered. Please use a different email."
-        //   );
-        // } else {
-        //   toast.error(
-        //     result.error.message ||
-        //       "An error occurred while saving the profile."
-        //   );
-        // }
-        const errorMessage = result.payload
-          ? (result.payload as { message: string }).message
-          : "An error occurred while saving the profile.";
+        // const errorMessage = result.payload
+        //   ? (result.payload as { message: string }).message
+        //   : "An error occurred while saving the profile.";
+
+        // toast.error(errorMessage);
+        let errorMessage = "An error occurred while saving the profile.";
+
+        // Check if the payload contains a specific error message
+        if (result.payload) {
+          const payload = result.payload as { message: string };
+
+          // Check for duplicate email specific error
+          if (
+            payload.message.includes("Duplicate entry") &&
+            payload.message.includes("email")
+          ) {
+            errorMessage =
+              "Email address already registered. Please use a different email.";
+          } else {
+            errorMessage = payload.message;
+          }
+        }
 
         toast.error(errorMessage);
       } else {
