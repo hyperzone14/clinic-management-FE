@@ -143,11 +143,13 @@ const AddDoctorModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
       const resultAction = await dispatch(addDoctor(userToAdd));
 
       if (resultAction.meta.requestStatus === "rejected") {
-        const errorMessage = resultAction.payload
-          ? (resultAction.payload as { message: string }).message
-          : "An error occurred while saving the profile.";
+        // const errorMessage = resultAction.payload
+        //   ? (resultAction.payload as { message: string }).message
+        //   : "An error occurred while saving the profile.";
 
-        toast.error(errorMessage);
+        toast.error(
+          "The email has already been registered, please change to another email"
+        );
       }
 
       if (addDoctor.fulfilled.match(resultAction)) {

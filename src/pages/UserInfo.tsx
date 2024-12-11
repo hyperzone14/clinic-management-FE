@@ -152,25 +152,27 @@ const UserInfo = () => {
         //   : "An error occurred while saving the profile.";
 
         // toast.error(errorMessage);
-        let errorMessage = "An error occurred while saving the profile.";
+        // let errorMessage = "An error occurred while saving the profile.";
 
-        // Check if the payload contains a specific error message
-        if (result.payload) {
-          const payload = result.payload as { message: string };
+        // // Check if the payload contains a specific error message
+        // if (result.payload) {
+        //   const payload = result.payload as { message: string };
 
-          // Check for duplicate email specific error
-          if (
-            payload.message.includes("Duplicate entry") &&
-            payload.message.includes("email")
-          ) {
-            errorMessage =
-              "Email address already registered. Please use a different email.";
-          } else {
-            errorMessage = payload.message;
-          }
-        }
+        //   // Check for duplicate email specific error
+        //   if (
+        //     payload.message.includes("Duplicate entry") &&
+        //     payload.message.includes("email")
+        //   ) {
+        //     errorMessage =
+        //       "Email address already registered. Please use a different email.";
+        //   } else {
+        //     errorMessage = payload.message;
+        //   }
+        // }
 
-        toast.error(errorMessage);
+        toast.error(
+          "Your email might be already registered. Please use a different email."
+        );
       } else {
         // Navigate to the login page and display a success message
         navigate("/login");

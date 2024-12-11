@@ -119,8 +119,8 @@ const DoctorManagement = () => {
               const departmentId = item.departmentId || "";
 
               return (
-                fullName.toLowerCase().trim().includes(searchValue) ||
-                email.toLowerCase().includes(searchValue) ||
+                fullName.trim().includes(searchValue) ||
+                email.includes(searchValue) ||
                 departmentId.toString().includes(searchValue)
               );
             })

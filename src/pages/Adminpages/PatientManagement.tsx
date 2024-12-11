@@ -34,7 +34,7 @@ const UserManagement: React.FC = () => {
     (state: RootState) => state.userManage.users || []
   );
   const loading = useSelector((state: RootState) => state.userManage.loading);
-  const error = useSelector((state: RootState) => state.userManage.error);
+  // const error = useSelector((state: RootState) => state.userManage.error);
   const dispatch = useDispatch<AppDispatch>();
   const [search, setSearch] = useState("");
   const [filteredData, setFilteredData] = useState<TableData[]>([]);
@@ -102,8 +102,8 @@ const UserManagement: React.FC = () => {
               if (!item) return false;
 
               return (
-                item.fullName.toLowerCase().includes(searchValue) ||
-                item.email.toLowerCase().includes(searchValue)
+                item.fullName.includes(searchValue) ||
+                item.email.includes(searchValue)
               );
             })
             .map(transformUser)
@@ -159,9 +159,9 @@ const UserManagement: React.FC = () => {
   return (
     <div className="p-4">
       <h1 className="text-3xl font-bold my-5">Patients Management</h1>
-      {error && (
+      {/* {error && (
         <div className="text-red-500 mb-4">Error loading patients: {error}</div>
-      )}
+      )} */}
       {loading ? (
         <div>Loading...</div>
       ) : (

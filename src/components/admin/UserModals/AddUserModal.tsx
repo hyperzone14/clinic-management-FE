@@ -115,11 +115,13 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
       const resultAction = await dispatch(addUserAsync(userToAdd));
 
       if (resultAction.meta.requestStatus === "rejected") {
-        const errorMessage = resultAction.payload
-          ? (resultAction.payload as { message: string }).message
-          : "An error occurred while saving the profile.";
+        // const errorMessage = resultAction.payload
+        //   ? (resultAction.payload as { message: string }).message
+        //   : "An error occurred while saving the profile.";
 
-        toast.error(errorMessage);
+        toast.error(
+          "The email has already been used by a doctor, please change to another email"
+        );
       }
 
       if (addUserAsync.fulfilled.match(resultAction)) {

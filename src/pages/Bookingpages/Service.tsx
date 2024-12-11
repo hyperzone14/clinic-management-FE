@@ -188,9 +188,10 @@ const Service: React.FC = () => {
       }))
   );
 
-  const filterByDoctors = doctorsWithDepartments.filter((item) =>
-    item.doctor.fullName.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    item.department.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filterByDoctors = doctorsWithDepartments.filter(
+    (item) =>
+      item.doctor.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+    // item.department.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const filterByDepartments = departments.filter((department) =>
