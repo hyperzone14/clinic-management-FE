@@ -186,6 +186,31 @@ const ChooseDateTime: React.FC = () => {
 
   // Check if a time slot is available
   const isSlotAvailable = (slotId: string): boolean => {
+    const todayDate = new Date();
+    const compareDate = new Date();
+    compareDate.setHours(0, 0, 0, 0);
+
+    if (selectedDate && selectedDate.getTime() === compareDate.getTime()) {
+      const slot = TIME_SLOTS.find((s) => s.timeSlot === slotId);
+      if (slot) {
+        const [startHour] = slot.time.split("-")[0].split(/AM|PM/);
+        const isPM = slot.time.includes("PM");
+        const slotTime = new Date();
+        slotTime.setHours(
+          isPM ? parseInt(startHour) + 12 : parseInt(startHour),
+          0,
+          0,
+          0
+        );
+
+        const timeDifference =
+          (slotTime.getTime() - todayDate.getTime()) / (1000 * 60 * 60); // Difference in hours
+        if (timeDifference <= 2) {
+          return false;
+        }
+      }
+    }
+
     if (availableSlots.length === 0) {
       // If no schedule exists, all slots are available
       return true;
@@ -226,30 +251,30 @@ const ChooseDateTime: React.FC = () => {
   return (
     <>
       <ToastContainer />
-      <div className="w-full">
-        <div className="flex flex-col my-5 mx-10 justify-center items-center">
-          <h1 className="text-4xl font-bold font-sans my-5">BOOKING CENTER</h1>
+      <div className='w-full'>
+        <div className='flex flex-col my-5 mx-10 justify-center items-center'>
+          <h1 className='text-4xl font-bold font-sans my-5'>BOOKING CENTER</h1>
           <ProgressBar currentStep={1} />
         </div>
 
-        <div className="mt-24 grid grid-cols-3">
-          <div className="col-span-2 me-10">
+        <div className='mt-24 grid grid-cols-3'>
+          <div className='col-span-2 me-10'>
             <Title id={3} />
-            <div className="mt-20 mb-10 flex justify-center items-center gap-3">
+            <div className='mt-20 mb-10 flex justify-center items-center gap-3'>
               <Calendar
                 onChange={handleDateChange}
                 value={selectedDate}
-                minDetail="month"
-                prevLabel="Previous"
-                nextLabel="Next"
+                minDetail='month'
+                prevLabel='Previous'
+                nextLabel='Next'
                 tileDisabled={tileDisabled}
               />
             </div>
-            <div className="mt-5 grid grid-cols-3 gap-3 text-center">
+            <div className='mt-5 grid grid-cols-3 gap-3 text-center'>
               {TIME_SLOTS.map((timeSlot) => (
                 <div
                   key={timeSlot.id}
-                  className="col-span-1 flex justify-center items-center"
+                  className='col-span-1 flex justify-center items-center'
                 >
                   <div
                     className={getSlotStyle(timeSlot.timeSlot)}
@@ -257,14 +282,14 @@ const ChooseDateTime: React.FC = () => {
                       handleTimeSlotClick(timeSlot.time, timeSlot.timeSlot)
                     }
                   >
-                    <span className="font-bold">{timeSlot.time}</span>
+                    <span className='font-bold'>{timeSlot.time}</span>
                   </div>
                 </div>
               ))}
             </div>
-            <div className="mt-16 mb-20 flex justify-center items-center gap-3">
+            <div className='mt-16 mb-20 flex justify-center items-center gap-3'>
               <button
-                className="bg-[#34a85a] hover:bg-[#2e8b57] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out"
+                className='bg-[#34a85a] hover:bg-[#2e8b57] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out'
                 onClick={() => {
                   goToPreviousStep();
                   window.scrollTo({
@@ -276,14 +301,14 @@ const ChooseDateTime: React.FC = () => {
                 Previous
               </button>
               <button
-                className="bg-[#4567b7] hover:bg-[#3E5CA3] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out"
+                className='bg-[#4567b7] hover:bg-[#3E5CA3] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out'
                 onClick={handleSubmit}
               >
                 Submit
               </button>
             </div>
           </div>
-          <div className="col-span-1">
+          <div className='col-span-1'>
             <InformationList />
           </div>
         </div>
