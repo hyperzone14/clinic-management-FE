@@ -205,7 +205,7 @@ const ChooseDateTime: React.FC = () => {
 
         const timeDifference =
           (slotTime.getTime() - todayDate.getTime()) / (1000 * 60 * 60); // Difference in hours
-        if (timeDifference <= 2) {
+        if (timeDifference <= 4) {
           return false;
         }
       }

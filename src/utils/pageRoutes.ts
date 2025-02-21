@@ -22,6 +22,7 @@ export const getHeaderRoutes = (role: string): Routes[] => {
       { id: 1, path: "/", location: "Home" },
       { id: 2, path: "/booking", location: "Booking" },
       { id: 3, path: "/doctors", location: "Doctors" },
+      { id: 4, path: "/feedback", location: "Feedback" },
     ];
   } else if (role === "ROLE_DOCTOR") {
     // /, /schedule, /examination
@@ -175,6 +176,11 @@ export const pageRoutes: Routes[] = [
         location: "DoctorDetail",
       },
     ],
+  },
+  {
+    id: 14,
+    path: "/feedback",
+    location: "Feedback",
   },
 ];
 

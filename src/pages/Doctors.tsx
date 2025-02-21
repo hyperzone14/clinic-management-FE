@@ -46,6 +46,7 @@ const Doctors = () => {
   }, {} as Record<number, React.RefObject<HTMLDivElement>>);
 
   const handleDoctorClick = (doctorId: number) => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
     navigate(`/doctors/${doctorId}`);
   };
 
@@ -54,12 +55,14 @@ const Doctors = () => {
       <div className='w-full'>
         <SearchParallax />
         <div className='flex flex-col my-10 mx-10 justify-center items-center'>
-          <h1 className='text-4xl font-bold font-sans mt-5'>OUR DOCTORS</h1>
-          <span className='text-[#C0C0C0] text-center text-xl mt-2'>
+          <h1 className='text-4xl font-bold font-sans mt-5'>
+            Choose Your Doctor
+          </h1>
+          {/* <span className='text-[#C0C0C0] text-center text-xl mt-2'>
             {checkedChoice
               ? checkedChoice
               : "Which doctor do you want to dive deeper into?"}
-          </span>
+          </span> */}
         </div>
         <div className='mb-20 grid  grid-cols-4'>
           <div className='col-span-1'>
@@ -71,6 +74,7 @@ const Doctors = () => {
             <FormGroup className='ms-3'>
               {specialty.map((specialty) => (
                 <FormControlLabel
+                  key={specialty}
                   control={
                     <Checkbox
                       checked={checkedChoice === specialty}
@@ -102,8 +106,8 @@ const Doctors = () => {
                       <CSSTransition
                         key={doctor.id}
                         timeout={500}
+                        nodeRef={nodeRefs[doctor.id]}
                         classNames='fade-slide'
-                        // appear
                       >
                         <div
                           ref={nodeRefs[doctor.id]}
@@ -130,8 +134,8 @@ const Doctors = () => {
                         <CSSTransition
                           key={doctor.id}
                           timeout={500}
+                          nodeRef={nodeRefs[doctor.id]}
                           classNames='fade-slide'
-                          // appear
                         >
                           <div
                             ref={nodeRefs[doctor.id]}
