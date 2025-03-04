@@ -1,4 +1,3 @@
-import React from "react";
 import DoctorParallax from "../components/common/DoctorParallax";
 import SlidingBar from "../components/common/SlidingBar";
 

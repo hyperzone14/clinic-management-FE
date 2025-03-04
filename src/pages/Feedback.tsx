@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { IoMdPricetags } from "react-icons/io";
 import { MdOutlineGroup } from "react-icons/md";
 import {
@@ -177,7 +177,7 @@ const Feedback = () => {
                     name='half-rating-read justify-center'
                     size='large'
                     value={starValue[index]}
-                    onChange={(event, newValue) => {
+                    onChange={(_, newValue) => {
                       setStarValue((prev) => {
                         const updatedValues = [...prev];
                         updatedValues[index] = newValue ?? 0;

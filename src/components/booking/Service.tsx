@@ -151,11 +151,11 @@ const Service: React.FC<ServiceProps> = ({ isManualBooking = false }) => {
     (state: RootState) => state.department.departments || []
   );
   const infoList = useSelector((state: RootState) => state.infoList);
-  const [workingDays, setWorkingDays] = React.useState<string[]>([]);
+  const [, setWorkingDays] = React.useState<string[]>([]);
   const [serviceType, setServiceType] = React.useState<string>(
     infoList.service || ""
   );
-  const [type, setType] = React.useState<string>(infoList.type || "");
+  const [, setType] = React.useState<string>(infoList.type || "");
   const [searchTerm, setSearchTerm] = React.useState<string>("");
   const auth = useSelector((state: RootState) => state.auth);
 
