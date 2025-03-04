@@ -1,16 +1,18 @@
 import React from "react";
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import Title from "../common/Title";
+import DatePicker from "react-datepicker";
+// import { useNavigate } from "react-router-dom";
+import { useAppDispatch } from "../../redux/store";
+import {
+  addUserAsync,
+  retrieveLatestPatientId,
+} from "../../redux/slices/userManageSlice";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { RootState, useAppDispatch } from "../redux/store";
-import UserImage from "../components/common/UserImage";
-import DatePicker from "react-datepicker";
-import { addUserAsync } from "../redux/slices/userManageSlice";
 import "react-datepicker/dist/react-datepicker.css";
-// import { UserInfo } from "os";
+import InformationList from "../common/InformationList";
 
-interface userInfoProps {
+interface patientInfoProps {
   fullName: string;
   citizenId: string;
   email: string;
@@ -20,20 +22,20 @@ interface userInfoProps {
   birthDate: string;
 }
 
-const UserInfo = () => {
+const PatientInfo = () => {
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
-  const userInfo = useSelector((state: RootState) => state.signinProfile);
+  //   const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = React.useState<Date | null>(null);
+  const [patientId, setPatientId] = React.useState<string | null>(null);
   // const { error } = useSelector((state: RootState) => state.userManage);
   const [errors, setErrors] = React.useState<
-    Partial<Record<keyof userInfoProps, string>>
+    Partial<Record<keyof patientInfoProps, string>>
   >({});
-  const [formData, setFormData] = React.useState<userInfoProps>({
-    fullName: userInfo.fullName ? userInfo.fullName : "",
+  const [formData, setFormData] = React.useState<patientInfoProps>({
+    fullName: "",
     citizenId: "",
-    email: userInfo.email ? userInfo.email : "",
-    password: userInfo.password ? userInfo.password : "",
+    email: "",
+    password: "",
     gender: "",
     address: "",
     birthDate: "",
@@ -66,7 +68,7 @@ const UserInfo = () => {
   };
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<Record<keyof userInfoProps, string>> = {};
+    const newErrors: Partial<Record<keyof patientInfoProps, string>> = {};
 
     // Validate full name
     if (!formData.fullName.trim()) {
@@ -167,9 +169,11 @@ const UserInfo = () => {
           );
         }
       } else {
-        // Navigate to the login page and display a success message
-        navigate("/login");
-        toast.success("Profile is saved!");
+        const latestPatientId = await dispatch(retrieveLatestPatientId());
+        if (retrieveLatestPatientId.fulfilled.match(latestPatientId)) {
+          setPatientId(latestPatientId.payload?.toString() || null);
+          toast.success("Profile is saved!");
+        }
       }
     } catch (err) {
       // Handle any other errors that may occur
@@ -182,14 +186,10 @@ const UserInfo = () => {
   return (
     <>
       <ToastContainer />
-      <div className='w-full'>
-        <div className='flex flex-col my-5 mx-10 justify-center items-center'>
-          <h1 className='text-4xl font-bold font-sans my-5'>Patient Profile</h1>
-        </div>
-
-        <div className='grid grid-cols-3 gap-4 justify-items-center mb-10'>
-          <UserImage fullName={formData.fullName} />
-          <div className='col-span-2 bg-[#fff] rounded-lg shadow-lg w-full'>
+      <div className='my-12 mx-16'>
+        <Title id={8} />
+        <div className='mt-6 grid grid-cols-3 gap-x-4'>
+          <div className='col-span-2 bg-gray-50 rounded-lg shadow-lg w-full h-fit'>
             <div className='my-5'>
               <h1 className='text-3xl font-bold text-center'>Profile</h1>
               <div className='mt-3'>
@@ -303,7 +303,7 @@ const UserInfo = () => {
                             name={field.name}
                             value={
                               formData[
-                                field.name as keyof userInfoProps
+                                field.name as keyof patientInfoProps
                               ] as string
                             }
                             onChange={handleChange}
@@ -312,9 +312,9 @@ const UserInfo = () => {
                             required
                           />
                         </div>
-                        {errors[field.name as keyof userInfoProps] && (
+                        {errors[field.name as keyof patientInfoProps] && (
                           <span className='text-red-500 text-sm'>
-                            {errors[field.name as keyof userInfoProps]}
+                            {errors[field.name as keyof patientInfoProps]}
                           </span>
                         )}
                       </div>
@@ -342,7 +342,7 @@ const UserInfo = () => {
                       </div>
                     </div>
                   </fieldset>
-                  <div className='mt-5 mb-5 flex justify-end'>
+                  <div className='mt-10 flex justify-center'>
                     <button
                       className='bg-[#34a85a] hover:bg-[#309C54] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out'
                       type='submit'
@@ -354,10 +354,13 @@ const UserInfo = () => {
               </div>
             </div>
           </div>
+          <div className='col-span-1 mb-10'>
+            <InformationList patientId={patientId} />
+          </div>
         </div>
       </div>
     </>
   );
 };
 
-export default UserInfo;
+export default PatientInfo;

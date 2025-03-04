@@ -12,13 +12,13 @@ import { Footer } from "./components/layout/Footer";
 import { BackToTop } from "./components/layout/BackToTop";
 import {
   pageRoutes,
-  bookingRoutes,
+  // bookingRoutes,
   // dashboardRoutes,
   prescriptionRoutes,
   adminRoutes,
 } from "./utils/pageRoutes";
 import React, { Suspense, lazy } from "react";
-import Booking from "./pages/Booking";
+// import Booking from "./pages/Booking";
 import NotFound from "./pages/error/NotFound";
 // import Dashboard from "./pages/Dashboard";
 import { Provider } from "react-redux";
@@ -39,9 +39,9 @@ const ConditionalChatbot: React.FC = () => {
 // Layout wrapper component for pages that need header and footer
 const MainLayout: React.FC = () => {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className='flex flex-col min-h-screen'>
       <Header />
-      <main className="flex-grow mx-[11rem]">
+      <main className='flex-grow mx-[11rem]'>
         <Outlet />
       </main>
       <ConditionalChatbot />
@@ -54,8 +54,8 @@ const MainLayout: React.FC = () => {
 // Layout wrapper for auth pages without header and footer
 const AuthLayout: React.FC = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#efffeb]">
-      <main className="w-full">
+    <div className='flex min-h-screen items-center justify-center bg-[#efffeb]'>
+      <main className='w-full'>
         <Outlet />
       </main>
     </div>
@@ -64,9 +64,9 @@ const AuthLayout: React.FC = () => {
 
 const AdminLayout: React.FC = () => {
   return (
-    <div className="flex min-h-screen bg-[#f7f7f7]">
+    <div className='flex min-h-screen bg-[#f7f7f7]'>
       <AdminSideBar />
-      <main className="w-4/5 py-4 mx-32 flex-grow">
+      <main className='w-4/5 py-4 mx-32 flex-grow'>
         <Outlet />
       </main>
     </div>
@@ -90,7 +90,7 @@ function App() {
           <Routes>
             {/* Admin Routes */}
             <Route element={<ProtectedRoute />}>
-              <Route path="/admin" element={<AdminLayout />}>
+              <Route path='/admin' element={<AdminLayout />}>
                 {/* The dashboard is now directly at /admin */}
                 {adminRoutes.map((route) => {
                   const AdminComponent = lazy(() => {
@@ -117,7 +117,7 @@ function App() {
 
             {/* Not Permitted Route */}
             <Route
-              path="/admin/not-permitted"
+              path='/admin/not-permitted'
               element={
                 <Suspense fallback={<div>Loading...</div>}>
                   <NotPermitted />
@@ -128,7 +128,7 @@ function App() {
             {/* Auth Routes */}
             <Route element={<AuthLayout />}>
               <Route
-                path="/sign-in"
+                path='/sign-in'
                 element={
                   <Suspense fallback={<div>Loading...</div>}>
                     <SignIn />
@@ -136,7 +136,7 @@ function App() {
                 }
               />
               <Route
-                path="/login"
+                path='/login'
                 element={
                   <Suspense fallback={<div>Loading...</div>}>
                     <Login />
@@ -144,7 +144,7 @@ function App() {
                 }
               />
               <Route
-                path="/forgot-password"
+                path='/forgot-password'
                 element={
                   <Suspense fallback={<div>Loading...</div>}>
                     <ForgotPassword />
@@ -152,7 +152,7 @@ function App() {
                 }
               />
               <Route
-                path="/payment-success"
+                path='/payment-success'
                 element={
                   <Suspense fallback={<div>Loading...</div>}>
                     <PaymentSuccess />
@@ -202,7 +202,7 @@ function App() {
                           return (
                             <Route
                               key={child.id}
-                              path=":id"
+                              path=':id'
                               element={
                                 <Suspense fallback={<div>Loading...</div>}>
                                   <ChildComponent />
@@ -233,7 +233,7 @@ function App() {
                 })}
 
                 {/* Booking Routes */}
-                <Route element={<ProtectedRoute />}>
+                {/* <Route element={<ProtectedRoute />}>
                   <Route
                     path="/booking"
                     element={<Booking steps={bookingRoutes} />}
@@ -270,11 +270,11 @@ function App() {
                       );
                     })}
                   </Route>
-                </Route>
+                </Route> */}
 
                 {/* Prescription Routes */}
                 <Route
-                  path="/prescription"
+                  path='/prescription'
                   element={<Prescription steps={prescriptionRoutes} />}
                 >
                   <Route
@@ -309,8 +309,8 @@ function App() {
                 </Route>
 
                 {/* Not Found Route */}
-                <Route path="*" element={<NotFound />}>
-                  <Route path="*" element={<Navigate to="/error" replace />} />
+                <Route path='*' element={<NotFound />}>
+                  <Route path='*' element={<Navigate to='/error' replace />} />
                 </Route>
               </Route>
             </Route>

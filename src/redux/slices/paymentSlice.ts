@@ -9,6 +9,7 @@ export interface PaymentResponse {
 }
 
 export interface PaymentState {
+  cashPaymentSelected: boolean;
   paymentUrl: string | null;
   isProcessing: boolean;
   error: string | null;
@@ -17,6 +18,7 @@ export interface PaymentState {
 
 // Initial State
 const initialState: PaymentState = {
+  cashPaymentSelected: false,
   paymentUrl: null,
   isProcessing: false,
   error: null,
@@ -69,6 +71,9 @@ const paymentSlice = createSlice({
       state.error = null;
       state.paymentStatus = "idle";
     },
+    setCashPaymentSelected: (state, action) => {
+      state.cashPaymentSelected = action.payload;
+    },
   },
   extraReducers: (builder) => {
     // Create Payment Reducers
@@ -109,6 +114,7 @@ const paymentSlice = createSlice({
   },
 });
 
-export const { resetPaymentState } = paymentSlice.actions;
+export const { resetPaymentState, setCashPaymentSelected } =
+  paymentSlice.actions;
 
 export default paymentSlice.reducer;

@@ -30,12 +30,19 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    const errorDetails = {
+      message: error.response?.data?.message || "Unknown error occurred",
+      path: error.response?.data?.path || "",
+      timestamp: error.response?.data?.timestamp || "",
+      errorCode: error.response?.data?.errorCode || "",
+    };
     // Handle 401 Unauthorized errors
     if (error.response?.status === 401) {
       localStorage.removeItem("token");
       // Redirect to login page or handle refresh token
       window.location.href = "/error";
     }
+    error.details = errorDetails;
 
     return Promise.reject(error);
   }
