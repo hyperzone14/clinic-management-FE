@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import Rating from "@mui/material/Rating";
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa";
 

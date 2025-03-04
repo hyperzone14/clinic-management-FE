@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect } from "react";
 import { FaRegCalendarAlt } from "react-icons/fa";
@@ -83,7 +84,7 @@ const DoctorCard: React.FC<{
   onClick: (doctorId: number, doctorName: string) => void;
   handleWorkingDaysChange: (workingDays: string[]) => void;
   isSelected: boolean;
-}> = ({ doctor, onClick, handleWorkingDaysChange, isSelected }) => {
+}> = ({ doctor, onClick, handleWorkingDaysChange }) => {
   const handleClick = () => {
     handleWorkingDaysChange(doctor.doctor.workingDays);
     onClick(doctor.doctor.id, doctor.doctor.fullName);
@@ -123,7 +124,7 @@ const DepartmentCard: React.FC<{
   department: Department;
   onClick: (departmentId: number, departmentName: string) => void;
   isSelected: boolean;
-}> = ({ department, onClick, isSelected }) => (
+}> = ({ department, onClick }) => (
   <div
     className={
       "bg-[#fff] w-full h-fit rounded-lg flex shadow-sm hover:shadow-md transition-shadow cursor-pointer "
