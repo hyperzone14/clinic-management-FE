@@ -10,7 +10,8 @@ export type StatusType =
   | "cancelled"
   | "confirmed"
   | "lab_test_required"
-  | "lab_test_completed";
+  | "lab_test_completed"
+  | "pre_examination_completed";
 
 export type Gender = 'Male' | 'Female' | 'Other';
 
@@ -21,7 +22,8 @@ export enum AppointmentStatus {
   CANCELLED = 'CANCELLED',
   SUCCESS = 'SUCCESS',
   LAB_TEST_REQUIRED = 'LAB_TEST_REQUIRED',
-  LAB_TEST_COMPLETED = 'LAB_TEST_COMPLETED'
+  LAB_TEST_COMPLETED = 'LAB_TEST_COMPLETED',
+  PRE_EXAMINATION_COMPLETED = 'PRE_EXAMINATION_COMPLETED'
 }
 
 export interface PatientResponseDTO {
@@ -126,7 +128,8 @@ const mapStatus = (backendStatus: string): StatusType => {
     'CANCELLED': 'cancelled',
     'SUCCESS': 'success',
     'LAB_TEST_REQUIRED': 'lab_test_required',
-    'LAB_TEST_COMPLETED': 'lab_test_completed'
+    'LAB_TEST_COMPLETED': 'lab_test_completed',
+    'PRE_EXAMINATION_COMPLETED': 'pre_examination_completed'
   };
   const normalizedStatus = backendStatus?.toUpperCase() || 'PENDING';
   return statusMap[normalizedStatus] || 'pending';
