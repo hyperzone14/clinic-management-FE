@@ -3,6 +3,10 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { apiService } from '../utils/axios-config';
+import Title from '../components/common/Title';
+import { ClipboardList, Save } from 'lucide-react';
+import { useAppDispatch } from '../redux/store';
+import { updateAppointmentStatus, AppointmentStatus } from '../redux/slices/scheduleSlice';
 
 interface PreExaminationFormData {
   patientId: number;
@@ -19,6 +23,7 @@ interface PreExaminationFormData {
 const PreExaminationDetail: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const { patientId, doctorId, appointmentId, patientName, doctorName, appointmentDate } = location.state || {};
 
   const [formData, setFormData] = useState<PreExaminationFormData>({
@@ -39,6 +44,18 @@ const PreExaminationDetail: React.FC = () => {
       ...prev,
       [name]: value
     }));
+  };
+
+  const formatDate = (dateString: string) => {
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch {
+      return dateString;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -70,135 +87,215 @@ const PreExaminationDetail: React.FC = () => {
         return;
       }
 
-      // Submit pre-examination data
-      await apiService.post('/pre_examination', formData);
+      // Format data to match backend expectations
+      const preExamData = {
+        patientId: Number(patientId),
+        doctorId: Number(doctorId),
+        date: appointmentDate,
+        syndrome: formData.syndrome,
+        note: formData.note,
+        weight: Number(formData.weight),
+        heartRate: Number(formData.heartRate),
+        bloodPressure: formData.bloodPressure,
+        temperature: Number(formData.temperature)
+      };
 
-      // Update appointment status
-      await apiService.put(
+      // 1. Submit pre-examination data first
+      const response = await apiService.post('/medical-bills/pre_examination', preExamData);
+      
+      if (!response) {
+        throw new Error('Failed to save pre-examination data');
+      }
+
+      // 2. If pre-examination data is saved successfully, update appointment status
+      await apiService.put<void>(
         `/appointment/${appointmentId}/status`,
-        '"PRE_EXAMINATION_COMPLETED"'
+        AppointmentStatus.PRE_EXAMINATION_COMPLETED
       );
+
+      // 3. Update Redux store
+      dispatch(updateAppointmentStatus({
+        id: appointmentId,
+        status: "pre_examination_completed"
+      }));
 
       toast.success('Pre-examination completed successfully');
       navigate('/pre_exam');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting pre-examination:', error);
-      toast.error('Failed to submit pre-examination data');
+      // Log detailed error information
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        toast.error(`Failed to submit: ${error.response.data.message || 'Unknown error'}`);
+      } else {
+        toast.error('Failed to submit pre-examination data');
+      }
     }
   };
 
+  if (!location.state) {
+    toast.error("Missing required information");
+    navigate('/pre_exam');
+    return null;
+  }
+
   return (
-    <div className="min-h-screen bg-[#f7f7f7] py-8 px-4 sm:px-6 lg:px-8">
-      <ToastContainer />
-      
-      <div className="max-w-3xl mx-auto">
-        <div className="bg-white shadow-md rounded-lg p-6 sm:p-8">
-          <h2 className="text-2xl font-bold text-[#4567b7] mb-6">Pre-Examination Form</h2>
-          
-          <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="p-4 bg-[#f7f7f7] rounded-lg">
-              <h3 className="text-sm font-medium text-gray-500">Patient Name</h3>
-              <p className="text-lg font-semibold text-[#4567b7]">{patientName}</p>
-            </div>
-            <div className="p-4 bg-[#f7f7f7] rounded-lg">
-              <h3 className="text-sm font-medium text-gray-500">Doctor Name</h3>
-              <p className="text-lg font-semibold text-[#4567b7]">{doctorName}</p>
+    <div className="w-full min-h-screen bg-[#f7f7f7] pb-20">
+      <div className="pt-16 pb-10">
+        <ToastContainer />
+        <h1 className="text-4xl font-bold font-sans text-center text-[#4567b7]">
+          PRE-EXAMINATION FORM
+        </h1>
+        <div className="w-20 h-1 bg-[#4567b7] mx-auto mt-4 rounded-full"></div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Patient Information Section */}
+        <div className="mb-12">
+          <Title id={5} />
+          <div className="mt-10 mx-16 px-3">
+            <div className="grid grid-cols-3 gap-4 items-center">
+              <div className="col-span-1 flex">
+                <p className="font-bold text-2xl">Patient Name: </p>
+                <span className="ms-5 text-2xl text-gray-400">
+                  {patientName}
+                </span>
+              </div>
+              <div className="col-span-1 flex">
+                <p className="font-bold text-2xl">Visit Date: </p>
+                <span className="ms-5 text-2xl text-gray-400">
+                  {formatDate(appointmentDate)}
+                </span>
+              </div>
+              <div className="col-span-1 flex justify-end">
+                <button
+                  onClick={() => window.open(`/medical-history?id=${patientId}`, '_blank')}
+                  className="flex items-center px-6 py-3 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                >
+                  <ClipboardList className="h-5 w-5 mr-2" />
+                  <span className="text-lg">View History</span>
+                </button>
+              </div>
             </div>
           </div>
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Weight (kg)</label>
-                <input
-                  type="number"
-                  name="weight"
-                  value={formData.weight}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4567b7] focus:ring-[#4567b7]"
-                  step="0.1"
-                  required
-                />
+        {/* Doctor Information Section */}
+        <div className="mb-12">
+          <Title id={6} />
+          <div className="mt-10 mx-16 px-3">
+            <div className="flex">
+              <p className="font-bold text-2xl">Doctor Name: </p>
+              <span className="ms-5 text-2xl text-gray-400">
+                {doctorName}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Pre-Examination Form Section */}
+        <div className="mb-12">
+          <Title id={6} />
+          <div className="mt-8 bg-white rounded-2xl shadow-sm p-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-lg font-medium text-gray-700 mb-2">Weight (kg)</label>
+                  <input
+                    type="number"
+                    name="weight"
+                    value={formData.weight}
+                    onChange={handleInputChange}
+                    className="w-full p-3 border rounded-xl text-gray-700 focus:ring-2 focus:ring-[#4567b7] focus:border-transparent"
+                    step="0.1"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-lg font-medium text-gray-700 mb-2">Heart Rate (bpm)</label>
+                  <input
+                    type="number"
+                    name="heartRate"
+                    value={formData.heartRate}
+                    onChange={handleInputChange}
+                    className="w-full p-3 border rounded-xl text-gray-700 focus:ring-2 focus:ring-[#4567b7] focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-lg font-medium text-gray-700 mb-2">Blood Pressure</label>
+                  <input
+                    type="text"
+                    name="bloodPressure"
+                    value={formData.bloodPressure}
+                    onChange={handleInputChange}
+                    placeholder="e.g., 120/80"
+                    className="w-full p-3 border rounded-xl text-gray-700 focus:ring-2 focus:ring-[#4567b7] focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-lg font-medium text-gray-700 mb-2">Temperature (°C)</label>
+                  <input
+                    type="number"
+                    name="temperature"
+                    value={formData.temperature}
+                    onChange={handleInputChange}
+                    className="w-full p-3 border rounded-xl text-gray-700 focus:ring-2 focus:ring-[#4567b7] focus:border-transparent"
+                    step="0.1"
+                    required
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Heart Rate (bpm)</label>
-                <input
-                  type="number"
-                  name="heartRate"
-                  value={formData.heartRate}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4567b7] focus:ring-[#4567b7]"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Blood Pressure</label>
+                <label className="block text-lg font-medium text-gray-700 mb-2">Syndrome</label>
                 <input
                   type="text"
-                  name="bloodPressure"
-                  value={formData.bloodPressure}
+                  name="syndrome"
+                  value={formData.syndrome}
                   onChange={handleInputChange}
-                  placeholder="e.g., 120/80"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4567b7] focus:ring-[#4567b7]"
+                  className="w-full p-3 border rounded-xl text-gray-700 focus:ring-2 focus:ring-[#4567b7] focus:border-transparent"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Temperature (°C)</label>
-                <input
-                  type="number"
-                  name="temperature"
-                  value={formData.temperature}
+                <label className="block text-lg font-medium text-gray-700 mb-2">Notes</label>
+                <textarea
+                  name="note"
+                  value={formData.note}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4567b7] focus:ring-[#4567b7]"
-                  step="0.1"
-                  required
+                  rows={4}
+                  className="w-full p-3 border rounded-xl text-gray-700 focus:ring-2 focus:ring-[#4567b7] focus:border-transparent"
                 />
               </div>
-            </div>
+            </form>
+          </div>
+        </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Syndrome</label>
-              <input
-                type="text"
-                name="syndrome"
-                value={formData.syndrome}
-                onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4567b7] focus:ring-[#4567b7]"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Notes</label>
-              <textarea
-                name="note"
-                value={formData.note}
-                onChange={handleInputChange}
-                rows={4}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4567b7] focus:ring-[#4567b7]"
-              />
-            </div>
-
-            <div className="flex justify-end space-x-4">
-              <button
-                type="button"
-                onClick={() => navigate('/pre_exam')}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 text-sm font-medium text-white bg-[#4567b7] hover:bg-[#34a85a] rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4567b7]"
-              >
-                Submit
-              </button>
-            </div>
-          </form>
+        {/* Action Buttons */}
+        <div className="flex justify-center space-x-4">
+          <button
+            onClick={() => {
+              if (window.confirm('Are you sure you want to discard all changes? This action cannot be undone.')) {
+                navigate('/pre_exam');
+              }
+            }}
+            className="px-8 py-3 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-colors font-medium text-lg"
+          >
+            Discard Changes
+          </button>
+          <button
+            onClick={handleSubmit}
+            className="px-8 py-3 bg-[#4567b7] text-white rounded-xl hover:bg-[#3a569c] transition-colors font-medium text-lg shadow-lg shadow-blue-500/30 flex items-center"
+          >
+            <Save className="h-5 w-5 mr-2" />
+            Submit Pre-Examination
+          </button>
         </div>
       </div>
     </div>

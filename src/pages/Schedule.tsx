@@ -15,13 +15,14 @@ import { AuthService } from "../utils/security/services/AuthService";
 
 // Define status order for sorting
 const STATUS_ORDER: Record<StatusType, number> = {
-  'checked-in': 1,
-  'lab_test_completed': 2,
-  'lab_test_required': 3,
-  'success': 4,
-  'cancelled': 5,
-  'pending': 6,
-  'confirmed': 7
+  'pre_examination_completed': 1,
+  'checked-in': 2,
+  'lab_test_completed': 3,
+  'lab_test_required': 4,
+  'success': 5,
+  'cancelled': 6,
+  'pending': 7,
+  'confirmed': 8
 };
 
 const Schedule: React.FC = () => {
@@ -80,7 +81,7 @@ const Schedule: React.FC = () => {
   }, [dispatch, currentPage, pageSize, navigate]);
 
   const handlePatientClick = async (appointment: Appointment) => {
-    if (appointment.status === 'checked-in') {
+    if (appointment.status === 'pre_examination_completed') {
       try {
         if (!appointment.patientId || !appointment.doctorId) {
           toast.error('Missing required appointment data');
@@ -138,8 +139,11 @@ const Schedule: React.FC = () => {
         case 'lab_test_required':
           toast.info(`Please go the lab for ${appointment.patientName} tests.`);
           break;
+        case 'checked-in':
+          toast.info(`Please complete pre-examination first for ${appointment.patientName}`);
+          break;
         default:
-          toast.error(`Appointment must be checked-in to proceed.`);
+          toast.error(`Appointment must be pre-examined to proceed with medical service.`);
       }
     }
   };

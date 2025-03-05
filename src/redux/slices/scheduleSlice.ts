@@ -271,17 +271,57 @@ export const fetchLabTestAppointments = createAsyncThunk(
   }
 );
 
+export const fetchPreExaminationAppointments = createAsyncThunk(
+  "schedule/fetchPreExaminationAppointments",
+  async (params: {
+    appointmentDate: string;
+    page?: number;
+    size?: number;
+    sort?: string;
+  }, { rejectWithValue }) => {
+    try {
+      const baseUrl = `/appointment/search?appointmentDate=${params.appointmentDate}&page=${params.page || 0}&size=${params.size || 10}&sort=${params.sort || 'timeSlot,desc'}`;
+      
+      // Make separate API calls for each status
+      const [checkedInResponse, preExamCompletedResponse] = await Promise.all([
+        apiService.get<AppointmentResponse>(`${baseUrl}&appointmentStatus=CHECKED_IN`),
+        apiService.get<AppointmentResponse>(`${baseUrl}&appointmentStatus=PRE_EXAMINATION_COMPLETED`)
+      ]);
+
+      // Combine and deduplicate appointments
+      const allAppointments = [
+        ...checkedInResponse.result.content,
+        ...preExamCompletedResponse.result.content
+      ];
+
+      // Calculate combined totals
+      const totalElements = checkedInResponse.result.totalElements + preExamCompletedResponse.result.totalElements;
+      const totalPages = Math.ceil(totalElements / (params.size || 10));
+
+      return {
+        appointments: allAppointments.map(transformAppointmentData),
+        totalPages,
+        totalElements,
+        currentPage: params.page || 0,
+      };
+    } catch (error) {
+      const errorMessage = handleError(error);
+      toast.error(`Failed to fetch pre-examination appointments: ${errorMessage}`);
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 export const updateAppointmentStatus = createAsyncThunk(
   "schedule/updateStatus",
   async ({ id, status }: { id: number; status: StatusType }, { rejectWithValue }) => {
     try {
-      const backendStatus = status === 'checked-in' 
-        ? 'CHECKED_IN' 
-        : status.toUpperCase().replace(/-/g, '_');
+      // Convert status to backend format
+      const backendStatus = status.toUpperCase().replace(/-/g, '_');
       
       const response = await apiService.put<{ result: AppointmentResponse['result']['content'][0] }>(
         `/appointment/${id}/status`,
-        `"${backendStatus}"`
+        JSON.stringify(backendStatus)
       );
 
       const successMessage = (() => {
@@ -290,6 +330,8 @@ export const updateAppointmentStatus = createAsyncThunk(
             return 'Lab tests have been requested';
           case 'lab_test_completed':
             return 'Lab test results have been recorded';
+          case 'pre_examination_completed':
+            return 'Pre-examination has been completed';
           default:
             return `Appointment status updated to ${status.replace(/_/g, ' ')}`;
         }
@@ -389,6 +431,29 @@ const scheduleSlice = createSlice({
       .addCase(fetchLabTestAppointments.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string || "Failed to fetch lab test appointments";
+        state.appointments = [];
+      })
+      // Fetch pre-examination appointments
+      .addCase(fetchPreExaminationAppointments.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchPreExaminationAppointments.fulfilled, (state, action: PayloadAction<{
+        appointments: Appointment[];
+        totalPages: number;
+        totalElements: number;
+        currentPage: number;
+      }>) => {
+        state.loading = false;
+        state.appointments = action.payload.appointments;
+        state.totalPages = action.payload.totalPages;
+        state.totalElements = action.payload.totalElements;
+        state.currentPage = action.payload.currentPage;
+        state.error = null;
+      })
+      .addCase(fetchPreExaminationAppointments.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string || "Failed to fetch pre-examination appointments";
         state.appointments = [];
       })
       // Update appointment status
