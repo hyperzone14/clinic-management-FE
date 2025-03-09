@@ -21,8 +21,8 @@ interface ImageResponse {
 interface ExaminationDetail {
   id: number;
   examinationType: string;
-  examinationResult: string;
-  imageResponseDTOS?: ImageResponse[];
+  examinationResult: string | null;
+  imageResponseDTO?: ImageResponse[];
   doctorName: string;
   patientName: string;
 }
