@@ -7,7 +7,7 @@ import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
-import "./../styles/listingEffect.css";
+import "./../styles/listingYEffect.css";
 
 const specialty = [
   "All",

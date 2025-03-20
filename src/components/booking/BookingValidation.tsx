@@ -35,7 +35,8 @@ const useBookingValidation = ({
           return { isValid: true, errorMessage: "" };
 
         case 1: // Date & Time selection step
-          if (!infoList.date || !infoList.time || !infoList.timeSlot) {
+          console.log(infoList.date, infoList.time, infoList.timeSlot);
+          if (!infoList.date || !infoList.time) {
             return {
               isValid: false,
               errorMessage: "Please select date, time and time slot",
@@ -83,7 +84,12 @@ const useBookingValidation = ({
           return { isValid: true, errorMessage: "" };
 
         case 2: // Date & Time selection step
-          if (!infoList.date || !infoList.time || !infoList.timeSlot) {
+          if (
+            !infoList.date ||
+            !infoList.time ||
+            infoList.timeSlot === undefined ||
+            infoList.timeSlot === null
+          ) {
             return {
               isValid: false,
               errorMessage: "Please select date, time and time slot",

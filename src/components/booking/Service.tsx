@@ -300,7 +300,7 @@ const Service: React.FC<ServiceProps> = ({ isManualBooking = false }) => {
                 <div className='my-12'>
                   <SearchBar onChange={setSearchTerm} />
                   <div className='flex flex-col items-center justify-center w-full'>
-                    <div className='w-10/12 space-y-4 max-h-[80vh] overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-500'>
+                    <div className='w-10/12 space-y-4 max-h-[53vh] overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-500'>
                       {noResultsFound ? (
                         <p className='text-xl text-gray-500 text-center'>
                           No results found

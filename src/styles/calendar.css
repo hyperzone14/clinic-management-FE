@@ -1,0 +1,32 @@
+/* Remove black background outside calendar */
+.react-calendar {
+  border: none;
+  width: 100%;
+  max-width: 100%;
+  background: #f9fafb;
+  font-family: inherit;
+}
+
+/* Make navigation buttons rounded */
+.react-calendar__navigation button {
+  border-radius: 0.5rem; /* This is rounded-lg in Tailwind terms */
+  min-width: 44px;
+  background: none;
+}
+
+/* Add hover effect for buttons */
+.react-calendar__navigation button:hover,
+.react-calendar__navigation button:focus {
+  background-color: #f3f4f6; /* light gray background on hover */
+}
+
+/* Style the tile buttons */
+.react-calendar__tile {
+  border-radius: 0.5rem;
+  padding: 0.5em 0.75em;
+}
+
+/* Remove any outer container styling that might be adding the black background */
+.react-calendar-container {
+  background: #f9fafb;
+}

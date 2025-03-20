@@ -22,30 +22,60 @@ interface APIResponse {
   result: ScheduleResponse | null;
 }
 
+// interface CheckAvailabilityState {
+//   doctorTimeslotCapacityResponseDTO: Timeslot[];
+//   loading: boolean;
+//   error: string | null;
+// }
+
 interface CheckAvailabilityState {
-  doctorTimeslotCapacityResponseDTO: Timeslot[];
+  availabilityByDate: {
+    [date: string]: Timeslot[];
+  };
   loading: boolean;
   error: string | null;
 }
 
+// const initialState: CheckAvailabilityState = {
+//   doctorTimeslotCapacityResponseDTO: [],
+//   loading: false,
+//   error: null,
+// };
+
 const initialState: CheckAvailabilityState = {
-  doctorTimeslotCapacityResponseDTO: [],
+  availabilityByDate: {},
   loading: false,
   error: null,
 };
 
+// export const fetchSchedule = createAsyncThunk(
+//   "checkAvailability/fetchSchedule",
+//   async ({ doctorId, date }: { doctorId: number; date: string }) => {
+//     const response = await apiService.get<APIResponse>(
+//       `/schedules/doctor/${doctorId}/date/${date}`
+//     );
+
+//     // If result is null, return an empty array
+//     if (!response.result) {
+//       return [];
+//     }
+//     // console.log(response.result);
+//     const scheduleData = response.result.doctorTimeslotCapacityResponseDTOS;
+//     return scheduleData;
+//   }
+// );
 export const fetchSchedule = createAsyncThunk(
   "checkAvailability/fetchSchedule",
   async ({ doctorId, date }: { doctorId: number; date: string }) => {
     const response = await apiService.get<APIResponse>(
       `/schedules/doctor/${doctorId}/date/${date}`
     );
-    // If result is null, return an empty array
-    if (!response.result) {
-      return [];
-    }
-    const scheduleData = response.result.doctorTimeslotCapacityResponseDTOS;
-    return scheduleData;
+
+    // Return both the date and schedule data
+    return {
+      date,
+      timeslots: response.result?.doctorTimeslotCapacityResponseDTOS || [],
+    };
   }
 );
 
@@ -54,7 +84,7 @@ const checkAvailabilitySlice = createSlice({
   initialState,
   reducers: {
     clearSchedule: (state) => {
-      state.doctorTimeslotCapacityResponseDTO = [];
+      // state.doctorTimeslotCapacityResponseDTO = [];
       state.error = null;
       state.loading = false;
     },
@@ -67,15 +97,20 @@ const checkAvailabilitySlice = createSlice({
       })
       .addCase(
         fetchSchedule.fulfilled,
-        (state, action: PayloadAction<Timeslot[]>) => {
+        (
+          state,
+          action: PayloadAction<{ date: string; timeslots: Timeslot[] }>
+        ) => {
           state.loading = false;
-          state.doctorTimeslotCapacityResponseDTO = action.payload;
+          // Store the timeslots by date
+          state.availabilityByDate[action.payload.date] =
+            action.payload.timeslots;
           state.error = null;
         }
       )
       .addCase(fetchSchedule.rejected, (state, action) => {
         state.loading = false;
-        state.doctorTimeslotCapacityResponseDTO = [];
+        // state.doctorTimeslotCapacityResponseDTO = [];
         state.error = action.error.message ?? "Failed to fetch schedule";
       });
   },

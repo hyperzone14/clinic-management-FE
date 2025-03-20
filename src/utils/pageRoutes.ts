@@ -193,6 +193,12 @@ export const pageRoutes: Routes[] = [
     path: "/manual-booking",
     location: "ManualBooking",
   },
+  {
+    id: 16,
+    path: "/doctor-calendar",
+    location: "DoctorCalendar",
+    roles: ["ROLE_DOCTOR"],
+  },
 ];
 
 // export const bookingRoutes: Routes[] = [

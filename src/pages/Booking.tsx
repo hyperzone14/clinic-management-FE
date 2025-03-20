@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
@@ -20,7 +20,12 @@ import {
 } from "../redux/slices/appointmentSlice";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
-import { checkPaymentStatus } from "../redux/slices/paymentSlice";
+import {
+  checkPaymentStatus,
+  resetPaymentState,
+} from "../redux/slices/paymentSlice";
+import { resetInfoList } from "../redux/slices/infoListSlice";
+import { clearCurrentAppointment } from "../redux/slices/appointmentSlice";
 
 const steps = ["Select Service", "Pick Date & Time", "Purchase", "Finish"];
 
@@ -39,6 +44,14 @@ const Booking = () => {
   const completedSteps = Object.keys(completed).length;
   const allStepsCompleted = completedSteps === totalSteps;
 
+  useEffect(() => {
+    if (location.pathname === "/booking") {
+      dispatch(resetInfoList());
+      dispatch(clearCurrentAppointment());
+      dispatch(resetPaymentState());
+    }
+  }, [location.pathname, dispatch]);
+
   const handleBackButton = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
     // Scroll to top when moving to previous step
@@ -54,7 +67,12 @@ const Booking = () => {
 
   // Separated function to handle date/time submission
   const handleDateTimeSubmission = async (): Promise<boolean> => {
-    if (!infoList.date || !infoList.time || !infoList.timeSlot) {
+    if (
+      !infoList.date ||
+      !infoList.time ||
+      infoList.timeSlot === undefined ||
+      infoList.timeSlot === null
+    ) {
       toast.error("Please select the date and time for the reservation.");
       return false;
     }
