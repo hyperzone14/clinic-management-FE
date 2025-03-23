@@ -183,7 +183,7 @@ export const pageRoutes: Routes[] = [
     location: "Feedback",
   },
   {
-    id: 15,
+    id: 17,
     path: "/pre_exam",
     location: "Pre-Examination",
     roles: ["ROLE_DOCTOR"],
