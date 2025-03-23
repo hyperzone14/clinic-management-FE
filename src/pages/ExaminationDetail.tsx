@@ -15,7 +15,7 @@ import {
 import Title from '../components/common/Title';
 import { ClipboardList } from 'lucide-react';
 
-const API_BASE_URL = "http://localhost:8080/api";
+//const API_BASE_URL = "http://localhost:8080/api";
 
 interface LocationState {
   patientId: number;
@@ -175,9 +175,9 @@ const ExaminationDetail = () => {
     }
   };
 
-  const handleImageView = (downloadUrl: string) => {
-    window.open(`${API_BASE_URL}${downloadUrl}`, '_blank');
-  };
+  // const handleImageView = (downloadUrl: string) => {
+  //   window.open(`${API_BASE_URL}${downloadUrl}`, '_blank');
+  // };
 
   if (loading) {
     return (

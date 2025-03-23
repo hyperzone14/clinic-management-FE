@@ -56,8 +56,13 @@ export interface MedicalBill {
   date: string;
   syndrome: string;
   note: string;
-  prescribedDrugs: PrescribedDrug[];
-  examinationDetails: ExaminationDetail[];
+  weight: number;
+  heartRate: number;
+  bloodPressure: string;
+  temperature: number;
+  finalDiagnosis: string | null;
+  prescribedDrugs: any[];
+  examinationDetails: any[];
 }
 
 interface MedicalBillState {

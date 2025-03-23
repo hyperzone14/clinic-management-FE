@@ -22,6 +22,62 @@ interface LocationState {
   appointmentDate: string;
 }
 
+interface PrescribedDrugResponseDTO {
+  id: number;
+  drugId: number;
+  drugName: string;
+  dosage: number;
+  duration: number;
+  frequency: string;
+  specialInstructions: string;
+}
+
+interface ExaminationDetailResponseDTO {
+  id: number;
+  examinationType: string;
+  examinationResult: string;
+  imageResponseDTO?: ImageResponseDTO[];
+}
+
+interface ImageResponseDTO {
+  id: number;
+  fileName: string;
+  fileType: string;
+  size: number;
+}
+
+interface MedicalBill {
+  id: number;
+  patientId: number;
+  patientName: string;
+  patientGender: string;
+  patientBirthDate: string;
+  doctorId: number;
+  doctorName: string;
+  date: string;
+  syndrome: string;
+  note: string;
+  weight: number;
+  heartRate: number;
+  bloodPressure: string;
+  temperature: number;
+  finalDiagnosis: string | null;
+  prescribedDrugs: any[];
+  examinationDetails: any[];
+}
+
+interface Department {
+  name: string;
+}
+
+interface LabTest {
+  name: string;
+}
+
+interface ApiResponse<T> {
+  data: T;
+}
+
 const API_BASE_URL = "http://localhost:8080/api";
 
 const handleImageView = (imageId: number) => {
@@ -38,6 +94,15 @@ const MedicalBillFinal: React.FC = () => {
   // State for drug form and lab tests
   const [drugs, setDrugs] = useState<PrescribedDrugRequest[]>([]);
   const [newLabTests, setNewLabTests] = useState<string[]>([]);
+  const [medicalInfo, setMedicalInfo] = useState<Partial<MedicalBill>>({
+    syndrome: '',
+    note: '',
+    finalDiagnosis: null
+  });
+  const [departments, setDepartments] = useState<string[]>([]);
+  const [labTests, setLabTests] = useState<string[]>([]);
+  const [selectedDepartment, setSelectedDepartment] = useState<string>('');
+  const [selectedLabTests, setSelectedLabTests] = useState<string[]>([]);
 
   // Check doctor access on component mount
   useEffect(() => {
@@ -66,6 +131,58 @@ const MedicalBillFinal: React.FC = () => {
     }
   }, [dispatch, state?.patientId]);
 
+  // Add new useEffect to update medicalInfo when currentBill changes
+  useEffect(() => {
+    if (currentBill) {
+      setMedicalInfo({
+        syndrome: currentBill.syndrome || '',
+        note: currentBill.note || '',
+        finalDiagnosis: currentBill.finalDiagnosis || null
+      });
+    }
+  }, [currentBill]);
+
+  // Fetch departments on mount
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const response = await apiService.get('/lab_department');
+        console.log('Departments response:', response);
+        // Response is directly the array we need
+        setDepartments(response as string[]); // Add type assertion
+      } catch (error) {
+        console.error('Failed to fetch departments:', error);
+        toast.error('Failed to load departments');
+        setDepartments([]);
+      }
+    };
+
+    fetchDepartments();
+  }, []);
+
+  // Fetch lab tests when department changes
+  useEffect(() => {
+    const fetchLabTests = async () => {
+      if (!selectedDepartment) {
+        setLabTests([]);
+        return;
+      }
+
+      try {
+        const response = await apiService.get(`/lab_department/lab_tests?labDepartment=${selectedDepartment}`);
+        console.log('Lab tests response:', response);
+        // Response is directly the array we need
+        setLabTests(response as string[]); // Add type assertion
+      } catch (error) {
+        console.error('Failed to fetch lab tests:', error);
+        toast.error('Failed to load lab tests');
+        setLabTests([]);
+      }
+    };
+
+    fetchLabTests();
+  }, [selectedDepartment]);
+
   const handleDrugChange = (index: number, field: keyof PrescribedDrugRequest, value: string | number) => {
     const newDrugs = [...drugs];
     newDrugs[index] = {
@@ -90,76 +207,65 @@ const MedicalBillFinal: React.FC = () => {
     setDrugs(newDrugs);
   };
 
-  const handleAddLabTest = () => {
-    setNewLabTests([...newLabTests, '']);
+  const handleAddLabTest = (testName: string) => {
+    if (!selectedLabTests.includes(testName)) {
+      setSelectedLabTests([...selectedLabTests, testName]);
+    }
   };
 
-  const handleLabTestChange = (index: number, value: string) => {
-    const updatedTests = [...newLabTests];
-    updatedTests[index] = value;
-    setNewLabTests(updatedTests);
+  const removeLabTest = (testName: string) => {
+    setSelectedLabTests(selectedLabTests.filter(name => name !== testName));
   };
 
-  const removeLabTest = (index: number) => {
-    const updatedTests = newLabTests.filter((_, i) => i !== index);
-    setNewLabTests(updatedTests);
+  const validatePrescriptions = () => {
+    if (drugs.length === 0) return false;
+    
+    return drugs.every(drug => 
+      drug.drugId !== 0 && 
+      drug.dosage > 0 && 
+      drug.duration > 0 && 
+      drug.frequency.trim() !== ""
+    );
   };
 
-  const handleSubmitLabTests = async () => {
-    if (!currentBill || !state?.appointmentId) {
-      toast.error('Missing required information');
-      return;
-    }
-
-    // Validate lab tests
-    if (newLabTests.some(test => !test.trim())) {
-      toast.error('Please fill in all lab test types');
-      return;
-    }
-
-    try {
-      // Tạo mảng các lab test request
-      const labRequests = newLabTests.map(test => ({
-        examinationType: test
-      }));
-
-      // Gửi trực tiếp mảng lab requests
-      await apiService.post(
-        `/medical-bills/${currentBill.id}/lab_request`,
-        labRequests
-      );
-
-      // Update appointment status
-      await apiService.put(
-        `/appointment/${state.appointmentId}/status`,
-        "LAB_TEST_REQUIRED"
-      );
-
-      toast.success('Lab tests requested successfully');
-      navigate('/schedule');
-    } catch (error) {
-      console.error('Failed to submit lab tests:', error);
-      toast.error('Failed to submit lab tests');
-    }
+  const validateLabTests = () => {
+    if (newLabTests.length === 0) return false;
+    
+    return newLabTests.every(test => test.trim() !== "");
   };
 
   const handleSubmitTreatment = async () => {
-    if (!currentBill || !state?.appointmentId) {
-      toast.error('Missing required information');
+    if (!currentBill) {
+      toast.error('No medical bill found');
       return;
     }
 
-    // Validate drugs
-    const invalidDrugs = drugs.some(drug =>
-      !drug.drugId || !drug.dosage || !drug.specialInstructions
-    );
-
-    if (invalidDrugs) {
-      toast.error('Please fill in all required drug information');
+    // Validate drugs only when submitting
+    const hasValidPrescriptions = validatePrescriptions();
+    if (!hasValidPrescriptions) {
+      toast.error('Please complete all prescription fields (medicine, quantity, duration, and frequency)');
       return;
     }
 
     try {
+      // First update medical info with only necessary fields
+      const updateData = {
+        id: currentBill.id,
+        patientId: state.patientId,
+        doctorId: state.doctorId,
+        date: currentBill.date,
+        syndrome: medicalInfo.syndrome,
+        note: medicalInfo.note,
+        finalDiagnosis: medicalInfo.finalDiagnosis,
+        weight: currentBill.weight,
+        heartRate: currentBill.heartRate,
+        bloodPressure: currentBill.bloodPressure,
+        temperature: currentBill.temperature
+      };
+      
+      await apiService.put(`/medical-bills/${currentBill.id}`, updateData);
+
+      // Then submit treatment
       await dispatch(addDrugsToMedicalBill({
         medicalBillId: currentBill.id,
         drugs: drugs,
@@ -174,6 +280,40 @@ const MedicalBillFinal: React.FC = () => {
     }
   };
 
+  const handleSubmitLabTests = async () => {
+    if (!currentBill) {
+      toast.error('No medical bill found');
+      return;
+    }
+
+    if (selectedLabTests.length === 0) {
+      toast.error('Please select at least one lab test');
+      return;
+    }
+
+    try {
+      const labRequests = selectedLabTests.map(testName => ({
+        examinationType: testName
+      }));
+
+      await apiService.post(
+        `/medical-bills/${currentBill.id}/lab_request`,
+        labRequests
+      );
+
+      await apiService.put(
+        `/appointment/${state.appointmentId}/status`,
+        "LAB_TEST_REQUIRED"
+      );
+
+      toast.success('Lab tests requested successfully');
+      navigate('/schedule');
+    } catch (error) {
+      console.error('Failed to submit lab tests:', error);
+      toast.error('Failed to submit lab tests');
+    }
+  };
+
   const formatDate = (dateString: string) => {
     try {
       return new Date(dateString).toLocaleDateString('en-US', {
@@ -183,6 +323,45 @@ const MedicalBillFinal: React.FC = () => {
       });
     } catch {
       return dateString;
+    }
+  };
+
+  const handleMedicalInfoChange = (field: keyof MedicalBill, value: string) => {
+    setMedicalInfo(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleUpdateMedicalInfo = async () => {
+    try {
+      if (!currentBill) {
+        toast.error('No medical bill found');
+        return;
+      }
+
+      const updateData = {
+        id: currentBill.id,
+        patientId: state.patientId,
+        doctorId: state.doctorId,
+        date: currentBill.date,
+        syndrome: medicalInfo.syndrome,
+        note: medicalInfo.note,
+        finalDiagnosis: medicalInfo.finalDiagnosis,
+        weight: currentBill.weight,
+        heartRate: currentBill.heartRate,
+        bloodPressure: currentBill.bloodPressure,
+        temperature: currentBill.temperature
+      };
+
+      await apiService.put(`/medical-bills/${currentBill.id}`, updateData);
+      toast.success('Medical information updated successfully');
+      
+      // Refresh medical bill data
+      dispatch(fetchLatestMedicalBillByPatientId(state.patientId));
+    } catch (error) {
+      console.error('Failed to update medical information:', error);
+      toast.error('Failed to update medical information');
     }
   };
 
@@ -265,11 +444,30 @@ const MedicalBillFinal: React.FC = () => {
                 </span>
               </div>
             </div>
-            <div className="mt-7 flex">
-              <p className="font-bold text-2xl">Syndrome: </p>
-              <span className="ms-12 text-2xl text-[#A9A9A9] flex-1">
-                {currentBill.syndrome}
-              </span>
+          </div>
+        </div>
+
+        {/* Vital Signs Section */}
+        <div className="mb-12">
+          <Title id={7} />
+          <div className="mt-8 bg-white rounded-2xl shadow-sm p-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <p className="font-medium text-gray-700">Weight</p>
+                <p className="text-xl text-gray-900 mt-1">{currentBill.weight} kg</p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <p className="font-medium text-gray-700">Heart Rate</p>
+                <p className="text-xl text-gray-900 mt-1">{currentBill.heartRate} bpm</p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <p className="font-medium text-gray-700">Blood Pressure</p>
+                <p className="text-xl text-gray-900 mt-1">{currentBill.bloodPressure}</p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <p className="font-medium text-gray-700">Temperature</p>
+                <p className="text-xl text-gray-900 mt-1">{currentBill.temperature}°C</p>
+              </div>
             </div>
           </div>
         </div>
@@ -300,7 +498,7 @@ const MedicalBillFinal: React.FC = () => {
                       <div className="mt-4">
                         <p className="font-medium text-gray-700 mb-2">Images</p>
                         <div className="grid grid-cols-4 gap-4">
-                          {exam.imageResponseDTO.map((image) => (
+                          {exam.imageResponseDTO.map((image: ImageResponseDTO) => (
                             <div
                               key={image.id}
                               className="cursor-pointer"
@@ -327,64 +525,81 @@ const MedicalBillFinal: React.FC = () => {
         <div className="mb-12">
           <Title id={6} />
           <div className="mt-8 bg-white rounded-2xl shadow-sm p-8">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-semibold text-gray-800">Add New Lab Tests</h3>
-              <button
-                onClick={handleAddLabTest}
-                className="flex items-center px-4 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors"
-              >
-                <Plus className="h-5 w-5 mr-2" />
-                Add Test
-              </button>
-            </div>
-
-            {newLabTests.length > 0 ? (
-              <>
-                <div className="space-y-4">
-                  {newLabTests.map((test, index) => (
-                    <div key={index} className="p-6 bg-gray-50 rounded-xl relative group">
-                      <button
-                        onClick={() => removeLabTest(index)}
-                        className="absolute top-4 right-4 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <Trash2 className="h-5 w-5" />
-                      </button>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Test Type
-                        </label>
-                        <input
-                          type="text"
-                          value={test}
-                          onChange={(e) => handleLabTestChange(index, e.target.value)}
-                          className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Enter test type..."
-                        />
-                      </div>
-                    </div>
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Department
+                </label>
+                <select
+                  value={selectedDepartment}
+                  onChange={(e) => setSelectedDepartment(e.target.value)}
+                  className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">Select a department</option>
+                  {departments && departments.map((dept) => (
+                    <option key={dept} value={dept}>
+                      {dept}
+                    </option>
                   ))}
-                </div>
+                </select>
+              </div>
 
+              {selectedDepartment && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Available Lab Tests
+                  </label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {labTests
+                      .filter(test => !selectedLabTests.includes(test))
+                      .map((test) => (
+                        <button
+                          key={test}
+                          onClick={() => handleAddLabTest(test)}
+                          className="p-4 text-left bg-gray-50 rounded-xl hover:bg-blue-50 transition-colors"
+                        >
+                          {test}
+                        </button>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedLabTests.length > 0 && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Selected Lab Tests
+                  </label>
+                  <div className="space-y-3">
+                    {selectedLabTests.map((test) => (
+                      <div
+                        key={test}
+                        className="flex justify-between items-center p-4 bg-blue-50 rounded-xl"
+                      >
+                        <span className="text-blue-700">{test}</span>
+                        <button
+                          onClick={() => removeLabTest(test)}
+                          className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedLabTests.length > 0 && (
                 <div className="flex justify-center mt-8">
                   <button
-                    onClick={handleAddLabTest}
-                    className="px-6 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors mr-4"
-                  >
-                    Add Another Test
-                  </button>
-                  <button
                     onClick={handleSubmitLabTests}
-                    className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                    className="px-8 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors font-medium text-lg shadow-lg shadow-blue-500/30"
                   >
                     Submit Lab Tests
                   </button>
                 </div>
-              </>
-            ) : (
-              <div className="text-center py-12 text-gray-500">
-                Click "Add Test" to request new laboratory tests
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
 
@@ -482,6 +697,53 @@ const MedicalBillFinal: React.FC = () => {
                       ))}
                     </tbody>
                   </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Medical Information Section - Only show when adding drugs */}
+        {!hasLabTests && drugs.length > 0 && (
+          <div className="mb-12">
+            <Title id={8} />
+            <div className="mt-8 bg-white rounded-2xl shadow-sm p-8">
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Syndrome
+                  </label>
+                  <textarea
+                    value={medicalInfo.syndrome}
+                    onChange={(e) => handleMedicalInfoChange('syndrome', e.target.value)}
+                    className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    rows={3}
+                    placeholder="Enter syndrome..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Note
+                  </label>
+                  <textarea
+                    value={medicalInfo.note}
+                    onChange={(e) => handleMedicalInfoChange('note', e.target.value)}
+                    className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    rows={3}
+                    placeholder="Enter notes..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Final Diagnosis
+                  </label>
+                  <textarea
+                    value={medicalInfo.finalDiagnosis || ''}
+                    onChange={(e) => handleMedicalInfoChange('finalDiagnosis', e.target.value)}
+                    className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    rows={3}
+                    placeholder="Enter final diagnosis..."
+                  />
                 </div>
               </div>
             </div>
