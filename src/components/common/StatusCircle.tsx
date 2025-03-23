@@ -84,11 +84,12 @@ const STATUS_STYLES: Record<StatusType, StatusStyle> = {
   }
 };
 
-const FINAL_STATES: StatusType[] = ["cancelled", "success", "lab_test_completed"];
+const FINAL_STATES: StatusType[] = ["cancelled", "success", "lab_test_completed", "pre_examination_completed"];
 
 const StatusCircle: React.FC<StatusCircleProps> = ({
   status,
   onStatusChange,
+  isManualCheckin = false,
   showLabTestStatusesOnly = false,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -121,11 +122,22 @@ const StatusCircle: React.FC<StatusCircleProps> = ({
     }
   };
 
-  const getNextStatuses = (currentStatus: StatusType): StatusType[] => {
+  const getNextStatuses = (currentStatus: StatusType, isManualCheckin: boolean = false): StatusType[] => {
     if (showLabTestStatusesOnly) {
       switch (currentStatus) {
         case 'lab_test_required':
           return ['lab_test_completed'];
+        default:
+          return [];
+      }
+    }
+
+    if (isManualCheckin) {
+      switch (currentStatus) {
+        case 'pending':
+          return ['checked-in', 'cancelled'];
+        case 'checked-in':
+          return ['cancelled'];
         default:
           return [];
       }
@@ -180,7 +192,7 @@ const StatusCircle: React.FC<StatusCircleProps> = ({
       {isMenuOpen && isClickable() && (
         <div className="absolute right-0 mt-3 w-48 rounded-lg shadow-lg bg-white ring-1 ring-black/5 z-50 overflow-hidden transform transition-all duration-200 ease-in-out">
           <div className="py-1">
-            {getNextStatuses(normalizedStatus).map((statusOption) => (
+            {getNextStatuses(normalizedStatus, isManualCheckin).map((statusOption) => (
               <button
                 key={statusOption}
                 className="flex items-center w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"

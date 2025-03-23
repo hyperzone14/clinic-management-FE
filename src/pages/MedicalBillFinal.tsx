@@ -428,7 +428,7 @@ const MedicalBillFinal: React.FC = () => {
 
         {/* Doctor Information Section */}
         <div className="mb-12">
-          <Title id={6} />
+          <Title id={12} />
           <div className="mt-10 mx-16 px-3">
             <div className="grid grid-cols-2 justify-between">
               <div className="col-span-1 flex">
@@ -449,7 +449,7 @@ const MedicalBillFinal: React.FC = () => {
 
         {/* Vital Signs Section */}
         <div className="mb-12">
-          <Title id={7} />
+          <Title id={8} />
           <div className="mt-8 bg-white rounded-2xl shadow-sm p-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <div className="p-4 bg-gray-50 rounded-xl">
@@ -475,7 +475,7 @@ const MedicalBillFinal: React.FC = () => {
         {/* Previous Lab Tests Section */}
         {currentBill.examinationDetails && currentBill.examinationDetails.length > 0 && (
           <div className="mb-12">
-            <Title id={6} />
+            <Title id={13} />
             <div className="mt-8 bg-white rounded-2xl shadow-sm p-8">
               <h3 className="text-xl font-semibold text-gray-800 mb-6">Previous Lab Tests</h3>
               <div className="space-y-6">
@@ -522,91 +522,97 @@ const MedicalBillFinal: React.FC = () => {
         )}
 
         {/* Add New Lab Tests Section */}
-        <div className="mb-12">
-          <Title id={6} />
-          <div className="mt-8 bg-white rounded-2xl shadow-sm p-8">
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Department
-                </label>
-                <select
-                  value={selectedDepartment}
-                  onChange={(e) => setSelectedDepartment(e.target.value)}
-                  className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">Select a department</option>
-                  {departments && departments.map((dept) => (
-                    <option key={dept} value={dept}>
-                      {dept}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {selectedDepartment && (
+        {drugs.length === 0 && (
+          <div className="mb-12">
+            <Title id={9} />
+            <div className="mt-8 bg-white rounded-2xl shadow-sm p-8">
+              <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Available Lab Tests
+                    Select Department
                   </label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {labTests
-                      .filter(test => !selectedLabTests.includes(test))
-                      .map((test) => (
-                        <button
-                          key={test}
-                          onClick={() => handleAddLabTest(test)}
-                          className="p-4 text-left bg-gray-50 rounded-xl hover:bg-blue-50 transition-colors"
-                        >
-                          {test}
-                        </button>
-                      ))}
-                  </div>
-                </div>
-              )}
-
-              {selectedLabTests.length > 0 && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Selected Lab Tests
-                  </label>
-                  <div className="space-y-3">
-                    {selectedLabTests.map((test) => (
-                      <div
-                        key={test}
-                        className="flex justify-between items-center p-4 bg-blue-50 rounded-xl"
-                      >
-                        <span className="text-blue-700">{test}</span>
-                        <button
-                          onClick={() => removeLabTest(test)}
-                          className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <Trash2 className="h-5 w-5" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {selectedLabTests.length > 0 && (
-                <div className="flex justify-center mt-8">
-                  <button
-                    onClick={handleSubmitLabTests}
-                    className="px-8 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors font-medium text-lg shadow-lg shadow-blue-500/30"
+                  <select
+                    value={selectedDepartment}
+                    onChange={(e) => setSelectedDepartment(e.target.value)}
+                    className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    Submit Lab Tests
-                  </button>
+                    <option value="">Select a department</option>
+                    {departments && departments.map((dept) => (
+                      <option key={dept} value={dept}>
+                        {dept}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-              )}
+
+                {selectedDepartment && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Available Lab Tests
+                    </label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {labTests
+                        .filter(test => !selectedLabTests.includes(test) && 
+                          !currentBill.examinationDetails?.some(
+                            exam => exam.examinationType.toLowerCase() === test.toLowerCase()
+                          )
+                        )
+                        .map((test) => (
+                          <button
+                            key={test}
+                            onClick={() => handleAddLabTest(test)}
+                            className="p-4 text-left bg-gray-50 rounded-xl hover:bg-blue-50 transition-colors"
+                          >
+                            {test}
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                )}
+
+                {selectedLabTests.length > 0 && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Selected Lab Tests
+                    </label>
+                    <div className="space-y-3">
+                      {selectedLabTests.map((test) => (
+                        <div
+                          key={test}
+                          className="flex justify-between items-center p-4 bg-blue-50 rounded-xl"
+                        >
+                          <span className="text-blue-700">{test}</span>
+                          <button
+                            onClick={() => removeLabTest(test)}
+                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          >
+                            <Trash2 className="h-5 w-5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {selectedLabTests.length > 0 && (
+                  <div className="flex justify-center mt-8">
+                    <button
+                      onClick={handleSubmitLabTests}
+                      className="px-8 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors font-medium text-lg shadow-lg shadow-blue-500/30"
+                    >
+                      Submit Lab Tests
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Add Medicine Section - Only show if no lab tests */}
-        {!hasLabTests && (
+        {selectedLabTests.length === 0 && (
           <div className="mb-12">
-            <Title id={6} />
+            <Title id={10} />
             <div className="mt-8 bg-white rounded-2xl shadow-sm p-8">
               <div className="space-y-6">
                 <div className="flex justify-between items-center mb-6">
@@ -704,9 +710,9 @@ const MedicalBillFinal: React.FC = () => {
         )}
 
         {/* Medical Information Section - Only show when adding drugs */}
-        {!hasLabTests && drugs.length > 0 && (
+        {selectedLabTests.length === 0 && drugs.length > 0 && (
           <div className="mb-12">
-            <Title id={8} />
+            <Title id={11} />
             <div className="mt-8 bg-white rounded-2xl shadow-sm p-8">
               <div className="space-y-6">
                 <div>
@@ -751,7 +757,7 @@ const MedicalBillFinal: React.FC = () => {
         )}
 
         {/* Action Buttons - Only show if not adding lab tests */}
-        {!hasLabTests && drugs.length > 0 && (
+        {selectedLabTests.length === 0 && drugs.length > 0 && (
           <div className="flex justify-center space-x-4">
             <button
               onClick={() => {
