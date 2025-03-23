@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
@@ -20,19 +20,21 @@ import {
 } from "../redux/slices/appointmentSlice";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
-import {
-  checkPaymentStatus,
-  resetPaymentState,
-} from "../redux/slices/paymentSlice";
-import { resetInfoList } from "../redux/slices/infoListSlice";
-import { clearCurrentAppointment } from "../redux/slices/appointmentSlice";
+import { checkPaymentStatus } from "../redux/slices/paymentSlice";
+import PatientInfo from "../components/booking/PatientInfo";
 
-const steps = ["Select Service", "Pick Date & Time", "Purchase", "Finish"];
+const steps = [
+  "Patient Information",
+  "Select Service",
+  "Pick Date & Time",
+  "Purchase",
+  "Finish",
+];
 
-const Booking = () => {
+const ManualBooking = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [completed, setCompleted] = useState<{ [key: number]: boolean }>({});
-  const { validateStep } = useBookingValidation();
+  const { validateStep } = useBookingValidation({ isManualBooking: true });
   const dispatch = useDispatch<AppDispatch>();
   const infoList = useSelector((state: RootState) => state.infoList);
   const currentAppointment = useSelector(
@@ -43,14 +45,6 @@ const Booking = () => {
   const totalSteps = steps.length;
   const completedSteps = Object.keys(completed).length;
   const allStepsCompleted = completedSteps === totalSteps;
-
-  useEffect(() => {
-    if (location.pathname === "/booking") {
-      dispatch(resetInfoList());
-      dispatch(clearCurrentAppointment());
-      dispatch(resetPaymentState());
-    }
-  }, [location.pathname, dispatch]);
 
   const handleBackButton = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
@@ -67,12 +61,7 @@ const Booking = () => {
 
   // Separated function to handle date/time submission
   const handleDateTimeSubmission = async (): Promise<boolean> => {
-    if (
-      !infoList.date ||
-      !infoList.time ||
-      infoList.timeSlot === undefined ||
-      infoList.timeSlot === null
-    ) {
+    if (!infoList.date || !infoList.time || !infoList.timeSlot) {
       toast.error("Please select the date and time for the reservation.");
       return false;
     }
@@ -166,7 +155,7 @@ const Booking = () => {
     }
 
     // Special handling for date & time step
-    if (activeStep === 1) {
+    if (activeStep === 2) {
       const success = await handleDateTimeSubmission();
       if (!success) {
         return;
@@ -174,7 +163,7 @@ const Booking = () => {
     }
 
     // Special handling for payment step
-    if (activeStep === 2) {
+    if (activeStep === 3) {
       const paymentConfirmed = await handlePaymentStatusCheck();
       if (!paymentConfirmed) {
         return;
@@ -197,12 +186,14 @@ const Booking = () => {
   const renderStepContent = () => {
     switch (activeStep) {
       case 0:
-        return <Service />;
+        return <PatientInfo />;
       case 1:
-        return <ChooseDateTime />;
+        return <Service isManualBooking={true} />;
       case 2:
-        return <Payment />;
+        return <ChooseDateTime />;
       case 3:
+        return <Payment />;
+      case 4:
         return <Finish />;
       default:
         return <div>Unknown step</div>;
@@ -218,7 +209,7 @@ const Booking = () => {
             BOOKING CENTER
           </h1>
         </div>
-        <div className='my-10'>
+        <div className='mt-10 mb-5'>
           <Stepper activeStep={activeStep} alternativeLabel>
             {steps.map((label, index) => {
               return (
@@ -272,4 +263,4 @@ const Booking = () => {
   );
 };
 
-export default Booking;
+export default ManualBooking;

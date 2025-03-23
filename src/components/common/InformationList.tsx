@@ -107,41 +107,41 @@ const InformationList: React.FC<InformationListProps> = ({ patientId }) => {
   }, [dispatch, generateNote, infoList, infoList.note]);
 
   return (
-    <div className="w-[430px] h-fit bg-gray-50 rounded-md shadow-md">
-      <div className="w-full h-fit px-5 py-6 bg-[#87ceeb] rounded-t-md">
-        <div className="flex items-center justify-center">
-          <IoNewspaperOutline className="w-10 h-10" />
-          <span className="ms-5 font-bold text-3xl">Booking information</span>
+    <div className='w-[430px] h-fit bg-gray-50 rounded-md shadow-md'>
+      <div className='w-full h-fit px-5 py-6 bg-[#87ceeb] rounded-t-md'>
+        <div className='flex items-center justify-center'>
+          <IoNewspaperOutline className='w-10 h-10' />
+          <span className='ms-5 font-bold text-3xl'>Booking information</span>
         </div>
       </div>
-      <div className="w-full text-[20px] px-5 py-7">
-        <dl className="space-y-4">
-          <div className="flex justify-between mb-2">
-            <dt className="font-semibold">Name:</dt>
+      <div className='w-full text-[20px] px-5 py-7'>
+        <dl className='space-y-4'>
+          <div className='flex justify-between mb-2'>
+            <dt className='font-semibold'>Name:</dt>
             <dd>{infoList.name ?? "N/A"}</dd>
           </div>
-          <div className="flex justify-between mb-2">
-            <dt className="font-semibold">Service:</dt>
+          <div className='flex justify-between mb-2'>
+            <dt className='font-semibold'>Service:</dt>
             <dd>{infoList.service ?? "N/A"}</dd>
           </div>
-          <div className="flex justify-between mb-2">
+          <div className='flex justify-between mb-2'>
             {infoList.service === "By doctor" ? (
-              <dt className="font-semibold">Doctor:</dt>
+              <dt className='font-semibold'>Doctor:</dt>
             ) : (
-              <dt className="font-semibold">Department:</dt>
+              <dt className='font-semibold'>Department:</dt>
             )}
             <dd>{infoList.type ?? "N/A"}</dd>
           </div>
-          <div className="flex justify-between mb-2">
-            <dt className="font-semibold">Date:</dt>
+          <div className='flex justify-between mb-2'>
+            <dt className='font-semibold'>Date:</dt>
             <dd>{infoList.date ? formatDate(infoList.date) : "N/A"}</dd>
           </div>
-          <div className="flex justify-between mb-2">
-            <dt className="font-semibold">Time:</dt>
+          <div className='flex justify-between mb-2'>
+            <dt className='font-semibold'>Time:</dt>
             <dd>{infoList.time ?? "N/A"}</dd>
           </div>
-          <div className="flex justify-between mb-2">
-            <dt className="font-semibold">Price:</dt>
+          <div className='flex justify-between mb-2'>
+            <dt className='font-semibold'>Price:</dt>
             <dd>
               {infoList.price !== "N/A"
                 ? `${formatPrice(infoList.price)} VNĐ`
@@ -149,8 +149,8 @@ const InformationList: React.FC<InformationListProps> = ({ patientId }) => {
             </dd>
           </div>
         </dl>
-        <hr className="my-4 border-gray-300" />
-        <div className="flex justify-between font-bold">
+        <hr className='my-4 border-gray-300' />
+        <div className='flex justify-between font-bold'>
           <dt>Total:</dt>
           <dd>
             {infoList.price !== "N/A"
@@ -158,9 +158,9 @@ const InformationList: React.FC<InformationListProps> = ({ patientId }) => {
               : "N/A"}
           </dd>
         </div>
-        <div className="mt-4 flex justify-between font-bold">
+        <div className='mt-4 flex justify-between font-bold'>
           <dt>Note:</dt>
-          <dd className="text-right">{generateNote()}</dd>
+          <dd className='text-right'>{generateNote()}</dd>
         </div>
       </div>
     </div>

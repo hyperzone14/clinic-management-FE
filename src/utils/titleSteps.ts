@@ -40,4 +40,10 @@ export const titleSteps = [
     subTitle:
       "Choose the correct department, so your treatment starts with the right expertise",
   },
+  {
+    id: 8,
+    title: "Input patient information",
+    subTitle:
+      "Make sure all patient information is complete before proceeding.",
+  },
 ];

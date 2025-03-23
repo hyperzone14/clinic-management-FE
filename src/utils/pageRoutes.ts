@@ -23,6 +23,7 @@ export const getHeaderRoutes = (role: string): Routes[] => {
       { id: 2, path: "/booking", location: "Booking" },
       { id: 3, path: "/doctors", location: "Doctors" },
       { id: 4, path: "/feedback", location: "Feedback" },
+      // { id: 5, path: "/booking-test", location: "BookingTest" },
     ];
   } else if (role === "ROLE_DOCTOR") {
     // /, /schedule, /examination
@@ -182,6 +183,23 @@ export const pageRoutes: Routes[] = [
     path: "/feedback",
     location: "Feedback",
   },
+
+  // {
+  //   id: 15,
+  //   path: "/booking-test",
+  //   location: "BookingTest",
+  // },
+  {
+    id: 15,
+    path: "/manual-booking",
+    location: "ManualBooking",
+  },
+  {
+    id: 16,
+    path: "/doctor-calendar",
+    location: "DoctorCalendar",
+    roles: ["ROLE_DOCTOR"],
+  },
   {
     id: 17,
     path: "/pre_exam",
@@ -194,31 +212,31 @@ export const pageRoutes: Routes[] = [
         location: "PreExaminationDetail",
       },
     ],
-  },
+  }  
 ];
 
-export const bookingRoutes: Routes[] = [
-  {
-    id: 1,
-    path: "service", // relative path
-    location: "Service",
-  },
-  {
-    id: 2,
-    path: "choose-datetime",
-    location: "ChooseDateTime",
-  },
-  {
-    id: 3,
-    path: "payment",
-    location: "Payment",
-  },
-  {
-    id: 4,
-    path: "finish",
-    location: "Finish",
-  },
-];
+// export const bookingRoutes: Routes[] = [
+//   {
+//     id: 1,
+//     path: "service", // relative path
+//     location: "Service",
+//   },
+//   {
+//     id: 2,
+//     path: "choose-datetime",
+//     location: "ChooseDateTime",
+//   },
+//   {
+//     id: 3,
+//     path: "payment",
+//     location: "Payment",
+//   },
+//   {
+//     id: 4,
+//     path: "finish",
+//     location: "Finish",
+//   },
+// ];
 
 export const prescriptionRoutes: Routes[] = [
   {

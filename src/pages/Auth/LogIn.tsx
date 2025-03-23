@@ -94,42 +94,42 @@ const LogIn: React.FC = () => {
     }
   };
 
-  console.log(error);
+  // console.log(error);
   return (
     <>
       <ToastContainer />
-      <div className="flex justify-center items-center">
-        <div className="bg-[#fff] shadow-md p-8 rounded-lg w-9/12 h-fit">
-          <div className="grid grid-cols-2">
-            <div className="col-span-1 ms-5">
-              <div className="flex justify-start ms-3">
+      <div className='flex justify-center items-center'>
+        <div className='bg-[#fff] shadow-md p-8 rounded-lg w-9/12 h-fit'>
+          <div className='grid grid-cols-2'>
+            <div className='col-span-1 ms-5'>
+              <div className='flex justify-start ms-3'>
                 <img
-                  src="/assets/images/medpal.png"
-                  alt="Medpal"
-                  className="w-3/12"
+                  src='/assets/images/medpal.png'
+                  alt='Medpal'
+                  className='w-3/12'
                 />
               </div>
-              <div className="mt-20">
-                <h1 className="text-4xl font-bold text-center">Log in</h1>
+              <div className='mt-20'>
+                <h1 className='text-4xl font-bold text-center'>Log in</h1>
                 <form onSubmit={handleSubmit}>
                   {/* {error && (
                     <div className="text-red-500 text-center mb-4">{error}</div>
                   )} */}
-                  <div className="mt-8 space-y-4 px-16">
-                    <FormControl fullWidth variant="outlined" error={!!error}>
-                      <InputLabel htmlFor="email">Email</InputLabel>
+                  <div className='mt-8 space-y-4 px-16'>
+                    <FormControl fullWidth variant='outlined' error={!!error}>
+                      <InputLabel htmlFor='email'>Email</InputLabel>
                       <OutlinedInput
-                        id="email"
-                        type="email"
+                        id='email'
+                        type='email'
                         value={logInInfo.email}
                         onChange={handleChange("email")}
                         startAdornment={
-                          <InputAdornment position="start">
+                          <InputAdornment position='start'>
                             <EmailIcon />
                           </InputAdornment>
                         }
-                        label="Email"
-                        placeholder="Email"
+                        label='Email'
+                        placeholder='Email'
                       />
                       {error && (
                         <FormHelperText error>
@@ -137,20 +137,20 @@ const LogIn: React.FC = () => {
                         </FormHelperText>
                       )}
                     </FormControl>
-                    <FormControl fullWidth variant="outlined" error={!!error}>
-                      <InputLabel htmlFor="password">Password</InputLabel>
+                    <FormControl fullWidth variant='outlined' error={!!error}>
+                      <InputLabel htmlFor='password'>Password</InputLabel>
                       <OutlinedInput
-                        id="password"
-                        type="password"
+                        id='password'
+                        type='password'
                         value={logInInfo.password}
                         onChange={handleChange("password")}
                         startAdornment={
-                          <InputAdornment position="start">
+                          <InputAdornment position='start'>
                             <LockIcon />
                           </InputAdornment>
                         }
-                        label="Password"
-                        placeholder="Password"
+                        label='Password'
+                        placeholder='Password'
                       />
                       {error && (
                         <FormHelperText error>
@@ -158,33 +158,33 @@ const LogIn: React.FC = () => {
                         </FormHelperText>
                       )}
                     </FormControl>
-                    <div className="flex justify-between remember">
+                    <div className='flex justify-between remember'>
                       <FormControlLabel
                         control={
                           <Checkbox
-                            color="primary"
+                            color='primary'
                             checked={logInInfo.rememberMe}
                             onChange={handleChange("rememberMe")}
                           />
                         }
-                        label="Keep me logged in"
+                        label='Keep me logged in'
                       />
                     </div>
                     <button
-                      className="bg-[#6B87C7] hover:bg-[#4567B7] text-white font-bold py-2 px-6 rounded-md transition duration-300 ease-in-out w-full"
-                      type="submit"
+                      className='bg-[#6B87C7] hover:bg-[#4567B7] text-white font-bold py-2 px-6 rounded-md transition duration-300 ease-in-out w-full'
+                      type='submit'
                       disabled={loading}
                     >
                       {loading ? "Logging in..." : "Log in"}
                     </button>
                   </div>
                 </form>
-                <div className="mt-20 flex justify-center">
-                  <span className="gap-2">
+                <div className='mt-20 flex justify-center'>
+                  <span className='gap-2'>
                     Not a member yet?{" "}
                     <Link
-                      to="/sign-in"
-                      className="text-[#2495c3] hover:text-[#64BFE3] transition duration-300 ease-in-out"
+                      to='/sign-in'
+                      className='text-[#2495c3] hover:text-[#64BFE3] transition duration-300 ease-in-out'
                     >
                       Create an account
                     </Link>
@@ -192,11 +192,11 @@ const LogIn: React.FC = () => {
                 </div>
               </div>
             </div>
-            <div className="col-span-1">
+            <div className='col-span-1'>
               <img
-                src="/assets/images/treatment.png"
-                alt="Login"
-                className="w-full h-full"
+                src='/assets/images/treatment.png'
+                alt='Login'
+                className='w-full h-full'
               />
             </div>
           </div>

@@ -1,0 +1,23 @@
+.fade-slide-enter {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+.fade-slide-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 500ms, transform 500ms;
+}
+.fade-slide-exit {
+  opacity: 1;
+  transform: translateX(0);
+}
+.fade-slide-exit-active {
+  opacity: 0;
+  transform: translateX(20px);
+  transition: opacity 500ms, transform 500ms;
+}
+/* .fade-slide-appear {
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 500ms, transform 500ms;
+  } */

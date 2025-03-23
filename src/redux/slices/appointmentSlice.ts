@@ -273,6 +273,16 @@ export const searchAppointmentsCriteria = createAsyncThunk(
   }
 );
 
+export const searchAppointmentForDoctor = createAsyncThunk(
+  "appointment/searchForDoctor",
+  async ({ doctorId }: { doctorId: number }) => {
+    const response = await apiService.get<ApiResponsePagination>(
+      `/appointment/search?doctorId=${doctorId}`
+    );
+    return response.result;
+  }
+);
+
 export const rescheduleAppointment = createAsyncThunk(
   "appointment/reschedule",
   async ({
@@ -534,6 +544,21 @@ const appointmentSlice = createSlice({
         state.loading = false;
         state.error =
           action.error.message || "Failed to fetch patient appointments";
+      })
+
+      // Add case for search appointment for doctor
+      .addCase(searchAppointmentForDoctor.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(searchAppointmentForDoctor.fulfilled, (state, action) => {
+        state.loading = false;
+        state.appointments = action.payload.content || [];
+      })
+      .addCase(searchAppointmentForDoctor.rejected, (state, action) => {
+        state.loading = false;
+        state.error =
+          action.error.message || "Failed to search appointments for doctor";
       });
   },
 });
@@ -544,5 +569,6 @@ export const {
   setCurrentAppointment,
   setSearchTerm,
   clearSearch,
+  clearCurrentAppointment,
 } = appointmentSlice.actions;
 export default appointmentSlice.reducer;
