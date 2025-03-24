@@ -30,7 +30,7 @@ export const getHeaderRoutes = (role: string): Routes[] => {
     return [
       { id: 1, path: "/", location: "Home" },
       { id: 2, path: "/schedule", location: "Schedule" },
-      { id: 3, path: "/examination", location: "Examination" },
+      { id: 3, path: "/lab-tests", location: "LabTests" },
       { id: 4, path: "/pre_exam", location: "Pre-Examination" },
     ];
   } else {
@@ -212,6 +212,19 @@ export const pageRoutes: Routes[] = [
         location: "PreExaminationDetail",
       },
     ],
+  },
+  {
+    id: 18,
+    path: "/lab-tests",
+    location: "LabTests",
+    roles: ["ROLE_DOCTOR"],
+    children: [
+      {
+        id: 181,
+        path: ":id",
+        location: "LabTestDetail"
+      }
+    ]
   }  
 ];
 

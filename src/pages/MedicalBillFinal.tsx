@@ -22,22 +22,22 @@ interface LocationState {
   appointmentDate: string;
 }
 
-interface PrescribedDrugResponseDTO {
-  id: number;
-  drugId: number;
-  drugName: string;
-  dosage: number;
-  duration: number;
-  frequency: string;
-  specialInstructions: string;
-}
+// interface PrescribedDrugResponseDTO {
+//   id: number;
+//   drugId: number;
+//   drugName: string;
+//   dosage: number;
+//   duration: number;
+//   frequency: string;
+//   specialInstructions: string;
+// }
 
-interface ExaminationDetailResponseDTO {
-  id: number;
-  examinationType: string;
-  examinationResult: string;
-  imageResponseDTO?: ImageResponseDTO[];
-}
+// interface ExaminationDetailResponseDTO {
+//   id: number;
+//   examinationType: string;
+//   examinationResult: string;
+//   imageResponseDTO?: ImageResponseDTO[];
+// }
 
 interface ImageResponseDTO {
   id: number;
@@ -66,17 +66,17 @@ interface MedicalBill {
   examinationDetails: any[];
 }
 
-interface Department {
-  name: string;
-}
+// interface Department {
+//   name: string;
+// }
 
-interface LabTest {
-  name: string;
-}
+// interface LabTest {
+//   name: string;
+// }
 
-interface ApiResponse<T> {
-  data: T;
-}
+// interface ApiResponse<T> {
+//   data: T;
+// }
 
 const API_BASE_URL = "http://localhost:8080/api";
 
@@ -93,7 +93,7 @@ const MedicalBillFinal: React.FC = () => {
 
   // State for drug form and lab tests
   const [drugs, setDrugs] = useState<PrescribedDrugRequest[]>([]);
-  const [newLabTests, setNewLabTests] = useState<string[]>([]);
+  //const [newLabTests] = useState<string[]>([]);
   const [medicalInfo, setMedicalInfo] = useState<Partial<MedicalBill>>({
     syndrome: '',
     note: '',
@@ -203,8 +203,8 @@ const MedicalBillFinal: React.FC = () => {
   };
 
   const removeDrugField = (index: number) => {
-    const newDrugs = drugs.filter((_, i) => i !== index);
-    setDrugs(newDrugs);
+      const newDrugs = drugs.filter((_, i) => i !== index);
+      setDrugs(newDrugs);
   };
 
   const handleAddLabTest = (testName: string) => {
@@ -228,11 +228,11 @@ const MedicalBillFinal: React.FC = () => {
     );
   };
 
-  const validateLabTests = () => {
-    if (newLabTests.length === 0) return false;
+  // const validateLabTests = () => {
+  //   if (newLabTests.length === 0) return false;
     
-    return newLabTests.every(test => test.trim() !== "");
-  };
+  //   return newLabTests.every(test => test.trim() !== "");
+  // };
 
   const handleSubmitTreatment = async () => {
     if (!currentBill) {
@@ -380,7 +380,7 @@ const MedicalBillFinal: React.FC = () => {
     return null;
   }
 
-  const hasLabTests = newLabTests.length > 0;
+  // const hasLabTests = newLabTests.length > 0;
 
   return (
     <div className="w-full min-h-screen bg-gray-50 pb-20">
@@ -680,97 +680,97 @@ const MedicalBillFinal: React.FC = () => {
         {selectedLabTests.length === 0 && (
           <div className="mb-12">
             <Title id={10} />
-            <div className="mt-8 bg-white rounded-2xl shadow-sm p-8">
-              <div className="space-y-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-xl font-semibold text-gray-800">Add New Prescriptions</h3>
-                  <button
-                    onClick={addDrugField}
-                    className="flex items-center px-4 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors"
-                  >
-                    <Plus className="h-5 w-5 mr-2" />
-                    Add Medicine
-                  </button>
-                </div>
+          <div className="mt-8 bg-white rounded-2xl shadow-sm p-8">
+            <div className="space-y-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-semibold text-gray-800">Add New Prescriptions</h3>
+                <button
+                  onClick={addDrugField}
+                  className="flex items-center px-4 py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors"
+                >
+                  <Plus className="h-5 w-5 mr-2" />
+                  Add Medicine
+                </button>
+              </div>
 
-                <div className="overflow-hidden rounded-xl border border-gray-200">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Medicine Name</th>
-                        <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Quantity</th>
-                        <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Duration</th>
-                        <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Frequency</th>
-                        <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Instructions</th>
-                        <th className="w-20"></th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {drugs.map((drug, index) => (
-                        <tr key={index} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-6 py-4">
-                            <select
-                              value={drug.drugId}
-                              onChange={(e) => handleDrugChange(index, 'drugId', parseInt(e.target.value))}
-                              className="w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            >
-                              <option value="">Select Medicine</option>
-                              {availableDrugs.map((d) => (
-                                <option key={d.id} value={d.id}>
-                                  {d.name} ({d.standardDosage})
-                                </option>
-                              ))}
-                            </select>
-                          </td>
-                          <td className="px-6 py-4">
-                            <input
-                              type="number"
-                              value={drug.dosage}
-                              onChange={(e) => handleDrugChange(index, 'dosage', parseInt(e.target.value))}
-                              className="w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              placeholder="Quantity"
-                            />
-                          </td>
-                          <td className="px-6 py-4">
-                            <input
-                              type="number"
-                              value={drug.duration}
-                              onChange={(e) => handleDrugChange(index, 'duration', parseInt(e.target.value))}
-                              className="w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              placeholder="Days"
-                            />
-                          </td>
-                          <td className="px-6 py-4">
-                            <input
-                              type="text"
-                              value={drug.frequency}
-                              onChange={(e) => handleDrugChange(index, 'frequency', e.target.value)}
-                              className="w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              placeholder="e.g., Twice a day"
-                            />
-                          </td>
-                          <td className="px-6 py-4">
-                            <input
-                              type="text"
-                              value={drug.specialInstructions}
-                              onChange={(e) => handleDrugChange(index, 'specialInstructions', e.target.value)}
-                              className="w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              placeholder="Take after meals"
-                            />
-                          </td>
-                          <td className="px-6 py-4">
+              <div className="overflow-hidden rounded-xl border border-gray-200">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Medicine Name</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Quantity</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Duration</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Frequency</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Instructions</th>
+                      <th className="w-20"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {drugs.map((drug, index) => (
+                      <tr key={index} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4">
+                          <select
+                            value={drug.drugId}
+                            onChange={(e) => handleDrugChange(index, 'drugId', parseInt(e.target.value))}
+                            className="w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          >
+                            <option value="">Select Medicine</option>
+                            {availableDrugs.map((d) => (
+                              <option key={d.id} value={d.id}>
+                                {d.name} ({d.standardDosage})
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                        <td className="px-6 py-4">
+                          <input
+                            type="number"
+                            value={drug.dosage}
+                            onChange={(e) => handleDrugChange(index, 'dosage', parseInt(e.target.value))}
+                            className="w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Quantity"
+                          />
+                        </td>
+                        <td className="px-6 py-4">
+                          <input
+                            type="number"
+                            value={drug.duration}
+                            onChange={(e) => handleDrugChange(index, 'duration', parseInt(e.target.value))}
+                            className="w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Days"
+                          />
+                        </td>
+                        <td className="px-6 py-4">
+                          <input
+                            type="text"
+                            value={drug.frequency}
+                            onChange={(e) => handleDrugChange(index, 'frequency', e.target.value)}
+                            className="w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="e.g., Twice a day"
+                          />
+                        </td>
+                        <td className="px-6 py-4">
+                          <input
+                            type="text"
+                            value={drug.specialInstructions}
+                            onChange={(e) => handleDrugChange(index, 'specialInstructions', e.target.value)}
+                            className="w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Take after meals"
+                          />
+                        </td>
+                        <td className="px-6 py-4">
                             <button
                               onClick={() => removeDrugField(index)}
                               className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                             >
                               <Trash2 className="h-5 w-5" />
                             </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
               </div>
             </div>
           </div>
@@ -778,25 +778,25 @@ const MedicalBillFinal: React.FC = () => {
 
         {/* Action Buttons - Only show if not adding lab tests */}
         {selectedLabTests.length === 0 && drugs.length > 0 && (
-          <div className="flex justify-center space-x-4">
-            <button
-              onClick={() => {
+         <div className="flex justify-center space-x-4">
+          <button
+            onClick={() => {
                 if (window.confirm('Are you sure you want to discard all changes?')) {
-                  navigate(-1);
-                }
-              }}
-              className="px-8 py-3 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-colors font-medium text-lg"
-            >
-              Discard Changes
-            </button>
-            <button
-              onClick={handleSubmitTreatment}
-              className="px-8 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors font-medium text-lg shadow-lg shadow-blue-500/30 flex items-center"
-            >
-              <Pill className="h-5 w-5 mr-2" />
-              Submit Treatment
-            </button>
-          </div>
+                navigate(-1);
+              }
+            }}
+            className="px-8 py-3 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-colors font-medium text-lg"
+          >
+            Discard Changes
+          </button>
+          <button
+            onClick={handleSubmitTreatment}
+            className="px-8 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors font-medium text-lg shadow-lg shadow-blue-500/30 flex items-center"
+          >
+            <Pill className="h-5 w-5 mr-2" />
+            Submit Treatment
+          </button>
+        </div>
         )}
       </div>
     </div>

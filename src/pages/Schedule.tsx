@@ -7,7 +7,7 @@ import {
   StatusType,
   Appointment,
 } from "../redux/slices/scheduleSlice";
-import { initializeTreatmentAsync } from "../redux/slices/treatmentSlice";
+//import { initializeTreatmentAsync } from "../redux/slices/treatmentSlice";
 import AppointmentCard from "../components/common/AppointmentCard";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
