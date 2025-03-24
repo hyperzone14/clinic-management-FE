@@ -240,6 +240,18 @@ const MedicalBillFinal: React.FC = () => {
       return;
     }
 
+    // Check if finalDiagnosis is null or empty
+    if (!medicalInfo.finalDiagnosis) {
+      toast.error('Please enter Final Diagnosis before submitting treatment');
+      return;
+    }
+
+    // Check if syndrome is empty
+    if (!medicalInfo.syndrome) {
+      toast.error('Please enter Syndrome before submitting treatment');
+      return;
+    }
+
     // Validate drugs only when submitting
     const hasValidPrescriptions = validatePrescriptions();
     if (!hasValidPrescriptions) {
@@ -250,20 +262,13 @@ const MedicalBillFinal: React.FC = () => {
     try {
       // First update medical info with only necessary fields
       const updateData = {
-        id: currentBill.id,
-        patientId: state.patientId,
-        doctorId: state.doctorId,
-        date: currentBill.date,
         syndrome: medicalInfo.syndrome,
         note: medicalInfo.note,
-        finalDiagnosis: medicalInfo.finalDiagnosis,
-        weight: currentBill.weight,
-        heartRate: currentBill.heartRate,
-        bloodPressure: currentBill.bloodPressure,
-        temperature: currentBill.temperature
+        finalDiagnosis: medicalInfo.finalDiagnosis
       };
       
-      await apiService.put(`/medical-bills/${currentBill.id}`, updateData);
+      // Update medical information first
+      await apiService.patch(`/medical-bills/${currentBill.id}`, updateData);
 
       // Then submit treatment
       await dispatch(addDrugsToMedicalBill({
@@ -271,6 +276,12 @@ const MedicalBillFinal: React.FC = () => {
         drugs: drugs,
         appointmentId: state.appointmentId
       })).unwrap();
+
+      // Update appointment status to SUCCESS
+      await apiService.put(
+        `/appointment/${state.appointmentId}/status`,
+        "SUCCESS"
+      );
 
       toast.success('Treatment submitted successfully');
       navigate('/schedule');
@@ -341,20 +352,12 @@ const MedicalBillFinal: React.FC = () => {
       }
 
       const updateData = {
-        id: currentBill.id,
-        patientId: state.patientId,
-        doctorId: state.doctorId,
-        date: currentBill.date,
         syndrome: medicalInfo.syndrome,
         note: medicalInfo.note,
-        finalDiagnosis: medicalInfo.finalDiagnosis,
-        weight: currentBill.weight,
-        heartRate: currentBill.heartRate,
-        bloodPressure: currentBill.bloodPressure,
-        temperature: currentBill.temperature
+        finalDiagnosis: medicalInfo.finalDiagnosis
       };
 
-      await apiService.put(`/medical-bills/${currentBill.id}`, updateData);
+      await apiService.patch(`/medical-bills/${currentBill.id}`, updateData);
       toast.success('Medical information updated successfully');
       
       // Refresh medical bill data
@@ -467,6 +470,59 @@ const MedicalBillFinal: React.FC = () => {
               <div className="p-4 bg-gray-50 rounded-xl">
                 <p className="font-medium text-gray-700">Temperature</p>
                 <p className="text-xl text-gray-900 mt-1">{currentBill.temperature}°C</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Medical Information Section */}
+        <div className="mb-12">
+          <Title id={11} />
+          <div className="mt-8 bg-white rounded-2xl shadow-sm p-8">
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Syndrome
+                </label>
+                <textarea
+                  value={medicalInfo.syndrome}
+                  onChange={(e) => handleMedicalInfoChange('syndrome', e.target.value)}
+                  className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  rows={3}
+                  placeholder="Enter syndrome..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Note
+                </label>
+                <textarea
+                  value={medicalInfo.note}
+                  onChange={(e) => handleMedicalInfoChange('note', e.target.value)}
+                  className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  rows={3}
+                  placeholder="Enter notes..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Final Diagnosis
+                </label>
+                <textarea
+                  value={medicalInfo.finalDiagnosis || ''}
+                  onChange={(e) => handleMedicalInfoChange('finalDiagnosis', e.target.value)}
+                  className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  rows={3}
+                  placeholder="Enter final diagnosis..."
+                />
+              </div>
+              <div className="flex justify-end">
+                <button
+                  onClick={handleUpdateMedicalInfo}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Update Medical Information
+                </button>
               </div>
             </div>
           </div>
@@ -595,7 +651,18 @@ const MedicalBillFinal: React.FC = () => {
                 )}
 
                 {selectedLabTests.length > 0 && (
-                  <div className="flex justify-center mt-8">
+                  <div className="flex justify-center mt-8 space-x-4">
+                    <button
+                      onClick={() => {
+                        if (window.confirm('Are you sure you want to discard all selected lab tests?')) {
+                          setSelectedLabTests([]);
+                          setSelectedDepartment('');
+                        }
+                      }}
+                      className="px-8 py-3 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-colors font-medium text-lg"
+                    >
+                      Discard Lab Tests
+                    </button>
                     <button
                       onClick={handleSubmitLabTests}
                       className="px-8 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors font-medium text-lg shadow-lg shadow-blue-500/30"
@@ -703,53 +770,6 @@ const MedicalBillFinal: React.FC = () => {
                       ))}
                     </tbody>
                   </table>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Medical Information Section - Only show when adding drugs */}
-        {selectedLabTests.length === 0 && drugs.length > 0 && (
-          <div className="mb-12">
-            <Title id={11} />
-            <div className="mt-8 bg-white rounded-2xl shadow-sm p-8">
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Syndrome
-                  </label>
-                  <textarea
-                    value={medicalInfo.syndrome}
-                    onChange={(e) => handleMedicalInfoChange('syndrome', e.target.value)}
-                    className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    rows={3}
-                    placeholder="Enter syndrome..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Note
-                  </label>
-                  <textarea
-                    value={medicalInfo.note}
-                    onChange={(e) => handleMedicalInfoChange('note', e.target.value)}
-                    className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    rows={3}
-                    placeholder="Enter notes..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Final Diagnosis
-                  </label>
-                  <textarea
-                    value={medicalInfo.finalDiagnosis || ''}
-                    onChange={(e) => handleMedicalInfoChange('finalDiagnosis', e.target.value)}
-                    className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    rows={3}
-                    placeholder="Enter final diagnosis..."
-                  />
                 </div>
               </div>
             </div>
