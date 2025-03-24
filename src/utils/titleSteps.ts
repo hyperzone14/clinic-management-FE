@@ -46,4 +46,24 @@ export const titleSteps = [
     subTitle:
       "Make sure all patient information is complete before proceeding.",
   },
+  {
+    id: 9,
+    title: "Patient Pre-assessment",
+    subTitle: "Initial evaluation to understand the patient's condition.",
+  },
+  {
+    id: 10,
+    title: "Prescribed drugs",
+    subTitle: "Review and confirm the medications prescribed for the patient.",
+  },
+  {
+    id: 11,
+    title: "Final diagnosis",
+    subTitle: "The conclusive diagnosis based on all assessments and tests.",
+  },
+  {
+    id: 12,
+    title: "Lab Examination",
+    subTitle: "Review the lab test results to support the diagnosis process.",
+  },
 ];
