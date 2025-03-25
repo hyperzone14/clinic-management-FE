@@ -103,11 +103,9 @@ export const fetchDoctorsPagination = createAsyncThunk(
   "doctor/searchDoctorsPagination",
   async ({ page, searchTerm }: { page: number; searchTerm?: string }) => {
     let url = `/doctor?page=${page}`;
-    if (searchTerm) {
-      url += `&size=1000000000`;
-    } else {
-      url += `&size=10`;
-    }
+
+    const pageSize = searchTerm ? 1000000000 : 10;
+    url += `&size=${pageSize}`;
 
     if (searchTerm) {
       url += `&search=${encodeURIComponent(searchTerm)}`;
@@ -121,6 +119,7 @@ export const fetchDoctorsPagination = createAsyncThunk(
       totalPages: response.result.totalPages,
       totalElements: response.result.totalElements,
       pageSize: response.result.size,
+      searchTerm: searchTerm || "",
     };
   }
 );
@@ -273,12 +272,22 @@ const doctorSlice = createSlice({
       .addCase(fetchDoctorsPagination.fulfilled, (state, action) => {
         state.loading = false;
         state.doctors = action.payload.doctors;
-        state.pagination = {
-          currentPage: action.payload.page,
-          totalPages: action.payload.totalPages,
-          totalElements: action.payload.totalElements,
-          pageSize: action.payload.pageSize,
-        };
+        if (!action.payload.searchTerm) {
+          state.pagination = {
+            currentPage: action.payload.page,
+            totalPages: action.payload.totalPages,
+            totalElements: action.payload.totalElements,
+            pageSize: 10, // Explicitly set to default page size
+          };
+        } else {
+          // For search results, adjust pagination accordingly
+          state.pagination = {
+            currentPage: action.payload.page,
+            totalPages: action.payload.totalPages,
+            totalElements: action.payload.totalElements,
+            pageSize: action.payload.pageSize,
+          };
+        }
       })
       .addCase(fetchDoctorsPagination.rejected, (state, action) => {
         state.loading = false;

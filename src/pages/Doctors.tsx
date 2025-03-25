@@ -10,7 +10,7 @@ import { AppDispatch, RootState } from "../redux/store";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchDepartments } from "../redux/slices/departmentSlice";
 import {
-  fetchDoctors,
+  // fetchDoctors,
   fetchDoctorsPagination,
   setSearchTerm,
 } from "../redux/slices/doctorSlice";
@@ -109,11 +109,12 @@ const Doctors = React.memo(() => {
   useEffect(() => {
     const controller = new AbortController();
 
-    Promise.all([dispatch(fetchDepartments()), dispatch(fetchDoctors())]).catch(
-      (error) => {
-        console.error("Initial data fetch failed:", error);
-      }
-    );
+    Promise.all([
+      dispatch(fetchDepartments()),
+      dispatch(fetchDoctorsPagination({ page: 0 })),
+    ]).catch((error) => {
+      console.error("Initial data fetch failed:", error);
+    });
 
     return () => {
       controller.abort();
