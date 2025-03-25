@@ -21,6 +21,11 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
+    // Set Content-Type to multipart/form-data if FormData is being sent
+    if (config.data instanceof FormData) {
+      config.headers["Content-Type"] = "multipart/form-data";
+    }
+
     return config;
   },
   (error) => Promise.reject(error)
@@ -55,6 +60,8 @@ export const apiService = {
     api.post<T>(url, data).then((response) => response.data),
   put: <T, D = unknown>(url: string, data: D) =>
     api.put<T>(url, data).then((response) => response.data),
+  patch: <T, D = unknown>(url: string, data: D) =>
+    api.patch<T>(url, data).then((response) => response.data),
   delete: <T>(url: string) =>
     api.delete<T>(url).then((response) => response.data),
 };

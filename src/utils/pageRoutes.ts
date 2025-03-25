@@ -30,8 +30,8 @@ export const getHeaderRoutes = (role: string): Routes[] => {
     return [
       { id: 1, path: "/", location: "Home" },
       { id: 2, path: "/schedule", location: "Schedule" },
-      { id: 3, path: "/examination", location: "Examination" },
-      // { id: 4, path: "/booking-bill", location: "BookingBill" },
+      { id: 3, path: "/lab-tests", location: "LabTests" },
+      { id: 4, path: "/pre_exam", location: "Pre-Examination" },
     ];
   } else {
     return [
@@ -183,6 +183,7 @@ export const pageRoutes: Routes[] = [
     path: "/feedback",
     location: "Feedback",
   },
+
   // {
   //   id: 15,
   //   path: "/booking-test",
@@ -199,6 +200,32 @@ export const pageRoutes: Routes[] = [
     location: "DoctorCalendar",
     roles: ["ROLE_DOCTOR"],
   },
+  {
+    id: 17,
+    path: "/pre_exam",
+    location: "Pre-Examination",
+    roles: ["ROLE_DOCTOR"],
+    children: [
+      {
+        id: 151,
+        path: ":id",
+        location: "PreExaminationDetail",
+      },
+    ],
+  },
+  {
+    id: 18,
+    path: "/lab-tests",
+    location: "LabTests",
+    roles: ["ROLE_DOCTOR"],
+    children: [
+      {
+        id: 181,
+        path: ":id",
+        location: "LabTestDetail"
+      }
+    ]
+  }  
 ];
 
 // export const bookingRoutes: Routes[] = [

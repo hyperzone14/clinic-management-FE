@@ -7,21 +7,43 @@ import {
   StatusType,
   Appointment,
 } from "../redux/slices/scheduleSlice";
-import { initializeTreatmentAsync } from "../redux/slices/treatmentSlice";
+//import { initializeTreatmentAsync } from "../redux/slices/treatmentSlice";
 import AppointmentCard from "../components/common/AppointmentCard";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AuthService } from "../utils/security/services/AuthService";
+import { apiService } from "../utils/axios-config";
+
+interface MedicalBillResponse {
+  id: number;
+  patientId: number;
+  patientName: string;
+  patientGender: string;
+  patientBirthDate: string;
+  doctorId: number;
+  doctorName: string;
+  date: string;
+  syndrome: string;
+  note: string;
+  weight: number;
+  heartRate: number;
+  bloodPressure: string;
+  temperature: number;
+  finalDiagnosis: string | null;
+  prescribedDrugs: any[];
+  examinationDetails: any[];
+}
 
 // Define status order for sorting
 const STATUS_ORDER: Record<StatusType, number> = {
-  'checked-in': 1,
-  'lab_test_completed': 2,
-  'lab_test_required': 3,
-  'success': 4,
-  'cancelled': 5,
-  'pending': 6,
-  'confirmed': 7
+  'pre_examination_completed': 1,
+  'checked-in': 2,
+  'lab_test_completed': 3,
+  'lab_test_required': 4,
+  'success': 5,
+  'cancelled': 6,
+  'pending': 7,
+  'confirmed': 8
 };
 
 const Schedule: React.FC = () => {
@@ -80,35 +102,15 @@ const Schedule: React.FC = () => {
   }, [dispatch, currentPage, pageSize, navigate]);
 
   const handlePatientClick = async (appointment: Appointment) => {
-    if (appointment.status === 'checked-in') {
+    if (appointment.status === 'pre_examination_completed' || appointment.status === 'lab_test_completed') {
       try {
         if (!appointment.patientId || !appointment.doctorId) {
           toast.error('Missing required appointment data');
           return;
         }
 
-        await dispatch(initializeTreatmentAsync({
-          patientId: Number(appointment.patientId),
-          patientName: appointment.patientName,
-          doctorId: Number(appointment.doctorId),
-          doctorName: appointment.doctorName,
-          appointmentId: Number(appointment.id),
-          appointmentDate: appointment.appointmentDate,
-          gender: appointment.gender,
-          birthDate: appointment.birthDate
-        })).unwrap();
-
-        navigate('/schedule/medical-service');
-      } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-        toast.error(`Error initializing treatment: ${errorMessage}`);
-      }
-    } else if (appointment.status.toLowerCase() === 'lab_test_completed') {
-      try {
-        if (!appointment.patientId || !appointment.doctorId) {
-          toast.error('Missing required appointment data');
-          return;
-        }
+        // Fetch medical bill data
+        const medicalBill = await apiService.get<MedicalBillResponse>(`/medical-bills/top/patient/${appointment.patientId}`);
 
         navigate('/medical-bill-final', {
           state: {
@@ -117,12 +119,13 @@ const Schedule: React.FC = () => {
             doctorId: Number(appointment.doctorId),
             doctorName: appointment.doctorName,
             appointmentId: Number(appointment.id),
-            appointmentDate: appointment.appointmentDate
+            appointmentDate: appointment.appointmentDate,
+            medicalBill: medicalBill
           }
         });
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-        toast.error(`Error navigating to medical bill: ${errorMessage}`);
+        toast.error(`Error fetching medical bill data: ${errorMessage}`);
       }
     } else {
       switch (appointment.status.toLowerCase()) {
@@ -132,14 +135,11 @@ const Schedule: React.FC = () => {
         case 'cancelled':
           toast.warning(`This appointment was cancelled for ${appointment.patientName}`);
           break;
-        case 'lab_test_completed':
-          toast.info(`Lab tests have been completed for ${appointment.patientName}`);
-          break;
         case 'lab_test_required':
           toast.info(`Please go the lab for ${appointment.patientName} tests.`);
           break;
         default:
-          toast.error(`Appointment must be checked-in to proceed.`);
+          toast.error(`Appointment must be pre-examined to proceed with medical service.`);
       }
     }
   };

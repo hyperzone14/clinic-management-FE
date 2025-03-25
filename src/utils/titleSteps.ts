@@ -42,28 +42,36 @@ export const titleSteps = [
   },
   {
     id: 8,
-    title: "Input patient information",
+    title: "Patient Pre-assessment",
     subTitle:
       "Make sure all patient information is complete before proceeding.",
   },
   {
     id: 9,
-    title: "Patient Pre-assessment",
-    subTitle: "Initial evaluation to understand the patient's condition.",
+    title: "Choose the lab tests",
+    subTitle:
+      "Choose the correct lab tests, so your treatment starts with the right expertise",
   },
   {
     id: 10,
-    title: "Prescribed drugs",
-    subTitle: "Review and confirm the medications prescribed for the patient.",
+    title: "Choose medicine",
+    subTitle:
+      "Choose the correct medicine, so your treatment starts with the right expertise",
   },
   {
     id: 11,
-    title: "Final diagnosis",
-    subTitle: "The conclusive diagnosis based on all assessments and tests.",
+    title: "Doctor's diagnosis",
+    subTitle:
+      "Make sure all patient information is complete before proceeding.",
   },
   {
     id: 12,
-    title: "Lab Examination",
-    subTitle: "Review the lab test results to support the diagnosis process.",
+    title: "Doctor information",
+    subTitle: "Make sure all doctor information is complete before proceeding.",
+  },
+  {
+    id: 13,
+    title: "Lab tests result",
+    subTitle: "Make sure all lab tests result is complete before proceeding.",
   },
 ];

@@ -11,6 +11,7 @@ import {
 } from '../redux/slices/medicalBillSlice';
 import { toast, ToastContainer } from 'react-toastify';
 import { AuthService } from '../utils/security/services/AuthService';
+import { apiService } from '../utils/axios-config';
 
 interface LocationState {
   patientId: number;
@@ -20,6 +21,62 @@ interface LocationState {
   appointmentId: number;
   appointmentDate: string;
 }
+
+// interface PrescribedDrugResponseDTO {
+//   id: number;
+//   drugId: number;
+//   drugName: string;
+//   dosage: number;
+//   duration: number;
+//   frequency: string;
+//   specialInstructions: string;
+// }
+
+// interface ExaminationDetailResponseDTO {
+//   id: number;
+//   examinationType: string;
+//   examinationResult: string;
+//   imageResponseDTO?: ImageResponseDTO[];
+// }
+
+interface ImageResponseDTO {
+  id: number;
+  fileName: string;
+  fileType: string;
+  size: number;
+}
+
+interface MedicalBill {
+  id: number;
+  patientId: number;
+  patientName: string;
+  patientGender: string;
+  patientBirthDate: string;
+  doctorId: number;
+  doctorName: string;
+  date: string;
+  syndrome: string;
+  note: string;
+  weight: number;
+  heartRate: number;
+  bloodPressure: string;
+  temperature: number;
+  finalDiagnosis: string | null;
+  prescribedDrugs: any[];
+  examinationDetails: any[];
+}
+
+// interface Department {
+//   name: string;
+// }
+
+// interface LabTest {
+//   name: string;
+// }
+
+// interface ApiResponse<T> {
+//   data: T;
+// }
 
 const API_BASE_URL = "http://localhost:8080/api";
 
@@ -34,16 +91,18 @@ const MedicalBillFinal: React.FC = () => {
   const { currentBill, availableDrugs, loading } = useAppSelector(state => state.medicalBill);
   const state = location.state as LocationState;
 
-  // State for drug form
-  const [drugs, setDrugs] = useState<PrescribedDrugRequest[]>([
-    {
-      drugId: 0,
-      dosage: 0,
-      duration: 0,
-      frequency: '',
-      specialInstructions: ''
-    }
-  ]);
+  // State for drug form and lab tests
+  const [drugs, setDrugs] = useState<PrescribedDrugRequest[]>([]);
+  //const [newLabTests] = useState<string[]>([]);
+  const [medicalInfo, setMedicalInfo] = useState<Partial<MedicalBill>>({
+    syndrome: '',
+    note: '',
+    finalDiagnosis: null
+  });
+  const [departments, setDepartments] = useState<string[]>([]);
+  const [labTests, setLabTests] = useState<string[]>([]);
+  const [selectedDepartment, setSelectedDepartment] = useState<string>('');
+  const [selectedLabTests, setSelectedLabTests] = useState<string[]>([]);
 
   // Check doctor access on component mount
   useEffect(() => {
@@ -72,6 +131,58 @@ const MedicalBillFinal: React.FC = () => {
     }
   }, [dispatch, state?.patientId]);
 
+  // Add new useEffect to update medicalInfo when currentBill changes
+  useEffect(() => {
+    if (currentBill) {
+      setMedicalInfo({
+        syndrome: currentBill.syndrome || '',
+        note: currentBill.note || '',
+        finalDiagnosis: currentBill.finalDiagnosis || null
+      });
+    }
+  }, [currentBill]);
+
+  // Fetch departments on mount
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const response = await apiService.get('/lab_department');
+        console.log('Departments response:', response);
+        // Response is directly the array we need
+        setDepartments(response as string[]); // Add type assertion
+      } catch (error) {
+        console.error('Failed to fetch departments:', error);
+        toast.error('Failed to load departments');
+        setDepartments([]);
+      }
+    };
+
+    fetchDepartments();
+  }, []);
+
+  // Fetch lab tests when department changes
+  useEffect(() => {
+    const fetchLabTests = async () => {
+      if (!selectedDepartment) {
+        setLabTests([]);
+        return;
+      }
+
+      try {
+        const response = await apiService.get(`/lab_department/lab_tests?labDepartment=${selectedDepartment}`);
+        console.log('Lab tests response:', response);
+        // Response is directly the array we need
+        setLabTests(response as string[]); // Add type assertion
+      } catch (error) {
+        console.error('Failed to fetch lab tests:', error);
+        toast.error('Failed to load lab tests');
+        setLabTests([]);
+      }
+    };
+
+    fetchLabTests();
+  }, [selectedDepartment]);
+
   const handleDrugChange = (index: number, field: keyof PrescribedDrugRequest, value: string | number) => {
     const newDrugs = [...drugs];
     newDrugs[index] = {
@@ -92,40 +203,125 @@ const MedicalBillFinal: React.FC = () => {
   };
 
   const removeDrugField = (index: number) => {
-    if (drugs.length > 1) {
       const newDrugs = drugs.filter((_, i) => i !== index);
       setDrugs(newDrugs);
+  };
+
+  const handleAddLabTest = (testName: string) => {
+    if (!selectedLabTests.includes(testName)) {
+      setSelectedLabTests([...selectedLabTests, testName]);
     }
   };
 
+  const removeLabTest = (testName: string) => {
+    setSelectedLabTests(selectedLabTests.filter(name => name !== testName));
+  };
+
+  const validatePrescriptions = () => {
+    if (drugs.length === 0) return false;
+    
+    return drugs.every(drug => 
+      drug.drugId !== 0 && 
+      drug.dosage > 0 && 
+      drug.duration > 0 && 
+      drug.frequency.trim() !== ""
+    );
+  };
+
+  // const validateLabTests = () => {
+  //   if (newLabTests.length === 0) return false;
+    
+  //   return newLabTests.every(test => test.trim() !== "");
+  // };
+
   const handleSubmitTreatment = async () => {
-    if (!currentBill || !state?.appointmentId) {
-      toast.error('Missing required information');
+    if (!currentBill) {
+      toast.error('No medical bill found');
       return;
     }
 
-    // Validate drugs
-    const invalidDrugs = drugs.some(drug =>
-      !drug.drugId || !drug.dosage || !drug.specialInstructions
-    );
+    // Check if finalDiagnosis is null or empty
+    if (!medicalInfo.finalDiagnosis) {
+      toast.error('Please enter Final Diagnosis before submitting treatment');
+      return;
+    }
 
-    if (invalidDrugs) {
-      toast.error('Please fill in all required drug information');
+    // Check if syndrome is empty
+    if (!medicalInfo.syndrome) {
+      toast.error('Please enter Syndrome before submitting treatment');
+      return;
+    }
+
+    // Validate drugs only when submitting
+    const hasValidPrescriptions = validatePrescriptions();
+    if (!hasValidPrescriptions) {
+      toast.error('Please complete all prescription fields (medicine, quantity, duration, and frequency)');
       return;
     }
 
     try {
+      // First update medical info with only necessary fields
+      const updateData = {
+        syndrome: medicalInfo.syndrome,
+        note: medicalInfo.note,
+        finalDiagnosis: medicalInfo.finalDiagnosis
+      };
+      
+      // Update medical information first
+      await apiService.patch(`/medical-bills/${currentBill.id}`, updateData);
+
+      // Then submit treatment
       await dispatch(addDrugsToMedicalBill({
         medicalBillId: currentBill.id,
         drugs: drugs,
         appointmentId: state.appointmentId
       })).unwrap();
 
+      // Update appointment status to SUCCESS
+      await apiService.put(
+        `/appointment/${state.appointmentId}/status`,
+        "SUCCESS"
+      );
+
       toast.success('Treatment submitted successfully');
       navigate('/schedule');
     } catch (error) {
       toast.error('Failed to submit treatment');
       console.error('Failed to submit treatment:', error);
+    }
+  };
+
+  const handleSubmitLabTests = async () => {
+    if (!currentBill) {
+      toast.error('No medical bill found');
+      return;
+    }
+
+    if (selectedLabTests.length === 0) {
+      toast.error('Please select at least one lab test');
+      return;
+    }
+
+    try {
+      const labRequests = selectedLabTests.map(testName => ({
+        examinationType: testName
+      }));
+
+      await apiService.post(
+        `/medical-bills/${currentBill.id}/lab_request`,
+        labRequests
+      );
+
+      await apiService.put(
+        `/appointment/${state.appointmentId}/status`,
+        "LAB_TEST_REQUIRED"
+      );
+
+      toast.success('Lab tests requested successfully');
+      navigate('/schedule');
+    } catch (error) {
+      console.error('Failed to submit lab tests:', error);
+      toast.error('Failed to submit lab tests');
     }
   };
 
@@ -141,6 +337,37 @@ const MedicalBillFinal: React.FC = () => {
     }
   };
 
+  const handleMedicalInfoChange = (field: keyof MedicalBill, value: string) => {
+    setMedicalInfo(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleUpdateMedicalInfo = async () => {
+    try {
+      if (!currentBill) {
+        toast.error('No medical bill found');
+        return;
+      }
+
+      const updateData = {
+        syndrome: medicalInfo.syndrome,
+        note: medicalInfo.note,
+        finalDiagnosis: medicalInfo.finalDiagnosis
+      };
+
+      await apiService.patch(`/medical-bills/${currentBill.id}`, updateData);
+      toast.success('Medical information updated successfully');
+      
+      // Refresh medical bill data
+      dispatch(fetchLatestMedicalBillByPatientId(state.patientId));
+    } catch (error) {
+      console.error('Failed to update medical information:', error);
+      toast.error('Failed to update medical information');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -149,19 +376,11 @@ const MedicalBillFinal: React.FC = () => {
     );
   }
 
-  // Error or missing state
-  if (!state) {
-    toast.error("Missing required information");
-    navigate('/schedule');
+  if (!currentBill) {
     return null;
   }
 
-  // Missing bill
-  if (!currentBill) {
-    toast.error(`No medical bill found for patient: ${state.patientName}`);
-    navigate('/schedule');
-    return null;
-  }
+  // const hasLabTests = newLabTests.length > 0;
 
   return (
     <div className="w-full min-h-screen bg-gray-50 pb-20">
@@ -212,7 +431,7 @@ const MedicalBillFinal: React.FC = () => {
 
         {/* Doctor Information Section */}
         <div className="mb-12">
-          <Title id={6} />
+          <Title id={12} />
           <div className="mt-10 mx-16 px-3">
             <div className="grid grid-cols-2 justify-between">
               <div className="col-span-1 flex">
@@ -228,18 +447,239 @@ const MedicalBillFinal: React.FC = () => {
                 </span>
               </div>
             </div>
-            <div className="mt-7 flex">
-              <p className="font-bold text-2xl">Syndrome: </p>
-              <span className="ms-12 text-2xl text-[#A9A9A9] flex-1">
-                {currentBill.syndrome}
-              </span>
+          </div>
+        </div>
+
+        {/* Vital Signs Section */}
+        <div className="mb-12">
+          <Title id={8} />
+          <div className="mt-8 bg-white rounded-2xl shadow-sm p-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <p className="font-medium text-gray-700">Weight</p>
+                <p className="text-xl text-gray-900 mt-1">{currentBill.weight} kg</p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <p className="font-medium text-gray-700">Heart Rate</p>
+                <p className="text-xl text-gray-900 mt-1">{currentBill.heartRate} bpm</p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <p className="font-medium text-gray-700">Blood Pressure</p>
+                <p className="text-xl text-gray-900 mt-1">{currentBill.bloodPressure}</p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <p className="font-medium text-gray-700">Temperature</p>
+                <p className="text-xl text-gray-900 mt-1">{currentBill.temperature}°C</p>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Add New Drugs Section */}
+        {/* Medical Information Section */}
         <div className="mb-12">
-          <Title id={6} />
+          <Title id={11} />
+          <div className="mt-8 bg-white rounded-2xl shadow-sm p-8">
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Syndrome
+                </label>
+                <textarea
+                  value={medicalInfo.syndrome}
+                  onChange={(e) => handleMedicalInfoChange('syndrome', e.target.value)}
+                  className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  rows={3}
+                  placeholder="Enter syndrome..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Note
+                </label>
+                <textarea
+                  value={medicalInfo.note}
+                  onChange={(e) => handleMedicalInfoChange('note', e.target.value)}
+                  className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  rows={3}
+                  placeholder="Enter notes..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Final Diagnosis
+                </label>
+                <textarea
+                  value={medicalInfo.finalDiagnosis || ''}
+                  onChange={(e) => handleMedicalInfoChange('finalDiagnosis', e.target.value)}
+                  className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  rows={3}
+                  placeholder="Enter final diagnosis..."
+                />
+              </div>
+              <div className="flex justify-end">
+                <button
+                  onClick={handleUpdateMedicalInfo}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Update Medical Information
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Previous Lab Tests Section */}
+        {currentBill.examinationDetails && currentBill.examinationDetails.length > 0 && (
+          <div className="mb-12">
+            <Title id={13} />
+            <div className="mt-8 bg-white rounded-2xl shadow-sm p-8">
+              <h3 className="text-xl font-semibold text-gray-800 mb-6">Previous Lab Tests</h3>
+              <div className="space-y-6">
+                {currentBill.examinationDetails.map((exam) => (
+                  <div key={exam.id} className="p-6 bg-gray-50 rounded-xl">
+                    <div className="grid grid-cols-2 gap-6">
+                      <div>
+                        <p className="font-medium text-gray-700">Test Type</p>
+                        <p className="text-xl text-gray-900 mt-1">{exam.examinationType}</p>
+                      </div>
+                      {exam.examinationResult && (
+                        <div>
+                          <p className="font-medium text-gray-700">Result</p>
+                          <p className="text-xl text-gray-900 mt-1">{exam.examinationResult}</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {exam.imageResponseDTO && exam.imageResponseDTO.length > 0 && (
+                      <div className="mt-4">
+                        <p className="font-medium text-gray-700 mb-2">Images</p>
+                        <div className="grid grid-cols-4 gap-4">
+                          {exam.imageResponseDTO.map((image: ImageResponseDTO) => (
+                            <div
+                              key={image.id}
+                              className="cursor-pointer"
+                              onClick={() => handleImageView(image.id)}
+                            >
+                              <img
+                                src={`${API_BASE_URL}/images/download/${image.id}`}
+                                alt={image.fileName}
+                                className="w-full h-32 object-cover rounded-lg"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Add New Lab Tests Section */}
+        {drugs.length === 0 && (
+          <div className="mb-12">
+            <Title id={9} />
+            <div className="mt-8 bg-white rounded-2xl shadow-sm p-8">
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Select Department
+                  </label>
+                  <select
+                    value={selectedDepartment}
+                    onChange={(e) => setSelectedDepartment(e.target.value)}
+                    className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Select a department</option>
+                    {departments && departments.map((dept) => (
+                      <option key={dept} value={dept}>
+                        {dept}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {selectedDepartment && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Available Lab Tests
+                    </label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {labTests
+                        .filter(test => !selectedLabTests.includes(test) && 
+                          !currentBill.examinationDetails?.some(
+                            exam => exam.examinationType.toLowerCase() === test.toLowerCase()
+                          )
+                        )
+                        .map((test) => (
+                          <button
+                            key={test}
+                            onClick={() => handleAddLabTest(test)}
+                            className="p-4 text-left bg-gray-50 rounded-xl hover:bg-blue-50 transition-colors"
+                          >
+                            {test}
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                )}
+
+                {selectedLabTests.length > 0 && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Selected Lab Tests
+                    </label>
+                    <div className="space-y-3">
+                      {selectedLabTests.map((test) => (
+                        <div
+                          key={test}
+                          className="flex justify-between items-center p-4 bg-blue-50 rounded-xl"
+                        >
+                          <span className="text-blue-700">{test}</span>
+                          <button
+                            onClick={() => removeLabTest(test)}
+                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          >
+                            <Trash2 className="h-5 w-5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {selectedLabTests.length > 0 && (
+                  <div className="flex justify-center mt-8 space-x-4">
+                    <button
+                      onClick={() => {
+                        if (window.confirm('Are you sure you want to discard all selected lab tests?')) {
+                          setSelectedLabTests([]);
+                          setSelectedDepartment('');
+                        }
+                      }}
+                      className="px-8 py-3 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition-colors font-medium text-lg"
+                    >
+                      Discard Lab Tests
+                    </button>
+                    <button
+                      onClick={handleSubmitLabTests}
+                      className="px-8 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors font-medium text-lg shadow-lg shadow-blue-500/30"
+                    >
+                      Submit Lab Tests
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Add Medicine Section - Only show if no lab tests */}
+        {selectedLabTests.length === 0 && (
+          <div className="mb-12">
+            <Title id={10} />
           <div className="mt-8 bg-white rounded-2xl shadow-sm p-8">
             <div className="space-y-6">
               <div className="flex justify-between items-center mb-6">
@@ -319,107 +759,29 @@ const MedicalBillFinal: React.FC = () => {
                           />
                         </td>
                         <td className="px-6 py-4">
-                          {drugs.length > 1 && (
                             <button
                               onClick={() => removeDrugField(index)}
                               className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                             >
                               <Trash2 className="h-5 w-5" />
                             </button>
-                          )}
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Examination Details */}
-        {currentBill.examinationDetails && currentBill.examinationDetails.length > 0 && (
-          <div className="mb-12">
-            <Title id={6} />
-            <div className="mt-10 mx-16 px-3">
-              <p className="font-bold text-2xl mb-4">Examination Details</p>
-              <div className="space-y-6">
-                {currentBill.examinationDetails.map((exam) => (
-                  <div key={exam.id} className="border rounded-lg p-6">
-                    <div className="grid grid-cols-2 gap-6">
-                      {exam.examinationType && (
-                        <div className="flex">
-                          <p className="font-bold text-2xl">Test Type: </p>
-                          <span className="ms-4 text-2xl text-[#A9A9A9]">
-                            {exam.examinationType}
-                          </span>
-                        </div>
-                      )}
-                      {exam.examinationResult && (
-                        <div className="flex">
-                          <p className="font-bold text-2xl">Result: </p>
-                          <span className="ms-4 text-2xl text-[#A9A9A9]">
-                            {exam.examinationResult}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {exam.imageResponseDTO && exam.imageResponseDTO.length > 0 && (
-                      <div className="mt-6">
-                        <p className="font-bold text-2xl mb-4">Examination Images</p>
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                          {exam.imageResponseDTO.map((image) => (
-                            <div key={image.id} className="relative group">
-                              <div 
-                                className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
-                                onClick={() => handleImageView(image.id)}
-                              >
-                                <img 
-                                  src={`${API_BASE_URL}/images/download/${image.id}`}
-                                  alt={image.fileName}
-                                  className="object-cover w-full h-full"
-                                  onError={(e) => {
-                                    const target = e.target as HTMLImageElement;
-                                    target.src = '/placeholder-image.png';
-                                    target.onerror = null;
-                                  }}
-                                />
-                              </div>
-                              <div className="mt-2">
-                                <span className="text-xl text-[#A9A9A9] truncate">{image.fileName}</span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
               </div>
             </div>
           </div>
         )}
 
-        {/* Doctor Note */}
-        {currentBill.note && currentBill.note.trim() !== "" && (
-          <div className="my-10 mx-16">
-            <Title id={6} />
-            <div className="mt-10 mx-16 px-3">
-              <p className="font-bold text-2xl mb-4">Doctor Note</p>
-              <div className="p-4 rounded-md">
-                <p className="text-2xl text-[#A9A9A9] whitespace-pre-wrap">{currentBill.note}</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-
-         {/* Action Buttons */}
+        {/* Action Buttons - Only show if not adding lab tests */}
+        {selectedLabTests.length === 0 && drugs.length > 0 && (
          <div className="flex justify-center space-x-4">
           <button
             onClick={() => {
-              if (window.confirm('Are you sure you want to discard all changes? This action cannot be undone.')) {
+                if (window.confirm('Are you sure you want to discard all changes?')) {
                 navigate(-1);
               }
             }}
@@ -435,7 +797,7 @@ const MedicalBillFinal: React.FC = () => {
             Submit Treatment
           </button>
         </div>
-
+        )}
       </div>
     </div>
   );
