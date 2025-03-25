@@ -283,6 +283,16 @@ export const searchAppointmentForDoctor = createAsyncThunk(
   }
 );
 
+export const searchAppointmentForFeedback = createAsyncThunk(
+  "appointment/searchForFeedback",
+  async ({ patientId }: { patientId: number }) => {
+    const response = await apiService.get<ApiResponsePagination>(
+      `/appointment/search?patientId=${patientId}&appointmentStatus=SUCCESS`
+    );
+    return response.result;
+  }
+);
+
 export const rescheduleAppointment = createAsyncThunk(
   "appointment/reschedule",
   async ({
@@ -556,6 +566,21 @@ const appointmentSlice = createSlice({
         state.appointments = action.payload.content || [];
       })
       .addCase(searchAppointmentForDoctor.rejected, (state, action) => {
+        state.loading = false;
+        state.error =
+          action.error.message || "Failed to search appointments for doctor";
+      })
+
+      // Add case for search appointment for feedback
+      .addCase(searchAppointmentForFeedback.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(searchAppointmentForFeedback.fulfilled, (state, action) => {
+        state.loading = false;
+        state.appointments = action.payload.content || [];
+      })
+      .addCase(searchAppointmentForFeedback.rejected, (state, action) => {
         state.loading = false;
         state.error =
           action.error.message || "Failed to search appointments for doctor";
