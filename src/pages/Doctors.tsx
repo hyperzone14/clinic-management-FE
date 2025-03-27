@@ -52,6 +52,7 @@ const Doctors = React.memo(() => {
   // Memoized handlers to prevent unnecessary re-renders
   const handleDoctorClick = useCallback(
     (doctorId: number) => {
+      sessionStorage.setItem("doctorId", doctorId.toString());
       window.scrollTo({ top: 0, behavior: "smooth" });
       navigate(`/doctors/${doctorId}`);
     },

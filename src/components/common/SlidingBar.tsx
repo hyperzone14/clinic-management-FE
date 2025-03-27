@@ -1,56 +1,31 @@
 import { useRef, useState, useEffect } from "react";
 import Rating from "@mui/material/Rating";
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
+import { getFeedbackByDoctorId } from "../../redux/slices/feedbackSlice";
+import { AppDispatch, RootState } from "../../redux/store";
 
-const reviewsData = [
-  {
-    id: 1,
-    name: "Tommy",
-    rating: 4.5,
-    review: "Dr. John Doe is very knowledgeable and experienced.",
-  },
-  {
-    id: 2,
-    name: "Linda",
-    rating: 3.5,
-    review: "Skilled but needs better communication.",
-  },
-  {
-    id: 3,
-    name: "Michael",
-    rating: 4,
-    review: "Very knowledgeable but could be more personable.",
-  },
-  {
-    id: 4,
-    name: "John",
-    rating: 3.5,
-    review:
-      "Dr. John Doe is a skilled cardiologist, and he answered my questions adequately. However, there is room for improvement in terms of patient engagement and communication.",
-  },
-  {
-    id: 5,
-    name: "Terry",
-    rating: 1.5,
-    review:
-      "While Dr. John Doe is clearly experienced, I felt that the level of care provided was lacking. He was somewhat dismissive of my worries and didn’t provide thorough explanations.",
-  },
-  {
-    id: 6,
-    name: "Ford",
-    rating: 5,
-    review:
-      "Dr. John Doe is exceptional. He is not only incredibly knowledgeable but also very patient and empathetic. He took the time to answer all my questions thoroughly and made me feel at ease. I highly recommend him to anyone in need of a great cardiologist.",
-  },
-];
+interface SlidingBarProps {
+  feedbackId: string | null;
+}
 
-const SlidingBar = () => {
+const SlidingBar: React.FC<SlidingBarProps> = ({ feedbackId }) => {
+  const dispatch = useDispatch<AppDispatch>();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const scrollAmount = 340; // Adjust this based on card width
   const [showLeftButton, setShowLeftButton] = useState(false);
-  const [showRightButton, setShowRightButton] = useState(
-    reviewsData.length > 4
-  );
+
+  const feedbacks = useSelector((state: RootState) => state.feedback.feedbacks);
+  const [showRightButton, setShowRightButton] = useState(feedbacks.length > 4);
+
+  useEffect(() => {
+    if (feedbackId) {
+      dispatch(getFeedbackByDoctorId(Number(feedbackId)));
+    }
+  }, [dispatch, feedbackId]);
+
+  // console.log(feedbacks);
+  // console.log(feedbacks.length);
 
   const handleScroll = (direction: "left" | "right") => {
     if (scrollContainerRef.current) {
@@ -102,47 +77,32 @@ const SlidingBar = () => {
       )}
 
       {/* Scrollable Container */}
-      <div className='w-full overflow-hidden'>
-        <div
-          ref={scrollContainerRef}
-          className='flex gap-4 overflow-x-scroll scroll-smooth'
-          style={{
-            scrollBehavior: "smooth",
-            scrollbarWidth: "none", // Firefox
-            msOverflowStyle: "none", // IE/Edge
-          }}
-        >
-          {reviewsData.map((review) => (
-            <div
-              className='bg-white w-80 rounded-lg p-5 flex-shrink-0'
-              key={review.id}
-            >
-              <div className='flex items-center'>
-                <div className='w-10 h-10 rounded-full overflow-hidden'>
-                  <img
-                    src='/assets/images/profile.png'
-                    alt={review.name}
-                    className='w-full h-full object-cover'
-                  />
-                </div>
-                <div className='ml-3'>
-                  <h1 className='text-xl font-bold'>{review.name}</h1>
-                </div>
-                <div className='ms-5'>
+      <div ref={scrollContainerRef} className='flex overflow-x-auto space-x-4'>
+        {feedbacks.length > 0 ? (
+          feedbacks.map((feedback, index) => (
+            <div key={index} className='w-full flex-shrink-0'>
+              <div className='flex flex-col items-center'>
+                <div className='flex items-center'>
                   <Rating
                     name='half-rating-read justify-center'
-                    value={review.rating}
+                    value={feedback.rating}
                     precision={0.5}
                     readOnly
                   />
                 </div>
-              </div>
-              <div className='mt-5'>
-                <p className='text-gray-500'>{review.review}</p>
+                <div className='mt-5'>
+                  <p className='text-gray-500'>{feedback.comment}</p>
+                </div>
               </div>
             </div>
-          ))}
-        </div>
+          ))
+        ) : (
+          <div className='w-full flex justify-center items-center'>
+            <h1 className='text-2xl text-gray-500 text-center w-full'>
+              No feedbacks available
+            </h1>
+          </div>
+        )}
       </div>
 
       {/* Right Button */}

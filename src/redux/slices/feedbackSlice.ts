@@ -12,12 +12,15 @@ interface DoctorResponseDTO {
   birthDate: string;
   role: string;
   status: string;
+  departmentId: number;
+  workingDays: string[];
 }
 
 // Define feedback structure based on API response
 interface Feedback {
   rating: number;
   comment: string;
+  patientName: string;
   doctorResponseDTO?: DoctorResponseDTO;
 }
 
@@ -39,7 +42,21 @@ interface FeedbackState {
 interface ApiResponse {
   code: number;
   message: string;
-  result: Feedback[] | Feedback;
+  result: Feedback[];
+}
+
+interface ApiFeedbackResponse {
+  code: number;
+  message: string;
+  result: {
+    content: Feedback[];
+    pageable: {
+      pageNumber: number;
+      pageSize: number;
+    };
+    totalElements: number;
+    totalPages: number;
+  };
 }
 
 // Payload for posting feedback
@@ -105,19 +122,11 @@ export const getFeedbackByDoctorId = createAsyncThunk(
   "feedback/getFeedbackByDoctorId",
   async (doctorId: number) => {
     // try {
-    const response = await apiService.get<ApiResponse>(
-      `/api/feedback/doctor/${doctorId}`
+    const response = await apiService.get<ApiFeedbackResponse>(
+      `/feedback/doctor/${doctorId}`
     );
 
-    // return response.result;
-    return Array.isArray(response.result) ? response.result : [response.result];
-    // }
-    // catch (error) {
-    //   const errorMessage = error instanceof Error
-    //     ? error.message
-    //     : "An error occurred";
-    //   return rejectWithValue(errorMessage);
-    // }
+    return response.result.content;
   }
 );
 
