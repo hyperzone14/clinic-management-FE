@@ -20,7 +20,8 @@ interface DoctorResponseDTO {
 interface Feedback {
   rating: number;
   comment: string;
-  patientName: string;
+  doctorDepartmentName: string;
+  createdAt: string;
   doctorResponseDTO?: DoctorResponseDTO;
 }
 

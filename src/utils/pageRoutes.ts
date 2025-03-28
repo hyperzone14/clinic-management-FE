@@ -182,6 +182,7 @@ export const pageRoutes: Routes[] = [
     id: 14,
     path: "/feedback",
     location: "Feedback",
+    roles: ["ROLE_PATIENT", "ROLE_DOCTOR"],
   },
 
   // {
@@ -222,10 +223,10 @@ export const pageRoutes: Routes[] = [
       {
         id: 181,
         path: ":id",
-        location: "LabTestDetail"
-      }
-    ]
-  }  
+        location: "LabTestDetail",
+      },
+    ],
+  },
 ];
 
 // export const bookingRoutes: Routes[] = [

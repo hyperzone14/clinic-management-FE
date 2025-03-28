@@ -24,7 +24,7 @@ const SlidingBar: React.FC<SlidingBarProps> = ({ feedbackId }) => {
     }
   }, [dispatch, feedbackId]);
 
-  // console.log(feedbacks);
+  console.log(feedbacks);
   // console.log(feedbacks.length);
 
   const handleScroll = (direction: "left" | "right") => {
@@ -44,6 +44,15 @@ const SlidingBar: React.FC<SlidingBarProps> = ({ feedbackId }) => {
       setShowLeftButton(scrollLeft > 0);
       setShowRightButton(scrollLeft + clientWidth < scrollWidth);
     }
+  };
+
+  // Utility function to format just the date
+  const formatDateForApi = (date: string): string => {
+    const newDate = new Date(date);
+    const year = newDate.getFullYear();
+    const month = String(newDate.getMonth() + 1).padStart(2, "0");
+    const day = String(newDate.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   };
 
   useEffect(() => {
@@ -76,23 +85,35 @@ const SlidingBar: React.FC<SlidingBarProps> = ({ feedbackId }) => {
         </button>
       )}
 
-      {/* Scrollable Container */}
       <div ref={scrollContainerRef} className='flex overflow-x-auto space-x-4'>
         {feedbacks.length > 0 ? (
           feedbacks.map((feedback, index) => (
-            <div key={index} className='w-full flex-shrink-0'>
-              <div className='flex flex-col items-center'>
-                <div className='flex items-center'>
+            <div
+              className='bg-white w-80 rounded-lg p-5 flex-shrink-0'
+              key={index}
+            >
+              <div className='flex items-center'>
+                <div className='w-10 h-10 rounded-full overflow-hidden'>
+                  <img
+                    src='/assets/images/profile.png'
+                    alt='User'
+                    className='w-full h-full object-cover'
+                  />
+                </div>
+                <div className='ml-3'>
                   <Rating
                     name='half-rating-read justify-center'
                     value={feedback.rating}
                     precision={0.5}
                     readOnly
                   />
+                  <h1 className='text-sm font-bold ms-1'>
+                    Created At: {formatDateForApi(feedback.createdAt)}
+                  </h1>
                 </div>
-                <div className='mt-5'>
-                  <p className='text-gray-500'>{feedback.comment}</p>
-                </div>
+              </div>
+              <div className='mt-5'>
+                <p className='text-gray-500'>{feedback.comment}</p>
               </div>
             </div>
           ))

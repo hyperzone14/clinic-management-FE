@@ -19,6 +19,7 @@ interface Appointment {
   doctorName?: string; // Make optional
   doctorId?: number; // Make optional
   departmentId?: number; // Add departmentId
+  departmentName?: string; // Make optional
   patientId: number; // Add patientId
   patientResponseDTO?: PatientResponseDTO; // Make optional
   appointmentStatus: string;
