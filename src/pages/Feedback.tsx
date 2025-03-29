@@ -17,7 +17,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
   getFeedbackByDoctorId,
-  // getFeedbackByDoctorId,
+  getFeedbackByPatientId,
   postFeedback,
 } from "../redux/slices/feedbackSlice";
 import { LuCalendarClock } from "react-icons/lu";
@@ -31,6 +31,15 @@ const TIME_SLOTS = [
   { id: 6, time: "3PM-4PM", slot: 5, timeSlot: "SLOT_15_TO_16" },
 ];
 
+type FeedbackedDoctors = Array<{
+  doctorName: string | undefined;
+  departmentName: string | undefined;
+  appointmentDate: string;
+  timeSlot: string;
+  rating: number;
+  comment: string;
+}>;
+
 const truncateFeedback = (feedback: string | undefined, wordLimit: number) => {
   if (!feedback) return "";
   return feedback.length > wordLimit
@@ -39,19 +48,30 @@ const truncateFeedback = (feedback: string | undefined, wordLimit: number) => {
 };
 
 const Feedback = () => {
-  // const currentRole = AuthService.getCurrentRole();
   const dispatch = useDispatch<AppDispatch>();
   const feedbacks = useSelector((state: RootState) => state.feedback.feedbacks);
   const appointments = useSelector(
     (state: RootState) => state.appointment.appointments
   );
   const auth = useSelector((state: RootState) => state.auth);
-  const [feedbacked, setFeedbacked] = useState(false);
-  // Initialize with empty arrays - we'll populate them when appointments are loaded
   const [starValues, setStarValues] = useState<number[]>([]);
   const [userFeedbacks, setUserFeedbacks] = useState<string[]>([]);
   const [activeButtons, setActiveButtons] = useState<boolean[]>([]);
   const isDoctor = AuthService.hasRole("ROLE_DOCTOR");
+  const [activeNotFeedbackedButtons, setActiveNotFeedbackedButtons] = useState<
+    boolean[]
+  >([]);
+  const [activeFeedbackedButtons, setActiveFeedbackedButtons] = useState<
+    boolean[]
+  >([]);
+
+  // State to hold categorized appointments
+  const [notFeedbackedAppointments, setNotFeedbackedAppointments] = useState<
+    typeof appointments
+  >([]);
+  const [feedbackedDoctors, setFeedbackedDoctors] = useState<FeedbackedDoctors>(
+    []
+  );
 
   useEffect(() => {
     const id = AuthService.getIdFromToken();
@@ -64,14 +84,43 @@ const Feedback = () => {
     const userId = Number(auth.id);
     if (isDoctor) {
       dispatch(getFeedbackByDoctorId(userId));
+    } else {
+      dispatch(getFeedbackByPatientId(userId));
+      dispatch(searchAppointmentForFeedback({ patientId: userId }));
     }
-    dispatch(searchAppointmentForFeedback({ patientId: userId }));
   }, [dispatch, auth.id, isDoctor]);
 
-  // Initialize state arrays only when appointments change
+  useEffect(() => {
+    if (!isDoctor) {
+      const feedbackedDoctors: FeedbackedDoctors = [];
+      const notFeedbackedDoctors: typeof appointments = [];
+
+      appointments.forEach((appointment) => {
+        const feedbackIndex = feedbacks.findIndex(
+          (feedback) => feedback.doctorResponseDTO?.id === appointment.doctorId
+        );
+
+        if (feedbackIndex !== -1) {
+          feedbackedDoctors.push({
+            doctorName: appointment.doctorName,
+            departmentName: appointment.departmentName,
+            appointmentDate: appointment.appointmentDate,
+            timeSlot: appointment.timeSlot,
+            rating: feedbacks[feedbackIndex].rating,
+            comment: feedbacks[feedbackIndex].comment,
+          });
+        } else {
+          notFeedbackedDoctors.push(appointment);
+        }
+      });
+
+      setFeedbackedDoctors(feedbackedDoctors);
+      setNotFeedbackedAppointments(notFeedbackedDoctors);
+    }
+  }, [appointments, feedbacks, isDoctor]);
+
   useEffect(() => {
     if (!isDoctor && appointments.length > 0) {
-      // Initialize with default values
       setStarValues(new Array(appointments.length).fill(0));
       setUserFeedbacks(new Array(appointments.length).fill(""));
       setActiveButtons(new Array(appointments.length).fill(false));
@@ -80,7 +129,23 @@ const Feedback = () => {
       setUserFeedbacks(feedbacks.map((feedback) => feedback.comment));
       setActiveButtons(new Array(feedbacks.length).fill(false));
     }
-  }, [appointments.length, feedbacks, isDoctor]); // Only depend on the length
+  }, [appointments.length, feedbacks, isDoctor]);
+
+  const toggleNotFeedbackedButton = (index: number) => {
+    setActiveNotFeedbackedButtons((prev) => {
+      const newState = [...prev];
+      newState[index] = !newState[index];
+      return newState;
+    });
+  };
+
+  const toggleFeedbackedButton = (index: number) => {
+    setActiveFeedbackedButtons((prev) => {
+      const newState = [...prev];
+      newState[index] = !newState[index];
+      return newState;
+    });
+  };
 
   const toggleButton = (index: number) => {
     setActiveButtons((prev) => {
@@ -152,23 +217,16 @@ const Feedback = () => {
       if (postFeedback.fulfilled.match(result)) {
         toast.success("Feedback submitted successfully.");
         clearFeedback(index);
-        toggleButton(index);
-      } else if (postFeedback.rejected.match(result)) {
-        const errorPayload = result.payload as { message: string };
-        if (errorPayload.message?.includes("Duplicate entry")) {
-          setFeedbacked(true);
-          clearFeedback(index);
-          toggleButton(index);
-          toast.error(
-            "You have already submitted feedback for this appointment."
-          );
-        } else {
-          toast.error("Failed to submit feedback. Please try again.");
-        }
+        toggleNotFeedbackedButton(index);
+      } else {
+        clearFeedback(index);
+        toggleNotFeedbackedButton(index);
+        toast.error(
+          "You have already submitted feedback for this appointment."
+        );
       }
     };
 
-  // If state is not initialized yet, show loading or nothing
   if (starValues.length === 0 || userFeedbacks.length === 0) {
     return (
       <div className='flex justify-center items-center p-10'>
@@ -195,11 +253,17 @@ const Feedback = () => {
             Your Voice, Our Improvement
           </span>
         </div>
-        {!isDoctor
-          ? appointments.map((appointment, index) => (
+
+        {/* If not a doctor, render both not-feedbacked and feedbacked */}
+        {!isDoctor ? (
+          <>
+            {/* Render Not-Feedbacked Appointments */}
+            {notFeedbackedAppointments.map((appointment, index) => (
               <div className='my-10' key={appointment.id}>
+                {/* Render logic for not-feedbacked appointments */}
                 <div className='bg-[#fff] w-full h-fit rounded-lg hover:shadow-md transition-shadow duration-300'>
                   <div className='grid grid-cols-4 gap-3'>
+                    {/*image section*/}
                     <div className='w-full h-[100px] rounded-l-lg col-span-1 overflow-hidden'>
                       <img
                         src='/assets/images/care.png'
@@ -207,6 +271,8 @@ const Feedback = () => {
                         className='w-full h-full object-cover'
                       />
                     </div>
+
+                    {/*doctor info section*/}
                     <div className='col-span-1'>
                       <div className='ps-3 flex flex-col justify-center h-full'>
                         <p className='text-xl font-bold'>
@@ -220,6 +286,8 @@ const Feedback = () => {
                         </div>
                       </div>
                     </div>
+
+                    {/*appointment info section*/}
                     <div className='col-span-1'>
                       <div className='flex flex-col justify-center h-full'>
                         <div className='flex items-center'>
@@ -240,6 +308,8 @@ const Feedback = () => {
                         </div>
                       </div>
                     </div>
+
+                    {/*feedback section*/}
                     <div className='col-span-1 flex justify-between'>
                       <div className='flex flex-col justify-center h-full'>
                         <div className='flex items-center'>
@@ -253,11 +323,12 @@ const Feedback = () => {
                           </span>
                         </div>
                       </div>
+
+                      {/*dropdown area*/}
                       <div className='flex flex-col justify-center pr-5'>
                         <button
                           className='w-10 h-10 rounded-full bg-[#6B87C7] hover:bg-[#4567B7] transition-colors duration-300 flex justify-center items-center'
-                          onClick={() => toggleButton(index)}
-                          // {...(feedbacked && { disabled: true })}
+                          onClick={() => toggleNotFeedbackedButton(index)}
                         >
                           <FaAngleLeft
                             className={`text-white text-2xl ${
@@ -265,7 +336,6 @@ const Feedback = () => {
                                 ? "transform -rotate-90 transition-transform duration-300"
                                 : "transition-transform duration-300"
                             }`}
-                            // {...(feedbacked && { disabled: true })}
                           />
                         </button>
                       </div>
@@ -273,10 +343,9 @@ const Feedback = () => {
                   </div>
                 </div>
 
-                {/*this is the dropdown*/}
                 <div
                   className={`${
-                    activeButtons[index]
+                    activeNotFeedbackedButtons[index]
                       ? "max-h-screen duration-[1.25s]"
                       : "max-h-0 duration-[0.25s]"
                   } overflow-hidden bg-[#f0f0f0] w-full rounded-lg transition-all`}
@@ -293,12 +362,10 @@ const Feedback = () => {
                         onChange={(_, newValue) => {
                           setStarValues((prev) => {
                             const newValues = [...prev];
-                            // Ensure newValue is never null
                             newValues[index] = newValue === null ? 0 : newValue;
                             return newValues;
                           });
                         }}
-                        {...(feedbacked && { disabled: true })}
                       />
                     </div>
                     <div className='col-span-2 flex flex-col justify-center items-center'>
@@ -317,38 +384,40 @@ const Feedback = () => {
                             return newValues;
                           });
                         }}
-                        {...(feedbacked && { disabled: true })}
                       ></textarea>
                     </div>
                   </div>
-                  {feedbacked === false ? (
-                    <div className='flex justify-end mb-5 pr-4 gap-3'>
-                      <button
-                        className='bg-[#6B87C7] hover:bg-[#4567B7] text-white text-lg py-2 px-4 rounded-lg transition duration-300 ease-in-out'
-                        onClick={handlePostFeedback(
-                          appointment.id,
-                          index,
-                          starValues[index],
-                          userFeedbacks[index]
-                        )}
-                      >
-                        Submit
-                      </button>
-                      <button
-                        className='bg-[#D3D3D3] hover:bg-[#A9A9A9] text-black text-lg py-2 px-4 rounded-lg transition duration-300 ease-in-out'
-                        onClick={() => clearFeedback(index)}
-                      >
-                        Clear
-                      </button>
-                    </div>
-                  ) : null}
+
+                  {/*Buttons section*/}
+                  <div className='flex justify-end mb-5 pr-4 gap-3'>
+                    <button
+                      className='bg-[#6B87C7] hover:bg-[#4567B7] text-white text-lg py-2 px-4 rounded-lg transition duration-300 ease-in-out'
+                      onClick={handlePostFeedback(
+                        appointment.id,
+                        index,
+                        starValues[index],
+                        userFeedbacks[index]
+                      )}
+                    >
+                      Submit
+                    </button>
+                    <button
+                      className='bg-[#D3D3D3] hover:bg-[#A9A9A9] text-black text-lg py-2 px-4 rounded-lg transition duration-300 ease-in-out'
+                      onClick={() => clearFeedback(index)}
+                    >
+                      Clear
+                    </button>
+                  </div>
                 </div>
               </div>
-            ))
-          : feedbacks.map((feedback, index) => (
+            ))}
+
+            {/* Render Feedbacked Doctors */}
+            {feedbackedDoctors.map((feedback, index) => (
               <div className='my-10' key={index}>
                 <div className='bg-[#fff] w-full h-fit rounded-lg hover:shadow-md transition-shadow duration-300'>
-                  <div className='grid grid-cols-3 gap-3'>
+                  <div className='grid grid-cols-4 gap-3'>
+                    {/*image section*/}
                     <div className='w-full h-[100px] rounded-l-lg col-span-1 overflow-hidden'>
                       <img
                         src='/assets/images/care.png'
@@ -356,40 +425,67 @@ const Feedback = () => {
                         className='w-full h-full object-cover'
                       />
                     </div>
+
+                    {/*doctor info section*/}
                     <div className='col-span-1'>
                       <div className='ps-3 flex flex-col justify-center h-full'>
-                        {/* <p className='text-xl font-bold'>
-                    {feedback.doctorResponseDTO?.fullName}
-                  </p> */}
-                        <div className='flex items-center'>
-                          <LuCalendarClock className='text-2xl mr-2' />
-                          <p className='text-lg font-bold'>
-                            Created date: {formatDateForApi(feedback.createdAt)}
+                        <p className='text-xl font-bold'>
+                          {feedback.doctorName}
+                        </p>
+                        <div className='flex mt-1 items-center'>
+                          <GrGroup className='text-lg mr-2' />
+                          <p className='text-md font-bold'>
+                            {feedback.departmentName}
                           </p>
                         </div>
                       </div>
                     </div>
+
+                    {/*appointment info section*/}
+                    <div className='col-span-1'>
+                      <div className='flex flex-col justify-center h-full'>
+                        <div className='flex items-center'>
+                          <IoCalendarOutline className='text-lg mr-2' />
+                          <span className='text-md'>
+                            {formatDate(feedback.appointmentDate)}
+                          </span>
+                        </div>
+                        <div className='flex mt-1 items-center'>
+                          <BsClockHistory className='text-lg mr-2' />
+                          <span className='text-md'>
+                            {
+                              TIME_SLOTS.find(
+                                (slot) => slot.timeSlot === feedback.timeSlot
+                              )?.time
+                            }
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/*feedback section*/}
                     <div className='col-span-1 flex justify-between'>
                       <div className='flex flex-col justify-center h-full'>
                         <div className='flex items-center'>
                           <IoStarOutline className='text-lg mr-2' />
-                          <span className='text-md'>{starValues[index]}/5</span>
+                          <span className='text-md'>{feedback.rating}/5</span>
                         </div>
                         <div className='flex mt-1 items-center'>
                           <IoInformationCircle className='text-lg mr-2' />
                           <span className='text-md'>
-                            {truncateFeedback(userFeedbacks[index], 15)}
+                            {truncateFeedback(feedback.comment, 15)}
                           </span>
                         </div>
                       </div>
+                      {/*dropdown area*/}
                       <div className='flex flex-col justify-center pr-5'>
                         <button
                           className='w-10 h-10 rounded-full bg-[#6B87C7] hover:bg-[#4567B7] transition-colors duration-300 flex justify-center items-center'
-                          onClick={() => toggleButton(index)}
+                          onClick={() => toggleFeedbackedButton(index)}
                         >
                           <FaAngleLeft
                             className={`text-white text-2xl ${
-                              activeButtons[index]
+                              activeFeedbackedButtons[index]
                                 ? "transform -rotate-90 transition-transform duration-300"
                                 : "transition-transform duration-300"
                             }`}
@@ -399,11 +495,9 @@ const Feedback = () => {
                     </div>
                   </div>
                 </div>
-
-                {/*this is the dropdown*/}
                 <div
                   className={`${
-                    activeButtons[index]
+                    activeFeedbackedButtons[index]
                       ? "max-h-screen duration-[1.25s]"
                       : "max-h-0 duration-[0.25s]"
                   } overflow-hidden bg-[#f0f0f0] w-full rounded-lg transition-all`}
@@ -416,7 +510,7 @@ const Feedback = () => {
                       <Rating
                         name={`rating-${index}`}
                         size='large'
-                        value={starValues[index]}
+                        value={feedback.rating}
                         disabled
                       />
                     </div>
@@ -428,7 +522,7 @@ const Feedback = () => {
                       <textarea
                         className='w-full h-20 p-3 rounded-lg mt-3'
                         placeholder='Your feedback here...'
-                        value={userFeedbacks[index]}
+                        value={feedback.comment}
                         disabled
                       ></textarea>
                     </div>
@@ -436,6 +530,96 @@ const Feedback = () => {
                 </div>
               </div>
             ))}
+          </>
+        ) : (
+          /* If a doctor, render normal feedbacks */
+          feedbacks.map((feedback, index) => (
+            <div className='my-10' key={index}>
+              <div className='bg-[#fff] w-full h-fit rounded-lg hover:shadow-md transition-shadow duration-300'>
+                <div className='grid grid-cols-3 gap-3'>
+                  <div className='w-full h-[100px] rounded-l-lg col-span-1 overflow-hidden'>
+                    <img
+                      src='/assets/images/care.png'
+                      alt='Feedback'
+                      className='w-full h-full object-cover'
+                    />
+                  </div>
+                  <div className='col-span-1'>
+                    <div className='ps-3 flex flex-col justify-center h-full'>
+                      <div className='flex items-center'>
+                        <LuCalendarClock className='text-2xl mr-2' />
+                        <p className='text-lg font-bold'>
+                          Created date: {formatDateForApi(feedback.createdAt)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className='col-span-1 flex justify-between'>
+                    <div className='flex flex-col justify-center h-full'>
+                      <div className='flex items-center'>
+                        <IoStarOutline className='text-lg mr-2' />
+                        <span className='text-md'>{feedback.rating}/5</span>
+                      </div>
+                      <div className='flex mt-1 items-center'>
+                        <IoInformationCircle className='text-lg mr-2' />
+                        <span className='text-md'>
+                          {truncateFeedback(feedback.comment, 15)}
+                        </span>
+                      </div>
+                    </div>
+                    {/*dropdown area*/}
+                    <div className='flex flex-col justify-center pr-5'>
+                      <button
+                        className='w-10 h-10 rounded-full bg-[#6B87C7] hover:bg-[#4567B7] transition-colors duration-300 flex justify-center items-center'
+                        onClick={() => toggleButton(index)}
+                      >
+                        <FaAngleLeft
+                          className={`text-white text-2xl ${
+                            activeButtons[index]
+                              ? "transform -rotate-90 transition-transform duration-300"
+                              : "transition-transform duration-300"
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                className={`${
+                  activeButtons[index]
+                    ? "max-h-screen duration-[1.25s]"
+                    : "max-h-0 duration-[0.25s]"
+                } overflow-hidden bg-[#f0f0f0] w-full rounded-lg transition-all`}
+              >
+                <div className='grid grid-cols-3 p-5 gap-3'>
+                  <div className='col-span-1 flex flex-col justify-center items-center'>
+                    <span className='font-bold text-xl'>
+                      How Did Your Visit Feel?
+                    </span>
+                    <Rating
+                      name={`rating-${index}`}
+                      size='large'
+                      value={feedback.rating}
+                      disabled
+                    />
+                  </div>
+                  <div className='col-span-2 flex flex-col justify-center items-center'>
+                    <span className='font-bold text-xl'>
+                      Help Us Improve Our Services With Your Valuable Feedback.
+                    </span>
+                    <textarea
+                      className='w-full h-20 p-3 rounded-lg mt-3'
+                      placeholder='Your feedback here...'
+                      value={feedback.comment}
+                      disabled
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </>
   );

@@ -131,6 +131,17 @@ export const getFeedbackByDoctorId = createAsyncThunk(
   }
 );
 
+export const getFeedbackByPatientId = createAsyncThunk(
+  "feedback/getFeedbackByPatientId",
+  async (patientId: number) => {
+    const response = await apiService.get<ApiFeedbackResponse>(
+      `/feedback/patient/${patientId}`
+    );
+
+    return response.result.content;
+  }
+);
+
 const feedbackSlice = createSlice({
   name: "feedback",
   initialState,
@@ -174,6 +185,21 @@ const feedbackSlice = createSlice({
         state.feedbacks = action.payload; // Type is now inferred as Feedback[]
       })
       .addCase(getFeedbackByDoctorId.rejected, (state, action) => {
+        state.loading = false;
+        state.error = (action.payload as string) || "Failed to fetch feedback";
+      });
+
+    // Get feedback by patient ID cases
+    builder
+      .addCase(getFeedbackByPatientId.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getFeedbackByPatientId.fulfilled, (state, action) => {
+        state.loading = false;
+        state.feedbacks = action.payload;
+      })
+      .addCase(getFeedbackByPatientId.rejected, (state, action) => {
         state.loading = false;
         state.error = (action.payload as string) || "Failed to fetch feedback";
       });
