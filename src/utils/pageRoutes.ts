@@ -271,13 +271,11 @@ export const adminRoutes: Routes[] = [
     path: "",
     location: "Dashboard",
     roles: ["ROLE_ADMIN, ROLE_CLIENT_OWNER"],
-    // roles: ["ROLE_DOCTOR"],
   },
   {
     id: 2,
     path: "patient",
     location: "PatientManagement",
-    // roles: ["ROLE_DOCTOR"],
     roles: ["ROLE_CLIENT_OWNER"],
   },
   {
@@ -296,6 +294,12 @@ export const adminRoutes: Routes[] = [
     id: 5,
     path: "appointment",
     location: "AppointmentManagement",
+    roles: ["ROLE_CLIENT_OWNER"],
+  },
+  {
+    id: 6,
+    path: "pre-medical-bill",
+    location: "PreMedicalBillManagement",
     roles: ["ROLE_CLIENT_OWNER"],
   },
 ];
