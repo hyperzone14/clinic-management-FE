@@ -9,5 +9,5 @@
 
 .slider {
   display: flex;
-  animation: slide-left 30s linear infinite; /* Adjust the speed by modifying '30s' */
+  animation: slide-left 30s linear infinite;
 }
