@@ -134,6 +134,8 @@ const StatusCircle: React.FC<StatusCircleProps> = ({
 
     if (isManualCheckin) {
       switch (currentStatus) {
+        case 'confirmed':
+          return ['checked-in', 'cancelled'];
         case 'pending':
           return ['checked-in', 'cancelled'];
         case 'checked-in':

@@ -2,7 +2,7 @@ import Calendar, { CalendarProps } from "react-calendar";
 import CustomCalendar from "../components/common/CustomCalendar";
 import "react-calendar/dist/Calendar.css";
 import "../styles/calendar.css";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Occasions from "../components/common/Occasions";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redux/store";
