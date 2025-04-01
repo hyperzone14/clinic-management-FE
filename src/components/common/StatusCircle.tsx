@@ -84,7 +84,7 @@ const STATUS_STYLES: Record<StatusType, StatusStyle> = {
   }
 };
 
-const FINAL_STATES: StatusType[] = ["cancelled", "success", "lab_test_completed", "pre_examination_completed"];
+const FINAL_STATES: StatusType[] = ["cancelled", "success", "lab_test_completed"];
 
 const StatusCircle: React.FC<StatusCircleProps> = ({
   status,
@@ -140,6 +140,8 @@ const StatusCircle: React.FC<StatusCircleProps> = ({
           return ['checked-in', 'cancelled'];
         case 'checked-in':
           return ['cancelled'];
+        case 'pre_examination_completed':
+          return ['success', 'lab_test_required'];
         default:
           return [];
       }
