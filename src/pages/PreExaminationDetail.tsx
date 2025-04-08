@@ -14,10 +14,10 @@ interface PreExaminationFormData {
   date: string;
   syndrome: string;
   note: string;
-  weight: number;
-  heartRate: number;
+  weight: string;
+  heartRate: string;
   bloodPressure: string;
-  temperature: number;
+  temperature: string;
 }
 
 const PreExaminationDetail: React.FC = () => {
@@ -32,18 +32,30 @@ const PreExaminationDetail: React.FC = () => {
     date: appointmentDate || new Date().toISOString().split('T')[0],
     syndrome: '',
     note: '',
-    weight: 0,
-    heartRate: 0,
+    weight: '',
+    heartRate: '',
     bloodPressure: '',
-    temperature: 0
+    temperature: ''
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    
+    // Validate numeric inputs
+    if (['weight', 'heartRate', 'temperature'].includes(name)) {
+      // Allow empty value or positive numbers only
+      if (value === '' || (Number(value) > 0 && !value.startsWith('0'))) {
+        setFormData(prev => ({
+          ...prev,
+          [name]: value
+        }));
+      }
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -67,12 +79,12 @@ const PreExaminationDetail: React.FC = () => {
         return;
       }
 
-      if (formData.weight <= 0) {
+      if (!formData.weight || Number(formData.weight) <= 0) {
         toast.error('Please enter a valid weight');
         return;
       }
 
-      if (formData.heartRate <= 0) {
+      if (!formData.heartRate || Number(formData.heartRate) <= 0) {
         toast.error('Please enter a valid heart rate');
         return;
       }
@@ -82,7 +94,7 @@ const PreExaminationDetail: React.FC = () => {
         return;
       }
 
-      if (formData.temperature <= 0) {
+      if (!formData.temperature || Number(formData.temperature) <= 0) {
         toast.error('Please enter a valid temperature');
         return;
       }
@@ -208,6 +220,8 @@ const PreExaminationDetail: React.FC = () => {
                     onChange={handleInputChange}
                     className="w-full p-3 border rounded-xl text-gray-700 focus:ring-2 focus:ring-[#4567b7] focus:border-transparent"
                     step="0.1"
+                    min="0.1"
+                    placeholder="Enter weight"
                     required
                   />
                 </div>
@@ -220,6 +234,8 @@ const PreExaminationDetail: React.FC = () => {
                     value={formData.heartRate}
                     onChange={handleInputChange}
                     className="w-full p-3 border rounded-xl text-gray-700 focus:ring-2 focus:ring-[#4567b7] focus:border-transparent"
+                    min="1"
+                    placeholder="Enter heart rate"
                     required
                   />
                 </div>
@@ -246,6 +262,9 @@ const PreExaminationDetail: React.FC = () => {
                     onChange={handleInputChange}
                     className="w-full p-3 border rounded-xl text-gray-700 focus:ring-2 focus:ring-[#4567b7] focus:border-transparent"
                     step="0.1"
+                    min="30"
+                    max="45"
+                    placeholder="Enter temperature"
                     required
                   />
                 </div>

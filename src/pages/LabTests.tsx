@@ -37,6 +37,7 @@ const LabTests: React.FC = () => {
   const [selectedExaminationType, setSelectedExaminationType] = useState<string>('');
   const [appliedDepartment, setAppliedDepartment] = useState<string>('');
   const [appliedExaminationType, setAppliedExaminationType] = useState<string>('');
+  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(false);
 
   // Fetch departments on mount
@@ -82,9 +83,9 @@ const LabTests: React.FC = () => {
       try {
         let response;
         if (appliedExaminationType) {
-          response = await apiService.get<ApiResponse>(`/examination_detail/by_examination_type?examinationType=${appliedExaminationType}`);
+          response = await apiService.get<ApiResponse>(`/lab_department/by_lab_type_and_created_at?labTest=${appliedExaminationType}&createdAt=${selectedDate}`);
         } else if (appliedDepartment) {
-          response = await apiService.get<ApiResponse>(`/examination_detail/by_department?labDepartment=${appliedDepartment}`);
+          response = await apiService.get<ApiResponse>(`/lab_department/by_department_and_created_at?labDepartment=${appliedDepartment}&createdAt=${selectedDate}`);
         } else {
           response = await apiService.get<ApiResponse>('/examination_detail/all_undone');
         }
@@ -104,7 +105,7 @@ const LabTests: React.FC = () => {
     };
 
     fetchLabTests();
-  }, [appliedDepartment, appliedExaminationType]);
+  }, [appliedDepartment, appliedExaminationType, selectedDate]);
 
   const handleApplyFilter = () => {
     setAppliedDepartment(selectedDepartment);
@@ -142,7 +143,7 @@ const LabTests: React.FC = () => {
       <div className="my-12 flex flex-col items-center">
         {/* Filters Section */}
         <div className="w-9/12 bg-white rounded-xl shadow-sm p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="flex flex-col">
               <label className="text-sm font-medium text-gray-700 mb-2">Department</label>
               <div className="relative">
@@ -186,13 +187,23 @@ const LabTests: React.FC = () => {
               </div>
             </div>
 
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-gray-700 mb-2">Date</label>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="w-full pl-4 pr-10 py-3 bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
             <div className="flex items-end space-x-2">
               <button
                 onClick={handleApplyFilter}
                 className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 flex items-center justify-center font-medium"
               >
                 <Filter className="w-4 h-4 mr-2" />
-                Apply Filter
+                Apply 
               </button>
               <button
                 onClick={handleDiscardFilter}

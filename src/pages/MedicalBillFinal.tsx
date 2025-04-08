@@ -78,6 +78,14 @@ interface MedicalBill {
 //   data: T;
 // }
 
+interface DrugFormData {
+  drugId: number;
+  dosage: string;
+  duration: string;
+  frequency: string;
+  specialInstructions: string;
+}
+
 const API_BASE_URL = "http://localhost:8080/api";
 
 const handleImageView = (imageId: number) => {
@@ -92,7 +100,7 @@ const MedicalBillFinal: React.FC = () => {
   const state = location.state as LocationState;
 
   // State for drug form and lab tests
-  const [drugs, setDrugs] = useState<PrescribedDrugRequest[]>([]);
+  const [drugs, setDrugs] = useState<DrugFormData[]>([]);
   //const [newLabTests] = useState<string[]>([]);
   const [medicalInfo, setMedicalInfo] = useState<Partial<MedicalBill>>({
     syndrome: '',
@@ -183,20 +191,32 @@ const MedicalBillFinal: React.FC = () => {
     fetchLabTests();
   }, [selectedDepartment]);
 
-  const handleDrugChange = (index: number, field: keyof PrescribedDrugRequest, value: string | number) => {
+  const handleDrugChange = (index: number, field: keyof DrugFormData, value: string | number) => {
     const newDrugs = [...drugs];
-    newDrugs[index] = {
-      ...newDrugs[index],
-      [field]: value
-    };
-    setDrugs(newDrugs);
+    
+    if (field === 'dosage' || field === 'duration') {
+      // Allow empty value or positive numbers only
+      if (value === '' || (Number(value) > 0 && !String(value).startsWith('0'))) {
+        newDrugs[index] = {
+          ...newDrugs[index],
+          [field]: value.toString()
+        };
+        setDrugs(newDrugs);
+      }
+    } else {
+      newDrugs[index] = {
+        ...newDrugs[index],
+        [field]: value
+      };
+      setDrugs(newDrugs);
+    }
   };
 
   const addDrugField = () => {
     setDrugs([...drugs, {
       drugId: 0,
-      dosage: 0,
-      duration: 0,
+      dosage: '',
+      duration: '',
       frequency: '',
       specialInstructions: ''
     }]);
@@ -222,8 +242,8 @@ const MedicalBillFinal: React.FC = () => {
     
     return drugs.every(drug => 
       drug.drugId !== 0 && 
-      drug.dosage > 0 && 
-      drug.duration > 0 && 
+      drug.dosage !== '' && Number(drug.dosage) > 0 && 
+      drug.duration !== '' && Number(drug.duration) > 0 && 
       drug.frequency.trim() !== ""
     );
   };
@@ -233,6 +253,49 @@ const MedicalBillFinal: React.FC = () => {
     
   //   return newLabTests.every(test => test.trim() !== "");
   // };
+
+  const handleSubmitLabTests = async () => {
+    if (!currentBill) {
+      toast.error('No medical bill found');
+      return;
+    }
+
+    if (selectedLabTests.length === 0) {
+      toast.error('Please select at least one lab test');
+      return;
+    }
+
+    try {
+      // First update medical info
+      const updateData = {
+        syndrome: medicalInfo.syndrome,
+        note: medicalInfo.note,
+        finalDiagnosis: medicalInfo.finalDiagnosis
+      };
+      
+      await apiService.patch(`/medical-bills/${currentBill.id}`, updateData);
+
+      const labRequests = selectedLabTests.map(testName => ({
+        examinationType: testName
+      }));
+
+      await apiService.post(
+        `/medical-bills/${currentBill.id}/lab_request`,
+        labRequests
+      );
+
+      await apiService.put(
+        `/appointment/${state.appointmentId}/status`,
+        "LAB_TEST_REQUIRED"
+      );
+
+      toast.success('Lab tests requested successfully');
+      navigate('/schedule');
+    } catch (error) {
+      console.error('Failed to submit lab tests:', error);
+      toast.error('Failed to submit lab tests');
+    }
+  };
 
   const handleSubmitTreatment = async () => {
     if (!currentBill) {
@@ -260,20 +323,28 @@ const MedicalBillFinal: React.FC = () => {
     }
 
     try {
-      // First update medical info with only necessary fields
+      // First update medical info
       const updateData = {
         syndrome: medicalInfo.syndrome,
         note: medicalInfo.note,
         finalDiagnosis: medicalInfo.finalDiagnosis
       };
       
-      // Update medical information first
       await apiService.patch(`/medical-bills/${currentBill.id}`, updateData);
+
+      // Convert form data to PrescribedDrugRequest format
+      const prescribedDrugs: PrescribedDrugRequest[] = drugs.map(drug => ({
+        drugId: drug.drugId,
+        dosage: Number(drug.dosage),
+        duration: Number(drug.duration),
+        frequency: drug.frequency,
+        specialInstructions: drug.specialInstructions
+      }));
 
       // Then submit treatment
       await dispatch(addDrugsToMedicalBill({
         medicalBillId: currentBill.id,
-        drugs: drugs,
+        drugs: prescribedDrugs,
         appointmentId: state.appointmentId
       })).unwrap();
 
@@ -288,40 +359,6 @@ const MedicalBillFinal: React.FC = () => {
     } catch (error) {
       toast.error('Failed to submit treatment');
       console.error('Failed to submit treatment:', error);
-    }
-  };
-
-  const handleSubmitLabTests = async () => {
-    if (!currentBill) {
-      toast.error('No medical bill found');
-      return;
-    }
-
-    if (selectedLabTests.length === 0) {
-      toast.error('Please select at least one lab test');
-      return;
-    }
-
-    try {
-      const labRequests = selectedLabTests.map(testName => ({
-        examinationType: testName
-      }));
-
-      await apiService.post(
-        `/medical-bills/${currentBill.id}/lab_request`,
-        labRequests
-      );
-
-      await apiService.put(
-        `/appointment/${state.appointmentId}/status`,
-        "LAB_TEST_REQUIRED"
-      );
-
-      toast.success('Lab tests requested successfully');
-      navigate('/schedule');
-    } catch (error) {
-      console.error('Failed to submit lab tests:', error);
-      toast.error('Failed to submit lab tests');
     }
   };
 
@@ -475,59 +512,6 @@ const MedicalBillFinal: React.FC = () => {
           </div>
         </div>
 
-        {/* Medical Information Section */}
-        <div className="mb-12">
-          <Title id={11} />
-          <div className="mt-8 bg-white rounded-2xl shadow-sm p-8">
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Syndrome
-                </label>
-                <textarea
-                  value={medicalInfo.syndrome}
-                  onChange={(e) => handleMedicalInfoChange('syndrome', e.target.value)}
-                  className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={3}
-                  placeholder="Enter syndrome..."
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Note
-                </label>
-                <textarea
-                  value={medicalInfo.note}
-                  onChange={(e) => handleMedicalInfoChange('note', e.target.value)}
-                  className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={3}
-                  placeholder="Enter notes..."
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Final Diagnosis
-                </label>
-                <textarea
-                  value={medicalInfo.finalDiagnosis || ''}
-                  onChange={(e) => handleMedicalInfoChange('finalDiagnosis', e.target.value)}
-                  className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={3}
-                  placeholder="Enter final diagnosis..."
-                />
-              </div>
-              <div className="flex justify-end">
-                <button
-                  onClick={handleUpdateMedicalInfo}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Update Medical Information
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Previous Lab Tests Section */}
         {currentBill.examinationDetails && currentBill.examinationDetails.length > 0 && (
           <div className="mb-12">
@@ -576,6 +560,51 @@ const MedicalBillFinal: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Medical Information Section */}
+        <div className="mb-12">
+          <Title id={11} />
+          <div className="mt-8 bg-white rounded-2xl shadow-sm p-8">
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Syndrome
+                </label>
+                <textarea
+                  value={medicalInfo.syndrome}
+                  onChange={(e) => handleMedicalInfoChange('syndrome', e.target.value)}
+                  className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  rows={3}
+                  placeholder="Enter syndrome..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Note
+                </label>
+                <textarea
+                  value={medicalInfo.note}
+                  onChange={(e) => handleMedicalInfoChange('note', e.target.value)}
+                  className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  rows={3}
+                  placeholder="Enter notes..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Final Diagnosis
+                </label>
+                <textarea
+                  value={medicalInfo.finalDiagnosis || ''}
+                  onChange={(e) => handleMedicalInfoChange('finalDiagnosis', e.target.value)}
+                  className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  rows={3}
+                  placeholder="Enter final diagnosis..."
+                />
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Add New Lab Tests Section */}
         {drugs.length === 0 && (
@@ -726,18 +755,21 @@ const MedicalBillFinal: React.FC = () => {
                           <input
                             type="number"
                             value={drug.dosage}
-                            onChange={(e) => handleDrugChange(index, 'dosage', parseInt(e.target.value))}
+                            onChange={(e) => handleDrugChange(index, 'dosage', e.target.value)}
                             className="w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Quantity"
+                            placeholder="Enter quantity"
+                            min="0.1"
+                            step="0.1"
                           />
                         </td>
                         <td className="px-6 py-4">
                           <input
                             type="number"
                             value={drug.duration}
-                            onChange={(e) => handleDrugChange(index, 'duration', parseInt(e.target.value))}
+                            onChange={(e) => handleDrugChange(index, 'duration', e.target.value)}
                             className="w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Days"
+                            placeholder="Enter days"
+                            min="1"
                           />
                         </td>
                         <td className="px-6 py-4">
