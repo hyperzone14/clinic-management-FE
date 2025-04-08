@@ -64,6 +64,7 @@ interface MedicalBill {
   finalDiagnosis: string | null;
   prescribedDrugs: any[];
   examinationDetails: any[];
+  isHealthy: boolean;
 }
 
 // interface Department {
@@ -86,6 +87,27 @@ interface DrugFormData {
   specialInstructions: string;
 }
 
+interface Symptom {
+  id: number;
+  name: string;
+  description: string;
+  prescribedDrugs: {
+    id: number;
+    drugName: string;
+    dosage: number;
+    duration: number;
+    frequency: string;
+    specialInstructions: string;
+  }[];
+}
+
+interface MedicalInfoState {
+  syndrome: string;
+  note: string;
+  finalDiagnosis: string | null;
+  isHealthy: boolean;
+}
+
 const API_BASE_URL = "http://localhost:8080/api";
 
 const handleImageView = (imageId: number) => {
@@ -101,16 +123,20 @@ const MedicalBillFinal: React.FC = () => {
 
   // State for drug form and lab tests
   const [drugs, setDrugs] = useState<DrugFormData[]>([]);
-  //const [newLabTests] = useState<string[]>([]);
-  const [medicalInfo, setMedicalInfo] = useState<Partial<MedicalBill>>({
+  const [medicalInfo, setMedicalInfo] = useState<MedicalInfoState>({
     syndrome: '',
     note: '',
-    finalDiagnosis: null
+    finalDiagnosis: null,
+    isHealthy: false
   });
   const [departments, setDepartments] = useState<string[]>([]);
   const [labTests, setLabTests] = useState<string[]>([]);
   const [selectedDepartment, setSelectedDepartment] = useState<string>('');
   const [selectedLabTests, setSelectedLabTests] = useState<string[]>([]);
+  
+  // States for symptom search
+  const [symptoms, setSymptoms] = useState<Symptom[]>([]);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
 
   // Check doctor access on component mount
   useEffect(() => {
@@ -145,7 +171,8 @@ const MedicalBillFinal: React.FC = () => {
       setMedicalInfo({
         syndrome: currentBill.syndrome || '',
         note: currentBill.note || '',
-        finalDiagnosis: currentBill.finalDiagnosis || null
+        finalDiagnosis: currentBill.finalDiagnosis || null,
+        isHealthy: false
       });
     }
   }, [currentBill]);
@@ -374,11 +401,24 @@ const MedicalBillFinal: React.FC = () => {
     }
   };
 
-  const handleMedicalInfoChange = (field: keyof MedicalBill, value: string) => {
-    setMedicalInfo(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  const handleMedicalInfoChange = (field: keyof MedicalInfoState, value: string | boolean) => {
+    if (field === 'isHealthy') {
+      const isHealthyValue = value as boolean;
+      setMedicalInfo(prev => ({
+        ...prev,
+        isHealthy: isHealthyValue,
+        finalDiagnosis: isHealthyValue 
+          ? 'Patient is healthy. No treatment needed.' 
+          : prev.finalDiagnosis === 'Patient is healthy. No treatment needed.' 
+            ? '' 
+            : prev.finalDiagnosis
+      }));
+    } else {
+      setMedicalInfo(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    }
   };
 
   const handleUpdateMedicalInfo = async () => {
@@ -404,6 +444,72 @@ const MedicalBillFinal: React.FC = () => {
       toast.error('Failed to update medical information');
     }
   };
+
+  // Function to fetch symptoms based on search term
+  const searchSymptoms = async (term: string) => {
+    if (!term) {
+      setSymptoms([]);
+      return;
+    }
+    setIsSearching(true);
+    try {
+      const encodedTerm = encodeURIComponent(term);
+      const response = await apiService.get(`/symptom/name/${encodedTerm}`);
+      const data = response as { result: Symptom };
+      if (data.result) {
+        setSymptoms([data.result]);
+      }
+    } catch (error) {
+      // Don't show error for 404, just clear symptoms
+      if ((error as any)?.response?.status === 404) {
+        setSymptoms([]);
+      } else {
+        console.error('Failed to fetch symptoms:', error);
+        setSymptoms([]);
+      }
+    }
+    setIsSearching(false);
+  };
+
+  // Function to handle symptom selection
+  const handleSymptomSelect = (symptom: Symptom) => {
+    // Update final diagnosis with symptom description
+    setMedicalInfo(prev => ({
+      ...prev,
+      finalDiagnosis: symptom.description
+    }));
+
+    // Find matching drugs from availableDrugs based on name
+    const prescribedDrugs: DrugFormData[] = symptom.prescribedDrugs.map(prescribedDrug => {
+      const matchingDrug = availableDrugs.find(d => d.name === prescribedDrug.drugName);
+      return {
+        drugId: matchingDrug?.id || 0,
+        dosage: prescribedDrug.dosage.toString(),
+        duration: prescribedDrug.duration.toString(),
+        frequency: prescribedDrug.frequency,
+        specialInstructions: prescribedDrug.specialInstructions
+      };
+    });
+
+    // Update drugs state
+    setDrugs(prescribedDrugs);
+    
+    // Clear search results
+    setSymptoms([]);
+  };
+
+  // Debounce search function
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      if (medicalInfo.finalDiagnosis) {
+        searchSymptoms(medicalInfo.finalDiagnosis);
+      } else {
+        setSymptoms([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(debounceTimer);
+  }, [medicalInfo.finalDiagnosis]);
 
   if (loading) {
     return (
@@ -591,16 +697,53 @@ const MedicalBillFinal: React.FC = () => {
                 />
               </div>
               <div>
+                <div className="flex items-center space-x-2 mb-4">
+                  <input
+                    type="checkbox"
+                    id="isHealthy"
+                    checked={medicalInfo.isHealthy}
+                    onChange={(e) => handleMedicalInfoChange('isHealthy', e.target.checked)}
+                    className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                  />
+                  <label htmlFor="isHealthy" className="text-sm font-medium text-gray-700">
+                    Patient is healthy - No treatment needed
+                  </label>
+                </div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Final Diagnosis
                 </label>
-                <textarea
-                  value={medicalInfo.finalDiagnosis || ''}
-                  onChange={(e) => handleMedicalInfoChange('finalDiagnosis', e.target.value)}
-                  className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={3}
-                  placeholder="Enter final diagnosis..."
-                />
+                <div className="relative">
+                  <textarea
+                    value={medicalInfo.finalDiagnosis || ''}
+                    onChange={(e) => handleMedicalInfoChange('finalDiagnosis', e.target.value)}
+                    className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    rows={3}
+                    placeholder="Enter or search for final diagnosis..."
+                    disabled={medicalInfo.isHealthy}
+                  />
+                  {isSearching && (
+                    <div className="absolute right-3 top-3 flex items-center space-x-2 bg-blue-50 px-3 py-1 rounded-lg">
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                      </div>
+                      <span className="text-sm text-blue-600 font-medium">Searching...</span>
+                    </div>
+                  )}
+                  {symptoms.length > 0 && medicalInfo.finalDiagnosis && (
+                    <div className="absolute z-10 w-full bg-white border border-gray-200 rounded-xl shadow-lg mt-1 max-h-60 overflow-y-auto">
+                      {symptoms.map((symptom) => (
+                        <button
+                          key={symptom.id}
+                          onClick={() => handleSymptomSelect(symptom)}
+                          className="w-full text-left px-4 py-3 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none border-b border-gray-100 last:border-b-0"
+                        >
+                          <p className="font-medium text-gray-800">{symptom.name}</p>
+                          <p className="text-sm text-gray-500 mt-1">{symptom.description}</p>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
