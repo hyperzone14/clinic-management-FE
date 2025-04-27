@@ -233,6 +233,13 @@ export const pageRoutes: Routes[] = [
     path: "/lab-test-payment",
     location: "LabTestPayment",
     roles: ["ROLE_DOCTOR"],
+    children: [
+      {
+        id: 191,
+        path: ":id",
+        location: "LabTestPaymentDetail",
+      },
+    ],
   },
 ];
 
