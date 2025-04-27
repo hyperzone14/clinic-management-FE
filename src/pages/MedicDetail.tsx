@@ -288,26 +288,41 @@ const MedicDetail: React.FC = () => {
           )}
 
         {/* Doctor Final conclude & Note */}
-        {selectedRecord.note && selectedRecord.note.trim() !== "" && (
+        {(selectedRecord.note && selectedRecord.note.trim() !== "") || selectedRecord.finalDiagnosis || selectedRecord.nextAppointmentDate ? (
           <div className='my-10 mx-16'>
             <Title id={11} />
             <div className='mt-10 mx-16 px-3'>
-              <div className='flex mb-5'>
-                <p className='font-bold text-2xl'>Final Diagnosis: </p>
-                <span className='ms-12 text-2xl text-[#A9A9A9]'>
-                  {selectedRecord.finalDiagnosis}
-                </span>
-              </div>
+              {selectedRecord.finalDiagnosis && (
+                <div className='flex mb-5'>
+                  <p className='font-bold text-2xl'>Final Diagnosis: </p>
+                  <span className='ms-12 text-2xl text-[#A9A9A9]'>
+                    {selectedRecord.finalDiagnosis}
+                  </span>
+                </div>
+              )}
 
-              <p className='font-bold text-2xl mb-4'>Doctor Note</p>
-              <div className='p-4 rounded-md'>
-                <p className='text-2xl text-[#A9A9A9] whitespace-pre-wrap'>
-                  {selectedRecord.note}
-                </p>
-              </div>
+              {selectedRecord.nextAppointmentDate && (
+                <div className='flex mb-5 items-center'>
+                  <p className='font-bold text-2xl'>Next Appointment: </p>
+                  <span className='ms-5 text-2xl text-[#A9A9A9]'>
+                    {formatDate(selectedRecord.nextAppointmentDate)}
+                  </span>
+                </div>
+              )}
+
+              {selectedRecord.note && selectedRecord.note.trim() !== "" && (
+                <>
+                  <p className='font-bold text-2xl mb-4'>Doctor Note</p>
+                  <div className='p-4 rounded-md'>
+                    <p className='text-2xl text-[#A9A9A9] whitespace-pre-wrap'>
+                      {selectedRecord.note}
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
           </div>
-        )}
+        ) : null}
 
         {/* Back Button */}
         <div className='flex justify-center items-center my-20'>

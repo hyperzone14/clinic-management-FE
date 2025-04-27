@@ -42,6 +42,7 @@ export interface MedicalRecord {
   bloodPressure: string;
   temperature: number;
   finalDiagnosis: string;
+  nextAppointmentDate: string | null;
   prescribedDrugs: PrescribedDrug[];
   examinationDetails: ExaminationDetail[];
 }

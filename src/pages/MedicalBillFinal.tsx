@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../redux/store';
 import Title from '../components/common/Title';
-import { Plus, Trash2, ClipboardList, Pill } from 'lucide-react';
+import { Plus, Trash2, ClipboardList, Pill, Calendar } from 'lucide-react';
 import {
   fetchLatestMedicalBillByPatientId,
   addDrugsToMedicalBill,
@@ -12,6 +12,9 @@ import {
 import { toast, ToastContainer } from 'react-toastify';
 import { AuthService } from '../utils/security/services/AuthService';
 import { apiService } from '../utils/axios-config';
+import { format, parse } from 'date-fns';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 interface LocationState {
   patientId: number;
@@ -46,26 +49,6 @@ interface ImageResponseDTO {
   size: number;
 }
 
-interface MedicalBill {
-  id: number;
-  patientId: number;
-  patientName: string;
-  patientGender: string;
-  patientBirthDate: string;
-  doctorId: number;
-  doctorName: string;
-  date: string;
-  syndrome: string;
-  note: string;
-  weight: number;
-  heartRate: number;
-  bloodPressure: string;
-  temperature: number;
-  finalDiagnosis: string | null;
-  prescribedDrugs: any[];
-  examinationDetails: any[];
-  isHealthy: boolean;
-}
 
 // interface Department {
 //   name: string;
@@ -106,6 +89,7 @@ interface MedicalInfoState {
   note: string;
   finalDiagnosis: string | null;
   isHealthy: boolean;
+  nextAppointmentDate: string;
 }
 
 const API_BASE_URL = "http://localhost:8080/api";
@@ -127,7 +111,8 @@ const MedicalBillFinal: React.FC = () => {
     syndrome: '',
     note: '',
     finalDiagnosis: null,
-    isHealthy: false
+    isHealthy: false,
+    nextAppointmentDate: ''
   });
   const [departments, setDepartments] = useState<string[]>([]);
   const [labTests, setLabTests] = useState<string[]>([]);
@@ -168,11 +153,21 @@ const MedicalBillFinal: React.FC = () => {
   // Add new useEffect to update medicalInfo when currentBill changes
   useEffect(() => {
     if (currentBill) {
+      // Set default next appointment date to 7 days from now if not provided
+      const defaultNextDate = new Date();
+      defaultNextDate.setDate(defaultNextDate.getDate() + 7);
+      
+      // Format date as dd-mm-yyyy for display
+      const formattedNextAppointmentDate = currentBill.nextAppointmentDate 
+        ? format(new Date(currentBill.nextAppointmentDate), 'dd-MM-yyyy')
+        : format(defaultNextDate, 'dd-MM-yyyy');
+      
       setMedicalInfo({
         syndrome: currentBill.syndrome || '',
         note: currentBill.note || '',
         finalDiagnosis: currentBill.finalDiagnosis || null,
-        isHealthy: false
+        isHealthy: false,
+        nextAppointmentDate: formattedNextAppointmentDate
       });
     }
   }, [currentBill]);
@@ -293,11 +288,16 @@ const MedicalBillFinal: React.FC = () => {
     }
 
     try {
+      // Convert nextAppointmentDate from dd-mm-yyyy to yyyy-mm-dd for backend
+      const parsedDate = parse(medicalInfo.nextAppointmentDate, 'dd-MM-yyyy', new Date());
+      const formattedDateForBackend = format(parsedDate, 'yyyy-MM-dd');
+      
       // First update medical info
       const updateData = {
         syndrome: medicalInfo.syndrome,
         note: medicalInfo.note,
-        finalDiagnosis: medicalInfo.finalDiagnosis
+        finalDiagnosis: medicalInfo.finalDiagnosis,
+        nextAppointmentDate: formattedDateForBackend
       };
       
       await apiService.patch(`/medical-bills/${currentBill.id}`, updateData);
@@ -350,11 +350,16 @@ const MedicalBillFinal: React.FC = () => {
     }
 
     try {
+      // Convert nextAppointmentDate from dd-mm-yyyy to yyyy-mm-dd for backend
+      const parsedDate = parse(medicalInfo.nextAppointmentDate, 'dd-MM-yyyy', new Date());
+      const formattedDateForBackend = format(parsedDate, 'yyyy-MM-dd');
+      
       // First update medical info
       const updateData = {
         syndrome: medicalInfo.syndrome,
         note: medicalInfo.note,
-        finalDiagnosis: medicalInfo.finalDiagnosis
+        finalDiagnosis: medicalInfo.finalDiagnosis,
+        nextAppointmentDate: formattedDateForBackend
       };
       
       await apiService.patch(`/medical-bills/${currentBill.id}`, updateData);
@@ -421,54 +426,49 @@ const MedicalBillFinal: React.FC = () => {
     }
   };
 
-  const handleUpdateMedicalInfo = async () => {
-    try {
-      if (!currentBill) {
-        toast.error('No medical bill found');
-        return;
-      }
-
-      const updateData = {
-        syndrome: medicalInfo.syndrome,
-        note: medicalInfo.note,
-        finalDiagnosis: medicalInfo.finalDiagnosis
-      };
-
-      await apiService.patch(`/medical-bills/${currentBill.id}`, updateData);
-      toast.success('Medical information updated successfully');
-      
-      // Refresh medical bill data
-      dispatch(fetchLatestMedicalBillByPatientId(state.patientId));
-    } catch (error) {
-      console.error('Failed to update medical information:', error);
-      toast.error('Failed to update medical information');
-    }
-  };
 
   // Function to fetch symptoms based on search term
   const searchSymptoms = async (term: string) => {
-    if (!term) {
+    if (!term || term.trim().length < 2) {
       setSymptoms([]);
       return;
     }
+    
     setIsSearching(true);
+    console.log("Searching for symptom:", term);
+    
     try {
-      const encodedTerm = encodeURIComponent(term);
+      const encodedTerm = encodeURIComponent(term.trim());
+      console.log("API call to:", `/symptom/name/${encodedTerm}`);
+      
       const response = await apiService.get(`/symptom/name/${encodedTerm}`);
-      const data = response as { result: Symptom };
-      if (data.result) {
-        setSymptoms([data.result]);
+      console.log("API response:", response);
+      
+      // Check if we got a valid response
+      if (response && typeof response === 'object' && 'result' in response) {
+        console.log("Setting symptoms:", [response.result as Symptom]);
+        setSymptoms([response.result as Symptom]);
+      } else {
+        console.log("No symptoms found in response");
+        setSymptoms([]);
       }
-    } catch (error) {
+    } catch (error: any) {
+      // Log detailed error information
+      console.error('Failed to fetch symptoms:', error);
+      console.error('Error response:', error.response);
+      
       // Don't show error for 404, just clear symptoms
-      if ((error as any)?.response?.status === 404) {
+      if (error?.response?.status === 404) {
+        console.log("404 error - no symptoms found");
         setSymptoms([]);
       } else {
-        console.error('Failed to fetch symptoms:', error);
+        console.error('Other error fetching symptoms:', error);
+        toast.error("Error searching for symptoms");
         setSymptoms([]);
       }
+    } finally {
+      setIsSearching(false);
     }
-    setIsSearching(false);
   };
 
   // Function to handle symptom selection
@@ -500,16 +500,88 @@ const MedicalBillFinal: React.FC = () => {
 
   // Debounce search function
   useEffect(() => {
+    // Chỉ tìm kiếm triệu chứng khi finalDiagnosis thay đổi, không phải khi nextAppointmentDate thay đổi
     const debounceTimer = setTimeout(() => {
-      if (medicalInfo.finalDiagnosis) {
+      if (medicalInfo.finalDiagnosis && !medicalInfo.isHealthy) {
         searchSymptoms(medicalInfo.finalDiagnosis);
       } else {
         setSymptoms([]);
       }
-    }, 300);
+    }, 500); // Tăng thời gian debounce lên 500ms để tránh gọi API quá nhiều
 
     return () => clearTimeout(debounceTimer);
-  }, [medicalInfo.finalDiagnosis]);
+  }, [medicalInfo.finalDiagnosis, medicalInfo.isHealthy]); // Thêm isHealthy vào dependencies
+
+  // Chuyển đổi giá trị string date sang Date object
+  const getDateValue = () => {
+    try {
+      // Kiểm tra định dạng ngày hợp lệ trước khi parse
+      if (!medicalInfo.nextAppointmentDate || !/^\d{2}-\d{2}-\d{4}$/.test(medicalInfo.nextAppointmentDate)) {
+        return new Date(); // Trả về ngày hiện tại nếu định dạng không hợp lệ
+      }
+      
+      // Parse ngày từ chuỗi
+      const parsedDate = parse(medicalInfo.nextAppointmentDate, 'dd-MM-yyyy', new Date());
+      
+      // Kiểm tra xem date có hợp lệ không
+      if (isNaN(parsedDate.getTime())) {
+        console.warn("Invalid date detected:", medicalInfo.nextAppointmentDate);
+        return new Date();
+      }
+      
+      return parsedDate;
+    } catch (error) {
+      console.warn("Error parsing date:", error);
+      return new Date(); // Trả về ngày hiện tại nếu có lỗi
+    }
+  };
+
+  // Function để xử lý khi date thay đổi từ DatePicker
+  const handleDatePickerChange = (date: Date | null) => {
+    if (date && !isNaN(date.getTime())) {
+      const formattedDate = format(date, 'dd-MM-yyyy');
+      // Cập nhật trực tiếp state mà không gọi API
+      setMedicalInfo(prev => ({
+        ...prev,
+        nextAppointmentDate: formattedDate
+      }));
+    }
+  };
+
+  // Render DatePicker an toàn
+  const renderDatePicker = () => {
+    try {
+      return (
+        <DatePicker
+          selected={getDateValue()}
+          onChange={handleDatePickerChange}
+          dateFormat="dd-MM-yyyy"
+          minDate={new Date()}
+          className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12"
+          placeholderText="DD-MM-YYYY"
+          popperPlacement="bottom-end"
+          popperClassName="z-50"
+        />
+      );
+    } catch (error) {
+      console.error("Error rendering DatePicker:", error);
+      // Fallback to regular input if DatePicker fails
+      return (
+        <input
+          type="text"
+          value={medicalInfo.nextAppointmentDate}
+          onChange={(e) => {
+            setMedicalInfo(prev => ({
+              ...prev,
+              nextAppointmentDate: e.target.value
+            }));
+          }}
+          placeholder="DD-MM-YYYY"
+          className="w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12"
+        />
+      );
+    }
+  };
 
   if (loading) {
     return (
@@ -743,6 +815,19 @@ const MedicalBillFinal: React.FC = () => {
                       ))}
                     </div>
                   )}
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Next Appointment Date
+                </label>
+                <div className="relative">
+                  {renderDatePicker()}
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <Calendar className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1">Format: DD-MM-YYYY</p>
                 </div>
               </div>
             </div>
