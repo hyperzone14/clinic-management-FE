@@ -61,6 +61,7 @@ export interface MedicalBill {
   bloodPressure: string;
   temperature: number;
   finalDiagnosis: string | null;
+  nextAppointmentDate: string | null;
   prescribedDrugs: any[];
   examinationDetails: any[];
 }
