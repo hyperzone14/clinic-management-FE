@@ -182,6 +182,7 @@ const ChooseDateTime: React.FC = () => {
         const timeDifference =
           (slotTime.getTime() - todayDate.getTime()) / (1000 * 60 * 60); // Difference in hours
         if (timeDifference <= 1) {
+          // If the slot is within 1 hour from now
           return false;
         }
       }
