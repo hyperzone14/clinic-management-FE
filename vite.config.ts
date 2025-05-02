@@ -6,8 +6,14 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
+      // "/api": {
+      //   target: "http://localhost:8080", // Backend server
+      //   changeOrigin: true,
+      //   secure: false,
+      //   rewrite: (path) => path.replace(/^\/api/, ""), // Optional: Removes '/api' prefix
+      // },
       "/api": {
-        target: "http://localhost:8080", // Backend server
+        target: "https://clinic-management-tdd-ee9f27f356d8.herokuapp.com/", // Backend server
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, ""), // Optional: Removes '/api' prefix
