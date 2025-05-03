@@ -14,7 +14,7 @@ export default defineConfig({
       //   rewrite: (path) => path.replace(/^\/api/, ""), // Optional: Removes '/api' prefix
       // },
       "/api": {
-        target: "https://clinic-management-tdd-ee9f27f356d8.herokuapp.com/", // Backend server
+        target: "https://clinic-management-tdd-ee9f27f356d8.herokuapp.com/api", // Backend server
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, ""),
