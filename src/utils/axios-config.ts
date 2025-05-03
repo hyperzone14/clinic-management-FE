@@ -3,7 +3,8 @@ import axios from "axios";
 
 // Create axios instance with custom config
 const api = axios.create({
-  baseURL: "https://clinic-management-vdb.onrender.com/api", //https://clinic-management-vdb.onrender.com/api/doctor
+  // baseURL: "http://localhost:8080/api",
+  baseURL: "https://clinic-management-tdd-ee9f27f356d8.herokuapp.com/",
   headers: {
     "Content-Type": "application/json",
   },
@@ -21,6 +22,11 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
+    // Set Content-Type to multipart/form-data if FormData is being sent
+    if (config.data instanceof FormData) {
+      config.headers["Content-Type"] = "multipart/form-data";
+    }
+
     return config;
   },
   (error) => Promise.reject(error)
@@ -30,12 +36,19 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    const errorDetails = {
+      message: error.response?.data?.message || "Unknown error occurred",
+      path: error.response?.data?.path || "",
+      timestamp: error.response?.data?.timestamp || "",
+      errorCode: error.response?.data?.errorCode || "",
+    };
     // Handle 401 Unauthorized errors
     if (error.response?.status === 401) {
       localStorage.removeItem("token");
       // Redirect to login page or handle refresh token
       window.location.href = "/error";
     }
+    error.details = errorDetails;
 
     return Promise.reject(error);
   }
@@ -48,6 +61,8 @@ export const apiService = {
     api.post<T>(url, data).then((response) => response.data),
   put: <T, D = unknown>(url: string, data: D) =>
     api.put<T>(url, data).then((response) => response.data),
+  patch: <T, D = unknown>(url: string, data: D) =>
+    api.patch<T>(url, data).then((response) => response.data),
   delete: <T>(url: string) =>
     api.delete<T>(url).then((response) => response.data),
 };

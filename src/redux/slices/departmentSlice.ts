@@ -71,6 +71,21 @@ export const fetchDepartments = createAsyncThunk(
   }
 );
 
+export const fetchDepartmentById = createAsyncThunk(
+  "department/fetchDepartmentById",
+  async (departmentId: number) => {
+    try {
+      const response = await apiService.get<{ result: Department }>(
+        `/department/${departmentId}`
+      );
+      return response.result;
+    } catch (error) {
+      console.error("Error in fetchDepartmentById:", error);
+      throw error;
+    }
+  }
+);
+
 export const addDepartmentAsync = createAsyncThunk(
   "department/addDepartment",
   async (departmentData: Omit<Department, "id" | "doctors">) => {

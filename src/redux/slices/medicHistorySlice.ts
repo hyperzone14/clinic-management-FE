@@ -37,6 +37,12 @@ export interface MedicalRecord {
   date: string;
   syndrome: string;
   note: string;
+  weight: number;
+  heartRate: number;
+  bloodPressure: string;
+  temperature: number;
+  finalDiagnosis: string;
+  nextAppointmentDate: string | null;
   prescribedDrugs: PrescribedDrug[];
   examinationDetails: ExaminationDetail[];
 }
@@ -81,8 +87,6 @@ interface MedicalHistoryState {
   error: string | null;
   selectedRecord: MedicalRecord | null;
 }
-
-
 
 const initialState: MedicalHistoryState = {
   records: [],
@@ -178,7 +182,9 @@ export const fetchMedicalRecordsByPatient = createAsyncThunk(
         currentPage: 1,
       };
     } catch (error: any) {
-      return rejectWithValue(error?.message || "Failed to fetch records by patient");
+      return rejectWithValue(
+        error?.message || "Failed to fetch records by patient"
+      );
     }
   }
 );
@@ -196,12 +202,14 @@ export const fetchMedicalRecordsByPatientId = createAsyncThunk(
 
       return {
         content: records,
-        totalPages: 1,  // Since we're getting all records at once
+        totalPages: 1, // Since we're getting all records at once
         totalElements: records.length,
-        currentPage: 1  // Default to page 1 since we're not paginating
+        currentPage: 1, // Default to page 1 since we're not paginating
       };
     } catch (error: any) {
-      return rejectWithValue(error?.message || "Failed to fetch records by patient ID");
+      return rejectWithValue(
+        error?.message || "Failed to fetch records by patient ID"
+      );
     }
   }
 );
@@ -220,7 +228,9 @@ export const fetchMedicalRecordsByDoctor = createAsyncThunk(
         currentPage: 1,
       };
     } catch (error: any) {
-      return rejectWithValue(error?.message || "Failed to fetch records by doctor");
+      return rejectWithValue(
+        error?.message || "Failed to fetch records by doctor"
+      );
     }
   }
 );
@@ -242,7 +252,10 @@ export const createMedicalRecord = createAsyncThunk(
 
 export const updateMedicalRecord = createAsyncThunk(
   "medicHistory/updateRecord",
-  async ({ id, record }: { id: number; record: Partial<MedicalRecord> }, { rejectWithValue }) => {
+  async (
+    { id, record }: { id: number; record: Partial<MedicalRecord> },
+    { rejectWithValue }
+  ) => {
     try {
       const response = await apiService.put<MedicalRecord>(
         `/medical-bills/${id}`,
@@ -383,14 +396,16 @@ const medicHistorySlice = createSlice({
         state.totalElements += 1;
       })
       .addCase(updateMedicalRecord.fulfilled, (state, action) => {
-        const index = state.records.findIndex(r => r.id === action.payload.id);
+        const index = state.records.findIndex(
+          (r) => r.id === action.payload.id
+        );
         if (index !== -1) {
           state.records[index] = action.payload;
           state.filteredRecords = [...state.records];
         }
       })
       .addCase(deleteMedicalRecord.fulfilled, (state, action) => {
-        state.records = state.records.filter(r => r.id !== action.payload);
+        state.records = state.records.filter((r) => r.id !== action.payload);
         state.filteredRecords = [...state.records];
         state.totalElements -= 1;
       });

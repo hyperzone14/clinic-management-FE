@@ -10,7 +10,8 @@ export const VALID_STATUS_TYPES = [
   'cancelled',
   'confirmed',
   'lab_test_required',
-  'lab_test_completed'
+  'lab_test_completed',
+  'pre_examination_completed'
 ] as const;
 
 // Type guard to check if a status is valid
@@ -74,6 +75,12 @@ const STATUS_STYLES: Record<StatusType, StatusStyle> = {
     hoverBackground: "#0284C7",
     icon: <ClipboardCheck className="w-5 h-5 text-white drop-shadow-sm" />,
     label: "Test Completed"
+  },
+  "pre_examination_completed": {
+    background: "#6366F1",
+    hoverBackground: "#4F46E5",
+    icon: <CheckCircle className="w-5 h-5 text-white drop-shadow-sm" />,
+    label: "Pre-Examination Completed"
   }
 };
 
@@ -82,6 +89,7 @@ const FINAL_STATES: StatusType[] = ["cancelled", "success", "lab_test_completed"
 const StatusCircle: React.FC<StatusCircleProps> = ({
   status,
   onStatusChange,
+  isManualCheckin = false,
   showLabTestStatusesOnly = false,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -91,31 +99,68 @@ const StatusCircle: React.FC<StatusCircleProps> = ({
   const normalizedStatus = isValidStatus(status) ? status : "pending";
   const currentStyle = STATUS_STYLES[normalizedStatus];
 
-  const getAvailableStatuses = (): StatusType[] => {
+  const getStatusColor = (status: StatusType) => {
+    switch (status) {
+      case 'checked-in':
+        return 'bg-blue-500';
+      case 'pending':
+        return 'bg-yellow-400';
+      case 'success':
+        return 'bg-green-500';
+      case 'cancelled':
+        return 'bg-red-500';
+      case 'confirmed':
+        return 'bg-purple-500';
+      case 'lab_test_required':
+        return 'bg-orange-500';
+      case 'lab_test_completed':
+        return 'bg-sky-500';
+      case 'pre_examination_completed':
+        return 'bg-indigo-500';
+      default:
+        return 'bg-gray-300';
+    }
+  };
+
+  const getNextStatuses = (currentStatus: StatusType, isManualCheckin: boolean = false): StatusType[] => {
     if (showLabTestStatusesOnly) {
-      const labTestTransitions: Record<StatusType, StatusType[]> = {
-        lab_test_required: [ "cancelled"],
-        lab_test_completed: ["lab_test_required"],
-        cancelled: [],
-        success: ["lab_test_required", "lab_test_completed"],
-        confirmed: ["lab_test_required", "lab_test_completed"],
-        pending: ["lab_test_required", "lab_test_completed"],
-        "checked-in": ["lab_test_required", "lab_test_completed"]
-      };
-      return labTestTransitions[normalizedStatus] ?? ["lab_test_required", "lab_test_completed"];
+      switch (currentStatus) {
+        case 'lab_test_required':
+          return ['lab_test_completed'];
+        default:
+          return [];
+      }
     }
 
-    const statusTransitions: Record<StatusType, StatusType[]> = {
-      pending: ["confirmed","checked-in", "cancelled"],
-      confirmed: ["checked-in", "cancelled"],
-      "checked-in": ["cancelled"],
-      lab_test_required: ["cancelled"],
-      lab_test_completed: [],
-      cancelled: [],
-      success: [],
-    };
+    if (isManualCheckin) {
+      switch (currentStatus) {
+        case 'confirmed':
+          return ['checked-in', 'cancelled'];
+        case 'pending':
+          return ['checked-in', 'cancelled'];
+        case 'checked-in':
+          return ['cancelled'];
+        case 'pre_examination_completed':
+          return ['success', 'lab_test_required'];
+        default:
+          return [];
+      }
+    }
 
-    return statusTransitions[normalizedStatus] ?? ["checked-in", "confirmed", "cancelled", "lab_test_required", "lab_test_completed"];
+    switch (currentStatus) {
+      case 'confirmed':
+        return ['checked-in', 'cancelled'];
+      case 'checked-in':
+        return ['pre_examination_completed', 'cancelled'];
+      case 'pre_examination_completed':
+        return ['success', 'lab_test_required'];
+      case 'lab_test_required':
+        return ['lab_test_completed'];
+      case 'lab_test_completed':
+        return ['success'];
+      default:
+        return [];
+    }
   };
 
   const isClickable = () => {
@@ -151,15 +196,14 @@ const StatusCircle: React.FC<StatusCircleProps> = ({
       {isMenuOpen && isClickable() && (
         <div className="absolute right-0 mt-3 w-48 rounded-lg shadow-lg bg-white ring-1 ring-black/5 z-50 overflow-hidden transform transition-all duration-200 ease-in-out">
           <div className="py-1">
-            {getAvailableStatuses().map((statusOption) => (
+            {getNextStatuses(normalizedStatus, isManualCheckin).map((statusOption) => (
               <button
                 key={statusOption}
                 className="flex items-center w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
                 onClick={() => handleStatusChange(statusOption)}
               >
                 <div
-                  className="w-6 h-6 rounded-full mr-3 flex items-center justify-center shadow-sm"
-                  style={{ backgroundColor: STATUS_STYLES[statusOption].background }}
+                  className={`w-6 h-6 rounded-full mr-3 flex items-center justify-center shadow-sm ${getStatusColor(statusOption)}`}
                 >
                   {STATUS_STYLES[statusOption].icon}
                 </div>

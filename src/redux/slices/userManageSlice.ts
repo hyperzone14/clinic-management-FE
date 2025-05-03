@@ -76,6 +76,14 @@ interface ApiError {
   status?: number;
 }
 
+interface ApiErrorResponse {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
+
 export const fetchUsers = createAsyncThunk(
   "userManage/fetchUsers",
   async (_, { rejectWithValue }) => {
@@ -109,14 +117,39 @@ export const fetchUsers = createAsyncThunk(
   }
 );
 
+// export const addUserAsync = createAsyncThunk(
+//   "userManage/addUser",
+//   async (userData: NewUser) => {
+//     const response = await apiService.post<{ result: User }>(
+//       "/patient",
+//       userData
+//     );
+//     return response.result;
+//   }
+// );
+
 export const addUserAsync = createAsyncThunk(
   "userManage/addUser",
-  async (userData: NewUser) => {
-    const response = await apiService.post<{ result: User }>(
-      "/patient",
-      userData
-    );
-    return response.result;
+  async (userData: NewUser, { rejectWithValue }) => {
+    try {
+      const response = await apiService.post<{
+        result: User;
+        code: number;
+        message: string;
+      }>("/patient", userData);
+      return response.result;
+    } catch (err: unknown) {
+      // Type assertion after checking if err is an object
+      const apiError = err as ApiErrorResponse;
+      const errorMessage =
+        apiError.response?.data?.message || "Failed to add user";
+
+      // Return a structured error object
+      return rejectWithValue({
+        message: errorMessage,
+        email: userData.email,
+      });
+    }
   }
 );
 
@@ -129,6 +162,32 @@ export const updateUserAsync = createAsyncThunk(
       userData
     );
     return response.result;
+  }
+);
+
+export const retrieveLatestPatientId = createAsyncThunk(
+  "userManage/retrieveLatestPatientId",
+  async (_, { rejectWithValue }) => {
+    try {
+      // Fetch first page with just one record, sorted by ID in descending order
+      const response = await apiService.get<PaginatedResponse>(
+        `/patient?page=0&size=1&sort=id,desc`
+      );
+
+      // Check if there are any patients in the response
+      if (response.result.content && response.result.content.length > 0) {
+        // Return the ID of the first (latest) patient
+        return response.result.content[0].id;
+      } else {
+        return null; // No patients found
+      }
+    } catch (err) {
+      const error = err as ApiError;
+      return rejectWithValue({
+        message: error.message || "Failed to retrieve latest patient ID",
+        status: error.status,
+      });
+    }
   }
 );
 
@@ -235,6 +294,21 @@ const userManageSlice = createSlice({
       .addCase(getUserById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Failed to get user";
+      })
+
+      // Retrieve latest patient ID cases
+      .addCase(retrieveLatestPatientId.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(retrieveLatestPatientId.fulfilled, (state) => {
+        state.loading = false;
+        // state.latestUserId = action.payload;
+      })
+      .addCase(retrieveLatestPatientId.rejected, (state, action) => {
+        state.loading = false;
+        state.error =
+          action.error.message || "Failed to retrieve latest patient ID";
       });
   },
 });

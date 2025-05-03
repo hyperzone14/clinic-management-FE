@@ -40,4 +40,38 @@ export const titleSteps = [
     subTitle:
       "Choose the correct department, so your treatment starts with the right expertise",
   },
+  {
+    id: 8,
+    title: "Patient Pre-assessment",
+    subTitle:
+      "Make sure all patient information is complete before proceeding.",
+  },
+  {
+    id: 9,
+    title: "Choose the lab tests",
+    subTitle:
+      "Choose the correct lab tests, so your treatment starts with the right expertise",
+  },
+  {
+    id: 10,
+    title: "Choose medicine",
+    subTitle:
+      "Choose the correct medicine, so your treatment starts with the right expertise",
+  },
+  {
+    id: 11,
+    title: "Doctor's diagnosis",
+    subTitle:
+      "Make sure all patient information is complete before proceeding.",
+  },
+  {
+    id: 12,
+    title: "Doctor information",
+    subTitle: "Make sure all doctor information is complete before proceeding.",
+  },
+  {
+    id: 13,
+    title: "Lab tests result",
+    subTitle: "Make sure all lab tests result is complete before proceeding.",
+  },
 ];

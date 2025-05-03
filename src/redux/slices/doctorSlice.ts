@@ -19,12 +19,26 @@ interface DoctorState {
   doctors: Doctor[];
   loading: boolean;
   error: string | null;
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalElements: number;
+    pageSize: number;
+  };
+  searchTerm: string;
 }
 
 const initialState: DoctorState = {
   doctors: [],
   loading: false,
   error: null,
+  pagination: {
+    currentPage: 0,
+    totalPages: 1,
+    totalElements: 0,
+    pageSize: 10,
+  },
+  searchTerm: "",
 };
 
 interface Sort {
@@ -53,6 +67,17 @@ interface PaginatedResponse {
   };
 }
 
+interface SearchDoctorsPagination {
+  code: number;
+  message: string;
+  result: {
+    content: Doctor[];
+    totalPages: number;
+    totalElements: number;
+    size: number;
+  };
+}
+
 export const fetchDoctors = createAsyncThunk(
   "doctor/fetchDoctors",
   async () => {
@@ -71,6 +96,31 @@ export const fetchDoctors = createAsyncThunk(
       departmentId: doctor.departmentId,
       workingDays: doctor.workingDays || [],
     }));
+  }
+);
+
+export const fetchDoctorsPagination = createAsyncThunk(
+  "doctor/searchDoctorsPagination",
+  async ({ page, searchTerm }: { page: number; searchTerm?: string }) => {
+    let url = `/doctor?page=${page}`;
+
+    const pageSize = searchTerm ? 1000000000 : 10;
+    url += `&size=${pageSize}`;
+
+    if (searchTerm) {
+      url += `&search=${encodeURIComponent(searchTerm)}`;
+    }
+
+    const response = await apiService.get<SearchDoctorsPagination>(url);
+
+    return {
+      doctors: response.result.content,
+      page,
+      totalPages: response.result.totalPages,
+      totalElements: response.result.totalElements,
+      pageSize: response.result.size,
+      searchTerm: searchTerm || "",
+    };
   }
 );
 
@@ -122,6 +172,14 @@ const doctorSlice = createSlice({
       state.doctors = state.doctors.filter(
         (doctor) => doctor.id !== action.payload
       );
+    },
+    setSearchTerm: (state, action: PayloadAction<string>) => {
+      state.searchTerm = action.payload;
+      state.pagination.currentPage = 0;
+    },
+    clearSearch: (state) => {
+      state.searchTerm = "";
+      state.pagination.currentPage = 0;
     },
   },
   extraReducers: (builder) => {
@@ -204,9 +262,40 @@ const doctorSlice = createSlice({
       .addCase(getDoctorById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Failed to fetch doctor by ID";
+      })
+
+      // Search doctors cases
+      .addCase(fetchDoctorsPagination.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchDoctorsPagination.fulfilled, (state, action) => {
+        state.loading = false;
+        state.doctors = action.payload.doctors;
+        if (!action.payload.searchTerm) {
+          state.pagination = {
+            currentPage: action.payload.page,
+            totalPages: action.payload.totalPages,
+            totalElements: action.payload.totalElements,
+            pageSize: 10, // Explicitly set to default page size
+          };
+        } else {
+          // For search results, adjust pagination accordingly
+          state.pagination = {
+            currentPage: action.payload.page,
+            totalPages: action.payload.totalPages,
+            totalElements: action.payload.totalElements,
+            pageSize: action.payload.pageSize,
+          };
+        }
+      })
+      .addCase(fetchDoctorsPagination.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || "Failed to search doctors";
       });
   },
 });
 
-export const { setDoctors, deleteDoctor } = doctorSlice.actions;
+export const { setDoctors, deleteDoctor, setSearchTerm, clearSearch } =
+  doctorSlice.actions;
 export default doctorSlice.reducer;

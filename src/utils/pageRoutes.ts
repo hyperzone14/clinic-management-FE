@@ -21,14 +21,18 @@ export const getHeaderRoutes = (role: string): Routes[] => {
     return [
       { id: 1, path: "/", location: "Home" },
       { id: 2, path: "/booking", location: "Booking" },
+      { id: 3, path: "/doctors", location: "Doctors" },
+      { id: 4, path: "/feedback", location: "Feedback" },
+      // { id: 5, path: "/booking-test", location: "BookingTest" },
     ];
   } else if (role === "ROLE_DOCTOR") {
     // /, /schedule, /examination
     return [
       { id: 1, path: "/", location: "Home" },
       { id: 2, path: "/schedule", location: "Schedule" },
-      { id: 3, path: "/examination", location: "Examination" },
-      // { id: 4, path: "/booking-bill", location: "BookingBill" },
+      { id: 3, path: "/lab-tests", location: "LabTests" },
+      { id: 4, path: "/pre_exam", location: "Pre-Examination" },
+      { id: 5, path: "/lab-test-payment", location: "Lab Test Payment" },
     ];
   } else {
     return [
@@ -48,11 +52,6 @@ export const pageRoutes: Routes[] = [
   //   id: 2,
   //   path: "/feedback",
   //   location: "Feedback",
-  // },
-  // {
-  //   id: 3,
-  //   path: "/search",
-  //   location: "Search",
   // },
   {
     id: 2,
@@ -168,30 +167,104 @@ export const pageRoutes: Routes[] = [
     path: "/user-information",
     location: "UserInfo",
   },
+  {
+    id: 13,
+    path: "/doctors",
+    location: "Doctors",
+    children: [
+      {
+        id: 131,
+        path: "/doctor-detail",
+        location: "DoctorDetail",
+      },
+    ],
+  },
+  {
+    id: 14,
+    path: "/feedback",
+    location: "Feedback",
+    roles: ["ROLE_PATIENT", "ROLE_DOCTOR"],
+  },
+
+  // {
+  //   id: 15,
+  //   path: "/booking-test",
+  //   location: "BookingTest",
+  // },
+  {
+    id: 15,
+    path: "/manual-booking",
+    location: "ManualBooking",
+  },
+  {
+    id: 16,
+    path: "/doctor-calendar",
+    location: "DoctorCalendar",
+    roles: ["ROLE_DOCTOR"],
+  },
+  {
+    id: 17,
+    path: "/pre_exam",
+    location: "Pre-Examination",
+    roles: ["ROLE_DOCTOR"],
+    children: [
+      {
+        id: 151,
+        path: ":id",
+        location: "PreExaminationDetail",
+      },
+    ],
+  },
+  {
+    id: 18,
+    path: "/lab-tests",
+    location: "LabTests",
+    roles: ["ROLE_DOCTOR"],
+    children: [
+      {
+        id: 181,
+        path: ":id",
+        location: "LabTestDetail",
+      },
+    ],
+  },
+  {
+    id: 19,
+    path: "/lab-test-payment",
+    location: "LabTestPayment",
+    roles: ["ROLE_DOCTOR"],
+    children: [
+      {
+        id: 191,
+        path: ":id",
+        location: "LabTestPaymentDetail",
+      },
+    ],
+  },
 ];
 
-export const bookingRoutes: Routes[] = [
-  {
-    id: 1,
-    path: "service", // relative path
-    location: "Service",
-  },
-  {
-    id: 2,
-    path: "choose-datetime",
-    location: "ChooseDateTime",
-  },
-  {
-    id: 3,
-    path: "payment",
-    location: "Payment",
-  },
-  {
-    id: 4,
-    path: "finish",
-    location: "Finish",
-  },
-];
+// export const bookingRoutes: Routes[] = [
+//   {
+//     id: 1,
+//     path: "service", // relative path
+//     location: "Service",
+//   },
+//   {
+//     id: 2,
+//     path: "choose-datetime",
+//     location: "ChooseDateTime",
+//   },
+//   {
+//     id: 3,
+//     path: "payment",
+//     location: "Payment",
+//   },
+//   {
+//     id: 4,
+//     path: "finish",
+//     location: "Finish",
+//   },
+// ];
 
 // export const prescriptionRoutes: Routes[] = [
 //   {
@@ -212,13 +285,11 @@ export const adminRoutes: Routes[] = [
     path: "",
     location: "Dashboard",
     roles: ["ROLE_ADMIN, ROLE_CLIENT_OWNER"],
-    // roles: ["ROLE_DOCTOR"],
   },
   {
     id: 2,
     path: "patient",
     location: "PatientManagement",
-    // roles: ["ROLE_DOCTOR"],
     roles: ["ROLE_CLIENT_OWNER"],
   },
   {
@@ -237,6 +308,12 @@ export const adminRoutes: Routes[] = [
     id: 5,
     path: "appointment",
     location: "AppointmentManagement",
+    roles: ["ROLE_CLIENT_OWNER"],
+  },
+  {
+    id: 6,
+    path: "pre-medical-bill",
+    location: "PreMedicalBillManagement",
     roles: ["ROLE_CLIENT_OWNER"],
   },
 ];

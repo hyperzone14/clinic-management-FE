@@ -20,6 +20,8 @@ import signinProfileReducer from "./slices/signinProfileSlice";
 import doctorManageReducer from "./slices/doctorManageSlice";
 import paymentReducer from "./slices/paymentSlice";
 import appointmentManageReducer from "./slices/appointmentManageSlice";
+import doctorEventsReducer from "./slices/doctorEventsSlice";
+import feedbackReducer from "./slices/feedbackSlice";
 
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { thunk } from "redux-thunk";
@@ -49,6 +51,8 @@ const rootReducer = combineReducers({
   doctorManage: doctorManageReducer,
   payment: paymentReducer,
   appointmentManage: appointmentManageReducer,
+  doctorEvents: doctorEventsReducer,
+  feedback: feedbackReducer,
 });
 
 const store = configureStore({

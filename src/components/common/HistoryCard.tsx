@@ -1,5 +1,5 @@
 import React from "react";
-import { Calendar, UserRound } from "lucide-react";
+import { Calendar, UserRound, CalendarClock } from "lucide-react";
 import { PiUserCircleLight } from "react-icons/pi";
 import { ExaminationDetail } from "../../redux/slices/medicHistorySlice";
 
@@ -25,6 +25,7 @@ interface MedicalRecord {
   note: string;
   prescribedDrugs: PrescribedDrug[];
   examinationDetails: ExaminationDetail[];
+  nextAppointmentDate: string | null;
 }
 
 interface HistoryCardProps {
@@ -33,6 +34,23 @@ interface HistoryCardProps {
 }
 
 const HistoryCard: React.FC<HistoryCardProps> = ({ record, onClick }) => {
+  // Format date to display in dd-MM-yyyy format
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "Not scheduled";
+    
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    } catch (error) {
+      console.error("Invalid date format:", dateString);
+      return "Invalid date";
+    }
+  };
+
   return (
     <div
       onClick={onClick}
@@ -66,9 +84,15 @@ const HistoryCard: React.FC<HistoryCardProps> = ({ record, onClick }) => {
           </div>
           <div className="flex items-center justify-end mb-2">
             <p className="text-gray-600 me-3">
-              {new Date(record.date).toLocaleDateString()}
+              Visit: {formatDate(record.date)}
             </p>
             <Calendar className="w-6 h-6" />
+          </div>
+          <div className="flex items-center justify-end">
+            <p className="text-gray-600 me-3">
+              Next appointment: {formatDate(record.nextAppointmentDate)}
+            </p>
+            <CalendarClock className="w-6 h-6 text-blue-500" />
           </div>
         </div>
       </div>

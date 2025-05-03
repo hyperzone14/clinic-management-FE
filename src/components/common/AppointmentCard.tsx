@@ -61,6 +61,8 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
         return "bg-orange-100 text-orange-800";
       case 'lab_test_completed':
         return "bg-sky-100 text-sky-800";
+      case 'pre_examination_completed':
+        return "bg-indigo-100 text-indigo-800";
       default:
         return "";
     }
@@ -93,6 +95,8 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
         return "Laboratory tests are required";
       case 'lab_test_completed':
         return "Lab test results are ready";
+      case 'pre_examination_completed':
+        return "Pre-examination completed";
       default:
         return "";
     }
@@ -121,6 +125,8 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
         return "";
       case 'cancelled':
         return "opacity-75";
+      case 'pre_examination_completed':
+        return "opacity-75";
       default:
         return "";
     }
@@ -142,6 +148,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
         ${appointment.status === 'confirmed' ? 'border-purple-500' : ''}
         ${appointment.status === 'lab_test_required' ? 'border-orange-500' : ''}
         ${appointment.status === 'lab_test_completed' ? 'border-sky-500' : ''}
+        ${appointment.status === 'pre_examination_completed' ? 'border-indigo-500' : ''}
         ${getCardStyles(appointment.status)}
       `}
     >

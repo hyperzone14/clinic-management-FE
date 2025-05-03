@@ -21,8 +21,8 @@ interface ImageResponse {
 interface ExaminationDetail {
   id: number;
   examinationType: string;
-  examinationResult: string;
-  imageResponseDTOS?: ImageResponse[];
+  examinationResult: string | null;
+  imageResponseDTO?: ImageResponse[];
   doctorName: string;
   patientName: string;
 }
@@ -195,7 +195,7 @@ const examinationSlice = createSlice({
   name: "examination",
   initialState,
   reducers: {
-    clearExamination: () => {
+    clearExamination: (_state) => {
       FileManager.clear();
       return initialState;
     },
