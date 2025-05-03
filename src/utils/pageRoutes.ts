@@ -266,18 +266,18 @@ export const pageRoutes: Routes[] = [
 //   },
 // ];
 
-// export const prescriptionRoutes: Routes[] = [
-//   {
-//     id: 1,
-//     path: "prescription-list",
-//     location: "PrescriptionList",
-//   },
-//   {
-//     id: 2,
-//     path: "create-prescribe",
-//     location: "CreatePrescribe",
-//   },
-// ];
+export const prescriptionRoutes: Routes[] = [
+  {
+    id: 1,
+    path: "prescription-list",
+    location: "PrescriptionList",
+  },
+  {
+    id: 2,
+    path: "create-prescribe",
+    location: "CreatePrescribe",
+  },
+];
 
 export const adminRoutes: Routes[] = [
   {

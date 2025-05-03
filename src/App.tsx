@@ -15,6 +15,7 @@ import {
   // bookingRoutes,
   // dashboardRoutes,
   adminRoutes,
+  prescriptionRoutes,
 } from "./utils/pageRoutes";
 import React, { Suspense, lazy } from "react";
 // import Booking from "./pages/Booking";
@@ -27,6 +28,7 @@ import Chatbot from "./components/layout/Chatbot";
 import { ProtectedRoute } from "./utils/security/components/ProtectedRoute";
 import NotPermitted from "./pages/Adminpages/NotPermitted";
 import { AuthService } from "./utils/security/services/AuthService";
+import Prescription from "./pages/Prescription";
 
 const ConditionalChatbot: React.FC = () => {
   const userRole = AuthService.getRolesFromToken();
