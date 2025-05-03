@@ -136,7 +136,7 @@ const PatientProfile: React.FC<PatientProfileProps> = ({ id }) => {
     // Convert Date to string format for Redux
     setFormData((prevData) => ({
       ...prevData,
-      birthDate: date ? date.toUTCString() : null,
+      birthDate: date ? date.toISOString().split("T")[0] : null,
     }));
     setErrors((prev) => ({ ...prev, birthDate: "" }));
   };
@@ -169,103 +169,103 @@ const PatientProfile: React.FC<PatientProfileProps> = ({ id }) => {
   return (
     <>
       <ToastContainer />
-      <div className=" bg-[#fff] rounded-lg shadow-lg w-full py-3">
-        <div className="mb-5">
-          <h1 className="text-3xl font-bold text-center">
+      <div className=' bg-[#fff] rounded-lg shadow-lg w-full py-3'>
+        <div className='mb-5'>
+          <h1 className='text-3xl font-bold text-center'>
             Profile Information
           </h1>
-          <div className="mt-3">
-            <form className="m-8" onSubmit={handleSaveProfile}>
+          <div className='mt-3'>
+            <form className='m-8' onSubmit={handleSaveProfile}>
               <fieldset
                 disabled={!isEditing}
-                className="grid grid-cols-2 gap-x-8 gap-y-5"
+                className='grid grid-cols-2 gap-x-8 gap-y-5'
               >
-                <div className=" col-span-1">
-                  <div className="flex flex-col">
-                    <label className="font-bold text-2xl mb-1">Name</label>
+                <div className=' col-span-1'>
+                  <div className='flex flex-col'>
+                    <label className='font-bold text-2xl mb-1'>Name</label>
                     <input
-                      type="text"
-                      id="name"
-                      name="fullName"
+                      type='text'
+                      id='name'
+                      name='fullName'
                       value={formData.fullName}
                       onChange={handleChange}
-                      className="w-full h-[2.5rem] bg-[#d9d9d9] rounded-md p-2"
-                      placeholder="Enter your name..."
+                      className='w-full h-[2.5rem] bg-[#d9d9d9] rounded-md p-2'
+                      placeholder='Enter your name...'
                       required
                     />
                     {errors.fullName && (
-                      <span className="text-red-500 text-sm mt-1">
+                      <span className='text-red-500 text-sm mt-1'>
                         {errors.fullName}
                       </span>
                     )}
                   </div>
                 </div>
 
-                <div className=" col-span-1">
-                  <div className="flex flex-col">
-                    <label className="font-bold text-2xl mb-1">Gender</label>
-                    <div className="flex gap-5 mt-1">
-                      <label className="flex items-center text-2xl">
+                <div className=' col-span-1'>
+                  <div className='flex flex-col'>
+                    <label className='font-bold text-2xl mb-1'>Gender</label>
+                    <div className='flex gap-5 mt-1'>
+                      <label className='flex items-center text-2xl'>
                         <input
-                          type="radio"
-                          name="gender"
-                          value="MALE"
+                          type='radio'
+                          name='gender'
+                          value='MALE'
                           checked={formData.gender === "MALE"}
                           onChange={handleChange}
-                          className="mr-2 cursor-pointer w-[1.5rem] h-[1.5rem]"
+                          className='mr-2 cursor-pointer w-[1.5rem] h-[1.5rem]'
                         />
                         MALE
                       </label>
 
-                      <label className="flex items-center text-2xl">
+                      <label className='flex items-center text-2xl'>
                         <input
-                          type="radio"
-                          name="gender"
-                          value="FEMALE"
+                          type='radio'
+                          name='gender'
+                          value='FEMALE'
                           checked={formData.gender === "FEMALE"}
                           onChange={handleChange}
-                          className="mr-2 cursor-pointer w-[1.5rem] h-[1.5rem]"
+                          className='mr-2 cursor-pointer w-[1.5rem] h-[1.5rem]'
                         />
                         FEMALE
                       </label>
 
-                      <label className="flex items-center text-2xl">
+                      <label className='flex items-center text-2xl'>
                         <input
-                          type="radio"
-                          name="gender"
-                          value="OTHER"
+                          type='radio'
+                          name='gender'
+                          value='OTHER'
                           checked={formData.gender === "OTHER"}
                           onChange={handleChange}
-                          className="mr-2 cursor-pointer w-[1.5rem] h-[1.5rem]"
+                          className='mr-2 cursor-pointer w-[1.5rem] h-[1.5rem]'
                         />
                         OTHER
                       </label>
                     </div>
                     {errors.gender && (
-                      <span className="text-red-500 text-sm mt-1">
+                      <span className='text-red-500 text-sm mt-1'>
                         {errors.gender}
                       </span>
                     )}
                   </div>
                 </div>
-                <div className="col-span-1">
-                  <div className="flex flex-col">
-                    <label className="font-bold text-2xl mb-1">
+                <div className='col-span-1'>
+                  <div className='flex flex-col'>
+                    <label className='font-bold text-2xl mb-1'>
                       Date of birth
                     </label>
                     <DatePicker
-                      id="birthDate"
-                      name="birthDate"
+                      id='birthDate'
+                      name='birthDate'
                       selected={selectedDate}
                       onChange={handleDateChange}
-                      dateFormat="dd/MM/yyyy"
-                      className="w-full h-[2.5rem] bg-[#d9d9d9] rounded-md p-2"
-                      placeholderText="DD/MM/YYYY"
+                      dateFormat='dd/MM/yyyy'
+                      className='w-full h-[2.5rem] bg-[#d9d9d9] rounded-md p-2'
+                      placeholderText='DD/MM/YYYY'
                       isClearable
                       required
                     />
                     {errors.birthDate && (
-                      <span className="text-red-500 text-sm mt-1">
+                      <span className='text-red-500 text-sm mt-1'>
                         {errors.birthDate}
                       </span>
                     )}
@@ -281,9 +281,9 @@ const PatientProfile: React.FC<PatientProfileProps> = ({ id }) => {
                   },
                   { label: "Password", name: "password", type: "password" },
                 ].map((field) => (
-                  <div key={field.name} className="col-span-1">
-                    <div className="flex flex-col">
-                      <label className="font-bold text-2xl mb-1">
+                  <div key={field.name} className='col-span-1'>
+                    <div className='flex flex-col'>
+                      <label className='font-bold text-2xl mb-1'>
                         {field.label}
                       </label>
                       <input
@@ -291,53 +291,53 @@ const PatientProfile: React.FC<PatientProfileProps> = ({ id }) => {
                         name={field.name}
                         value={formData[field.name as keyof Profile] as string}
                         onChange={handleChange}
-                        className="w-full h-10 bg-[#d9d9d9] rounded-md p-2"
+                        className='w-full h-10 bg-[#d9d9d9] rounded-md p-2'
                         placeholder={`Enter your ${field.label.toLowerCase()}...`}
                         disabled={field.disabled}
                         required
                       />
                       {errors[field.name as keyof Profile] && (
-                        <span className="text-red-500 text-sm mt-1">
+                        <span className='text-red-500 text-sm mt-1'>
                           {errors[field.name as keyof Profile]}
                         </span>
                       )}
                     </div>
                   </div>
                 ))}
-                <div className="col-span-2">
-                  <div className="flex flex-col">
-                    <label className="font-bold text-2xl mb-1">Address</label>
+                <div className='col-span-2'>
+                  <div className='flex flex-col'>
+                    <label className='font-bold text-2xl mb-1'>Address</label>
                     <input
-                      type="text"
-                      id="address"
-                      name="address"
+                      type='text'
+                      id='address'
+                      name='address'
                       value={formData.address}
                       onChange={handleChange}
-                      className="w-full h-[2.5rem] bg-[#d9d9d9] rounded-md p-2"
-                      placeholder="Enter your Address..."
+                      className='w-full h-[2.5rem] bg-[#d9d9d9] rounded-md p-2'
+                      placeholder='Enter your Address...'
                       required
                     />
                   </div>
                 </div>
               </fieldset>
-              <div className="mt-12 mb-3 flex justify-end">
+              <div className='mt-12 mb-3 flex justify-end'>
                 {!isEditing ? (
                   <button
-                    className="bg-[#4567b7] hover:bg-[#3E5CA3] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out"
+                    className='bg-[#4567b7] hover:bg-[#3E5CA3] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out'
                     onClick={handleEditProfile}
                   >
                     Edit Profile
                   </button>
                 ) : (
-                  <div className="flex justtify-between items-center">
+                  <div className='flex justtify-between items-center'>
                     <button
-                      className="bg-[#34a85a] hover:bg-[#309C54] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out me-8"
-                      type="submit"
+                      className='bg-[#34a85a] hover:bg-[#309C54] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out me-8'
+                      type='submit'
                     >
                       Save
                     </button>
                     <button
-                      className="bg-[#D84846] hover:bg-[#D43835] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out"
+                      className='bg-[#D84846] hover:bg-[#D43835] text-white px-5 py-3 rounded-lg transition duration-300 ease-in-out'
                       onClick={handleCancelEdit}
                     >
                       Cancel
