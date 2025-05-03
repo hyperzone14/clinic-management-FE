@@ -4,7 +4,7 @@ import axios from "axios";
 // Create axios instance with custom config
 const api = axios.create({
   // baseURL: "http://localhost:8080/api",
-  baseURL: "https://clinic-management-tdd-ee9f27f356d8.herokuapp.com/",
+  baseURL: "https://clinic-management-tdd-ee9f27f356d8.herokuapp.com/api",
   headers: {
     "Content-Type": "application/json",
   },
