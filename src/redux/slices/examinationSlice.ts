@@ -157,7 +157,7 @@ export const uploadLabResults = createAsyncThunk(
       }
 
       const response = await axios.post(
-        "https://clinic-management-vdb.onrender.com/api/examination_detail/images", //http://localhost:8080/api/examination_detail/images
+        "/api/examination_detail/images",
         formData,
         {
           headers: {
