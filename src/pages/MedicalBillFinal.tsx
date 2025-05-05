@@ -91,7 +91,11 @@ interface MedicalInfoState {
   nextAppointmentDate: string;
 }
 
-const API_BASE_URL = "http://localhost:8080/api";
+// const API_BASE_URL = "http://localhost:8080/api";
+// const API_BASE_URL = "https://clinic-management-tdd-ee9f27f356d8.herokuapp.com/api";
+// const API_BASE_URL = "http://localhost:8080/api";
+// const API_BASE_URL = "/api";
+const API_BASE_URL = "https://clinic-management-tdd-ee9f27f356d8.herokuapp.com/api";
 
 const handleImageView = (imageId: number) => {
   window.open(`${API_BASE_URL}/images/download/${imageId}`, "_blank");
