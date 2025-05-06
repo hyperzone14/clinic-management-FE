@@ -19,6 +19,18 @@ export default defineConfig({
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, ""),
       },
+      "/api_LLM": {
+        target: "http://localhost:2000", // Backend server
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api_LLM/, ""),
+      },
+      "/api_Train": {
+        target: "http://localhost:3000", // Backend server
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api_Train/, ""),
+      },
     },
   },
 });

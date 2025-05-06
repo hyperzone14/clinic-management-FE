@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../redux/store";
@@ -12,9 +13,11 @@ import {
 import { toast, ToastContainer } from "react-toastify";
 import { AuthService } from "../utils/security/services/AuthService";
 import { apiService } from "../utils/axios-config";
-import { format, parse } from "date-fns";
+import { format, parse, set } from "date-fns";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { FaNotesMedical } from "react-icons/fa";
+import { clearPredictions, getPredictions } from "../redux/slices/botLLMSlice";
 
 interface LocationState {
   patientId: number;
@@ -91,11 +94,27 @@ interface MedicalInfoState {
   nextAppointmentDate: string;
 }
 
+// const suggestedDiagnoses = [
+//   "Common Cold",
+//   "Seasonal Allergies",
+//   "Migraine",
+//   "Sinusitis",
+//   "Gastroenteritis",
+//   "Anxiety",
+//   "Hypertension",
+//   "Type 2 Diabetes",
+// ];
+
+// interface diagnosisOptions {
+//   predictions: [diseases: string, probability: number];
+// }
+
 // const API_BASE_URL = "http://localhost:8080/api";
 // const API_BASE_URL = "https://clinic-management-tdd-ee9f27f356d8.herokuapp.com/api";
 // const API_BASE_URL = "http://localhost:8080/api";
 // const API_BASE_URL = "/api";
-const API_BASE_URL = "https://clinic-management-tdd-ee9f27f356d8.herokuapp.com/api";
+const API_BASE_URL =
+  "https://clinic-management-tdd-ee9f27f356d8.herokuapp.com/api";
 
 const handleImageView = (imageId: number) => {
   window.open(`${API_BASE_URL}/images/download/${imageId}`, "_blank");
@@ -108,6 +127,7 @@ const MedicalBillFinal: React.FC = () => {
   const { currentBill, availableDrugs, loading } = useAppSelector(
     (state) => state.medicalBill
   );
+  const predictions = useAppSelector((state) => state.botLLM.predictions);
   const state = location.state as LocationState;
 
   // State for drug form and lab tests
@@ -127,6 +147,13 @@ const MedicalBillFinal: React.FC = () => {
   // States for symptom search
   const [symptoms, setSymptoms] = useState<Symptom[]>([]);
   const [isSearching, setIsSearching] = useState<boolean>(false);
+
+  const [fault, setFault] = useState<boolean>(false);
+  const [loadingPredictions, setLoadingPredictions] = useState<boolean>(false);
+
+  useEffect(() => {
+    dispatch(clearPredictions());
+  }, [dispatch]);
 
   // Check doctor access on component mount
   useEffect(() => {
@@ -640,6 +667,23 @@ const MedicalBillFinal: React.FC = () => {
     return null;
   }
 
+  const doPrediction = async () => {
+    if (!medicalInfo.syndrome) {
+      toast.error("Please enter a syndrome before predicting.");
+      return;
+    }
+
+    setLoadingPredictions(true); // Set loading to true
+    try {
+      await dispatch(getPredictions(medicalInfo.syndrome)).unwrap();
+      setFault(false);
+    } catch (error) {
+      setFault(true);
+    } finally {
+      setLoadingPredictions(false); // Set loading to false
+    }
+  };
+
   // const hasLabTests = newLabTests.length > 0;
 
   return (
@@ -864,7 +908,7 @@ const MedicalBillFinal: React.FC = () => {
                   Final Diagnosis
                 </label>
                 <div className='relative'>
-                  <textarea
+                  {/* <textarea
                     value={medicalInfo.finalDiagnosis || ""}
                     onChange={(e) =>
                       handleMedicalInfoChange("finalDiagnosis", e.target.value)
@@ -901,7 +945,72 @@ const MedicalBillFinal: React.FC = () => {
                         </button>
                       ))}
                     </div>
-                  )}
+                  )} */}
+                  <FaNotesMedical
+                    className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400'
+                    size={20}
+                  />
+                  <input
+                    type='text'
+                    value={medicalInfo.finalDiagnosis || ""}
+                    onChange={(e) =>
+                      handleMedicalInfoChange("finalDiagnosis", e.target.value)
+                    }
+                    className='w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                    placeholder='Enter final diagnosis...'
+                    disabled={medicalInfo.isHealthy}
+                  />
+                </div>
+                <div>
+                  <button
+                    className={`my-2 p-3 rounded-md text-white font-semibold transition-colors duration-300 ${
+                      loadingPredictions
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-[#4567b7] hover:bg-[#4567b7]/80"
+                    }`}
+                    onClick={doPrediction}
+                    disabled={loadingPredictions} // Disable button while loading
+                  >
+                    {loadingPredictions ? (
+                      <div className='flex items-center'>
+                        <div className='animate-spin rounded-full h-4 w-4 border-t-2 border-white mr-2'></div>
+                        Loading...
+                      </div>
+                    ) : (
+                      "Diagnosis Suggestions"
+                    )}
+                  </button>
+
+                  <div
+                    className={
+                      "overflow-hidden transition-all duration-300 ease-in-out mt-2 border rounded-md bg-gray-50 max-h-96"
+                    }
+                  >
+                    <div className={"p-4 transition-opacity duration-300"}>
+                      <h3 className='font-medium mb-2'>
+                        Suggested diagnoses based on symptoms:
+                      </h3>
+                      <div className='flex flex-wrap gap-2'>
+                        {fault === true ? (
+                          <p className='text-red-500 font-semibold'>
+                            No suggestions available. Please enter a valid
+                            syndrome.
+                          </p>
+                        ) : (
+                          predictions.map((prediction, index) => (
+                            <button
+                              key={index}
+                              // onClick={() => handleSymptomSelect(prediction.disease.toString())}
+                              className='bg-green-100 hover:bg-green-200 text-green-800 px-3 py-1 rounded duration-300 transition-colors'
+                            >
+                              {prediction.disease}
+                            </button>
+                          ))
+                        )}
+                        {/* {symptoms.length > 0} */}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
