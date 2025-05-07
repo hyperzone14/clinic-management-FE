@@ -17,7 +17,17 @@ import { format, parse, set } from "date-fns";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaNotesMedical } from "react-icons/fa";
-import { clearPredictions, getPredictions } from "../redux/slices/botLLMSlice";
+import {
+  clearPredictionsLLM,
+  getPredictionsLLM,
+} from "../redux/slices/botLLMSlice";
+import {
+  clearPredictionsTrain,
+  getPredictionsTrain,
+} from "../redux/slices/botTrainSlice";
+import { Switch } from "@mui/material";
+import "../styles/switchSetup.css";
+import { clear } from "console";
 
 interface LocationState {
   patientId: number;
@@ -127,7 +137,11 @@ const MedicalBillFinal: React.FC = () => {
   const { currentBill, availableDrugs, loading } = useAppSelector(
     (state) => state.medicalBill
   );
-  const predictions = useAppSelector((state) => state.botLLM.predictions);
+  const predictionsLLM = useAppSelector((state) => state.botLLM.predictions);
+  const predictionsTrain = useAppSelector(
+    (state) => state.botTrain.predictions
+  );
+
   const state = location.state as LocationState;
 
   // State for drug form and lab tests
@@ -150,9 +164,11 @@ const MedicalBillFinal: React.FC = () => {
 
   const [fault, setFault] = useState<boolean>(false);
   const [loadingPredictions, setLoadingPredictions] = useState<boolean>(false);
+  const [switchValue, setSwitchValue] = useState<"LLM" | "Train data">("LLM");
 
   useEffect(() => {
-    dispatch(clearPredictions());
+    dispatch(clearPredictionsLLM());
+    dispatch(clearPredictionsTrain());
   }, [dispatch]);
 
   // Check doctor access on component mount
@@ -675,13 +691,23 @@ const MedicalBillFinal: React.FC = () => {
 
     setLoadingPredictions(true); // Set loading to true
     try {
-      await dispatch(getPredictions(medicalInfo.syndrome)).unwrap();
+      if (switchValue === "Train data") {
+        await dispatch(getPredictionsTrain(medicalInfo.syndrome)).unwrap();
+        clearPredictionsLLM();
+      } else {
+        await dispatch(getPredictionsLLM(medicalInfo.syndrome)).unwrap();
+        clearPredictionsTrain();
+      }
       setFault(false);
     } catch (error) {
       setFault(true);
     } finally {
       setLoadingPredictions(false); // Set loading to false
     }
+  };
+
+  const handleSwitchChange = () => {
+    setSwitchValue((prev) => (prev === "LLM" ? "Train data" : "LLM"));
   };
 
   // const hasLabTests = newLabTests.length > 0;
@@ -960,27 +986,69 @@ const MedicalBillFinal: React.FC = () => {
                     placeholder='Enter final diagnosis...'
                     disabled={medicalInfo.isHealthy}
                   />
+                  {isSearching && (
+                    <div className='absolute right-3 top-3 flex items-center space-x-2 bg-blue-50 px-3 py-1 rounded-lg'>
+                      <div className='flex items-center justify-center'>
+                        <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500'></div>
+                      </div>
+                      <span className='text-sm text-blue-600 font-medium'>
+                        Searching...
+                      </span>
+                    </div>
+                  )}
+                  {symptoms.length > 0 && medicalInfo.finalDiagnosis && (
+                    <div className='absolute z-10 w-full bg-white border border-gray-200 rounded-xl shadow-lg mt-1 max-h-60 overflow-y-auto'>
+                      {symptoms.map((symptom) => (
+                        <button
+                          key={symptom.id}
+                          onClick={() => handleSymptomSelect(symptom)}
+                          className='w-full text-left px-4 py-3 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none border-b border-gray-100 last:border-b-0'
+                        >
+                          <p className='font-medium text-gray-800'>
+                            {symptom.name}
+                          </p>
+                          <p className='text-sm text-gray-500 mt-1'>
+                            {symptom.description}
+                          </p>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div>
-                  <button
-                    className={`my-2 p-3 rounded-md text-white font-semibold transition-colors duration-300 ${
-                      loadingPredictions
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-[#4567b7] hover:bg-[#4567b7]/80"
-                    }`}
-                    onClick={doPrediction}
-                    disabled={loadingPredictions} // Disable button while loading
-                  >
-                    {loadingPredictions ? (
-                      <div className='flex items-center'>
-                        <div className='animate-spin rounded-full h-4 w-4 border-t-2 border-white mr-2'></div>
-                        Loading...
-                      </div>
-                    ) : (
-                      "Diagnosis Suggestions"
-                    )}
-                  </button>
-
+                  <div className='flex mt-3'>
+                    <button
+                      className={`my-2 p-3 rounded-md text-white font-semibold transition-colors duration-300  ${
+                        loadingPredictions
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : "bg-[#4567b7] hover:bg-[#4567b7]/80"
+                      }`}
+                      onClick={doPrediction}
+                      disabled={loadingPredictions} // Disable button while loading
+                    >
+                      {loadingPredictions ? (
+                        <div className='flex items-center'>
+                          <div className='animate-spin rounded-full h-4 w-4 border-t-2 border-white mr-2'></div>
+                          Loading...
+                        </div>
+                      ) : (
+                        "Diagnosis Suggestions"
+                      )}
+                    </button>
+                    <div className='flex ms-7 items-center'>
+                      <p className='text-lg'>Train data</p>
+                      <Switch
+                        value={switchValue}
+                        inputProps={{
+                          "aria-label": "Switch between LLM and Train data",
+                        }}
+                        onChange={handleSwitchChange}
+                        checked={switchValue === "LLM"}
+                        className='custom-switch'
+                      />
+                      <p className='text-lg'>LLM</p>
+                    </div>
+                  </div>
                   <div
                     className={
                       "overflow-hidden transition-all duration-300 ease-in-out mt-2 border rounded-md bg-gray-50 max-h-96"
@@ -996,8 +1064,18 @@ const MedicalBillFinal: React.FC = () => {
                             No suggestions available. Please enter a valid
                             syndrome.
                           </p>
+                        ) : switchValue === "LLM" ? (
+                          predictionsLLM.map((prediction, index) => (
+                            <button
+                              key={index}
+                              // onClick={() => handleSymptomSelect(prediction.disease.toString())}
+                              className='bg-green-100 hover:bg-green-200 text-green-800 px-3 py-1 rounded duration-300 transition-colors'
+                            >
+                              {prediction.disease}
+                            </button>
+                          ))
                         ) : (
-                          predictions.map((prediction, index) => (
+                          predictionsTrain.map((prediction, index) => (
                             <button
                               key={index}
                               // onClick={() => handleSymptomSelect(prediction.disease.toString())}
@@ -1007,7 +1085,6 @@ const MedicalBillFinal: React.FC = () => {
                             </button>
                           ))
                         )}
-                        {/* {symptoms.length > 0} */}
                       </div>
                     </div>
                   </div>

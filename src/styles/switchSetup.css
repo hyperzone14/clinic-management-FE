@@ -1,0 +1,15 @@
+.custom-switch .MuiSwitch-switchBase.Mui-checked {
+  color: #4567b7; /* Blue for the right side when checked */
+}
+
+.custom-switch .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track {
+  background-color: #4567b7; /* Blue track when checked */
+}
+
+.custom-switch .MuiSwitch-switchBase {
+  color: #f44336; /* Red for the left side when unchecked */
+}
+
+.custom-switch .MuiSwitch-track {
+  background-color: #f44336; /* Red track when unchecked */
+}

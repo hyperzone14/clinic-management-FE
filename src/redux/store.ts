@@ -23,6 +23,7 @@ import appointmentManageReducer from "./slices/appointmentManageSlice";
 import doctorEventsReducer from "./slices/doctorEventsSlice";
 import feedbackReducer from "./slices/feedbackSlice";
 import botLLMReducer from "./slices/botLLMSlice";
+import botTrainReducer from "./slices/botTrainSlice";
 
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { thunk } from "redux-thunk";
@@ -55,6 +56,7 @@ const rootReducer = combineReducers({
   doctorEvents: doctorEventsReducer,
   feedback: feedbackReducer,
   botLLM: botLLMReducer,
+  botTrain: botTrainReducer,
 });
 
 const store = configureStore({

@@ -27,7 +27,7 @@ const initialState: BotLLMState = {
   error: null,
 };
 
-export const getPredictions = createAsyncThunk(
+export const getPredictionsLLM = createAsyncThunk(
   "botLLM/getPredictions",
   async (symptoms: string) => {
     const response = await apiService.post<ApiResponse>("/api_LLM/predict", {
@@ -41,29 +41,29 @@ const botLLMSlice = createSlice({
   name: "botLLM",
   initialState,
   reducers: {
-    clearPredictions: (state) => {
+    clearPredictionsLLM: (state) => {
       state.predictions = [];
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(getPredictions.pending, (state) => {
+      .addCase(getPredictionsLLM.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(
-        getPredictions.fulfilled,
+        getPredictionsLLM.fulfilled,
         (state, action: PayloadAction<BotLLM[]>) => {
           state.predictions = action.payload;
           state.loading = false;
         }
       )
-      .addCase(getPredictions.rejected, (state, action) => {
+      .addCase(getPredictionsLLM.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Failed to fetch predictions";
       });
   },
 });
 
-export const { clearPredictions } = botLLMSlice.actions;
+export const { clearPredictionsLLM } = botLLMSlice.actions;
 export default botLLMSlice.reducer;
