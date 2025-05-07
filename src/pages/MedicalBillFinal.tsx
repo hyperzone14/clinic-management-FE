@@ -553,7 +553,7 @@ const MedicalBillFinal: React.FC = () => {
     // Update final diagnosis with symptom description
     setMedicalInfo((prev) => ({
       ...prev,
-      finalDiagnosis: symptom.description,
+      finalDiagnosis: symptom.name,
     }));
 
     // Find matching drugs from availableDrugs based on name
@@ -708,6 +708,19 @@ const MedicalBillFinal: React.FC = () => {
 
   const handleSwitchChange = () => {
     setSwitchValue((prev) => (prev === "LLM" ? "Train data" : "LLM"));
+  };
+
+  const handlePredictionSelect = (disease: string) => {
+    setMedicalInfo(prev => ({
+      ...prev,
+      finalDiagnosis: disease
+    }));
+    // Clear predictions after selection
+    if (switchValue === "LLM") {
+      dispatch(clearPredictionsLLM());
+    } else {
+      dispatch(clearPredictionsTrain());
+    }
   };
 
   // const hasLabTests = newLabTests.length > 0;
@@ -1068,7 +1081,7 @@ const MedicalBillFinal: React.FC = () => {
                           predictionsLLM.map((prediction, index) => (
                             <button
                               key={index}
-                              // onClick={() => handleSymptomSelect(prediction.disease.toString())}
+                              onClick={() => handlePredictionSelect(prediction.disease.toString())}
                               className='bg-green-100 hover:bg-green-200 text-green-800 px-3 py-1 rounded duration-300 transition-colors'
                             >
                               {prediction.disease}
@@ -1078,7 +1091,7 @@ const MedicalBillFinal: React.FC = () => {
                           predictionsTrain.map((prediction, index) => (
                             <button
                               key={index}
-                              // onClick={() => handleSymptomSelect(prediction.disease.toString())}
+                              onClick={() => handlePredictionSelect(prediction.disease.toString())}
                               className='bg-green-100 hover:bg-green-200 text-green-800 px-3 py-1 rounded duration-300 transition-colors'
                             >
                               {prediction.disease}
