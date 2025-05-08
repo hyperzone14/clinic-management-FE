@@ -13,7 +13,7 @@ import {
 import { toast, ToastContainer } from "react-toastify";
 import { AuthService } from "../utils/security/services/AuthService";
 import { apiService } from "../utils/axios-config";
-import { format, parse, set } from "date-fns";
+import { format, parse } from "date-fns";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaNotesMedical } from "react-icons/fa";
@@ -27,7 +27,6 @@ import {
 } from "../redux/slices/botTrainSlice";
 import { Switch } from "@mui/material";
 import "../styles/switchSetup.css";
-import { clear } from "console";
 
 interface LocationState {
   patientId: number;
@@ -141,6 +140,8 @@ const MedicalBillFinal: React.FC = () => {
   const predictionsTrain = useAppSelector(
     (state) => state.botTrain.predictions
   );
+  const errorLLM = useAppSelector((state) => state.botLLM.error);
+  const errorTrain = useAppSelector((state) => state.botTrain.error);
 
   const state = location.state as LocationState;
 
@@ -693,10 +694,10 @@ const MedicalBillFinal: React.FC = () => {
     try {
       if (switchValue === "Train data") {
         await dispatch(getPredictionsTrain(medicalInfo.syndrome)).unwrap();
-        clearPredictionsLLM();
+        dispatch(clearPredictionsLLM());
       } else {
         await dispatch(getPredictionsLLM(medicalInfo.syndrome)).unwrap();
-        clearPredictionsTrain();
+        dispatch(clearPredictionsTrain());
       }
       setFault(false);
     } catch (error) {
@@ -711,9 +712,9 @@ const MedicalBillFinal: React.FC = () => {
   };
 
   const handlePredictionSelect = (disease: string) => {
-    setMedicalInfo(prev => ({
+    setMedicalInfo((prev) => ({
       ...prev,
-      finalDiagnosis: disease
+      finalDiagnosis: disease,
     }));
     // Clear predictions after selection
     if (switchValue === "LLM") {
@@ -1056,6 +1057,7 @@ const MedicalBillFinal: React.FC = () => {
                           "aria-label": "Switch between LLM and Train data",
                         }}
                         onChange={handleSwitchChange}
+                        disabled={loadingPredictions}
                         checked={switchValue === "LLM"}
                         className='custom-switch'
                       />
@@ -1074,14 +1076,21 @@ const MedicalBillFinal: React.FC = () => {
                       <div className='flex flex-wrap gap-2'>
                         {fault === true ? (
                           <p className='text-red-500 font-semibold'>
-                            No suggestions available. Please enter a valid
-                            syndrome.
+                            {switchValue === "LLM"
+                              ? errorLLM ||
+                                "No suggestions available. Please enter a valid syndrome."
+                              : errorTrain ||
+                                "No suggestions available. Please enter a valid syndrome."}
                           </p>
                         ) : switchValue === "LLM" ? (
                           predictionsLLM.map((prediction, index) => (
                             <button
                               key={index}
-                              onClick={() => handlePredictionSelect(prediction.disease.toString())}
+                              onClick={() =>
+                                handlePredictionSelect(
+                                  prediction.disease.toString()
+                                )
+                              }
                               className='bg-green-100 hover:bg-green-200 text-green-800 px-3 py-1 rounded duration-300 transition-colors'
                             >
                               {prediction.disease}
@@ -1091,7 +1100,11 @@ const MedicalBillFinal: React.FC = () => {
                           predictionsTrain.map((prediction, index) => (
                             <button
                               key={index}
-                              onClick={() => handlePredictionSelect(prediction.disease.toString())}
+                              onClick={() =>
+                                handlePredictionSelect(
+                                  prediction.disease.toString()
+                                )
+                              }
                               className='bg-green-100 hover:bg-green-200 text-green-800 px-3 py-1 rounded duration-300 transition-colors'
                             >
                               {prediction.disease}

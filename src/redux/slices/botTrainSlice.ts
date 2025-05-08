@@ -7,7 +7,10 @@ interface BotTrain {
 }
 
 interface ApiResponse {
-  predictions: BotTrain[];
+  success: boolean;
+  input?: string;
+  predictions?: BotTrain[];
+  message?: string; // Add message field for error responses
 }
 
 interface BotTrainState {
@@ -22,15 +25,32 @@ const initialState: BotTrainState = {
   error: null,
 };
 
-export const getPredictionsTrain = createAsyncThunk(
-  "botTrain/getPredictions",
-  async (symptoms: string) => {
+export const getPredictionsTrain = createAsyncThunk<
+  BotTrain[], // Return type
+  string, // Input type (symptoms)
+  { rejectValue: string } // ThunkAPI config with custom error type
+>("botTrain/getPredictions", async (symptoms: string, { rejectWithValue }) => {
+  try {
     const response = await apiService.post<ApiResponse>("/api_Train/predict", {
       symptoms: symptoms,
     });
-    return response.predictions;
+
+    // Check if the API returned success: false
+    if (!response.success) {
+      return rejectWithValue(response.message || "Unknown error occurred");
+    }
+
+    return response.predictions || [];
+  } catch (error: any) {
+    // Get error message from axios interceptor's error.details
+    if (error.details?.message) {
+      return rejectWithValue(error.details.message);
+    }
+
+    // Fallback error message
+    return rejectWithValue(error.message || "Failed to fetch predictions");
   }
-);
+});
 
 const botTrainSlice = createSlice({
   name: "botTrain",
@@ -38,6 +58,7 @@ const botTrainSlice = createSlice({
   reducers: {
     clearPredictionsTrain: (state) => {
       state.predictions = [];
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
@@ -51,11 +72,15 @@ const botTrainSlice = createSlice({
         (state, action: PayloadAction<BotTrain[]>) => {
           state.predictions = action.payload;
           state.loading = false;
+          state.error = null;
         }
       )
       .addCase(getPredictionsTrain.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || "Failed to fetch predictions";
+        state.error =
+          action.payload ||
+          action.error.message ||
+          "Failed to fetch predictions";
       });
   },
 });
