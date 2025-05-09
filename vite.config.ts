@@ -20,7 +20,8 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api/, ""),
       },
       "/api_LLM": {
-        target: "http://localhost:2000", // Backend server
+        // target: "http://localhost:2000", // Backend server
+        target: "https://medical-ai-api-d6f4a40b7b22.herokuapp.com", // Backend server
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api_LLM/, ""),
