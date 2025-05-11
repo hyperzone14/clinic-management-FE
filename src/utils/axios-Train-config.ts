@@ -160,7 +160,8 @@ interface ApiErrorResponse {
 
 // Create axios instance with custom config
 const api = axios.create({
-  baseURL: "http://localhost:3000",
+  baseURL: "http://localhost:8080",
+  // baseURL: "https://ai-1234-863400825337.us-central1.run.app",
   headers: {
     "Content-Type": "application/json",
   },

@@ -1,6 +1,9 @@
 {
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "https://clinic-management-vdb.onrender.com/$1" },
+    {
+      "source": "/api/(.*)",
+      "destination": "https://clinic-management-tdd-ee9f27f356d8.herokuapp.com"
+    },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

@@ -27,7 +27,8 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api_LLM/, ""),
       },
       "/api_Train": {
-        target: "http://localhost:3000", // Backend server
+        // target: "http://localhost:8080", // Backend server
+        target: "https://medical-predict-api-production.up.railway.app", // Backend server
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api_Train/, ""),

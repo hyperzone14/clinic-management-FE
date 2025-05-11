@@ -86,7 +86,8 @@ interface ApiErrorResponse {
 
 // Create axios instance with custom config
 const api = axios.create({
-  baseURL: "https://medical-ai-api-d6f4a40b7b22.herokuapp.com",
+  baseURL: "https://medical-predict-api-production.up.railway.app",
+  // baseURL: "http://localhost:8080",
   headers: {
     "Content-Type": "application/json",
   },
