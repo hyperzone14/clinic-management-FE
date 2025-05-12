@@ -158,7 +158,7 @@ export const pageRoutes: Routes[] = [
   },
   {
     id: 11,
-    path: "/medical-bill-final",
+    path: "/medical-bill",
     location: "MedicalBillFinal",
     roles: ["ROLE_DOCTOR"],
   },
