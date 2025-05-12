@@ -164,7 +164,6 @@ const MedicalBillFinal: React.FC = () => {
   const [symptoms, setSymptoms] = useState<Symptom[]>([]);
   const [isSearching, setIsSearching] = useState<boolean>(false);
 
-
   const [fault, setFault] = useState<boolean>(false);
   const [loadingPredictions, setLoadingPredictions] = useState<boolean>(false);
   const [switchValue, setSwitchValue] = useState<"LLM" | "Train data">("LLM");
@@ -173,11 +172,15 @@ const MedicalBillFinal: React.FC = () => {
     dispatch(clearPredictionsLLM());
     dispatch(clearPredictionsTrain());
   }, [dispatch]);
-  
+
   // New states for drug search
-  //const [searchDrugs, setSearchDrugs] = useState<{ id: number; name: string }[]>([]);
-  //const [isSearchingDrugs, setIsSearchingDrugs] = useState<boolean>(false);
-  //const [searchTerms, setSearchTerms] = useState<{ [index: number]: string }>({});
+  const [searchDrugs, setSearchDrugs] = useState<
+    { id: number; name: string }[]
+  >([]);
+  const [isSearchingDrugs, setIsSearchingDrugs] = useState<boolean>(false);
+  const [searchTerms, setSearchTerms] = useState<{ [index: number]: string }>(
+    {}
+  );
 
   // Check doctor access on component mount
   useEffect(() => {
@@ -568,9 +571,15 @@ const MedicalBillFinal: React.FC = () => {
     const prescribedDrugs: DrugFormData[] = symptom.prescribedDrugs.map(
       (prescribedDrug) => {
         // Ưu tiên lấy drugId, nếu không có thì lấy id
-        const drugId = (prescribedDrug as any).drugId !== undefined ? (prescribedDrug as any).drugId : (prescribedDrug as any).id;
+        const drugId =
+          (prescribedDrug as any).drugId !== undefined
+            ? (prescribedDrug as any).drugId
+            : (prescribedDrug as any).id;
         // Ưu tiên lấy drugName, nếu không có thì lấy name
-        const drugName = (prescribedDrug as any).drugName !== undefined ? (prescribedDrug as any).drugName : (prescribedDrug as any).name;
+        const drugName =
+          (prescribedDrug as any).drugName !== undefined
+            ? (prescribedDrug as any).drugName
+            : (prescribedDrug as any).name;
         const matchingDrug = availableDrugs.find((d) => d.id === drugId);
         return {
           drugId: matchingDrug?.id || drugId || 0,
@@ -691,11 +700,16 @@ const MedicalBillFinal: React.FC = () => {
 
     setIsSearchingDrugs(true);
     try {
-      const response = await apiService.get(`/drug/search?keyword=${encodeURIComponent(keyword.trim())}`);
+      const response = await apiService.get(
+        `/drug/search?keyword=${encodeURIComponent(keyword.trim())}`
+      );
       // Lấy đúng mảng content từ response
       let drugs: { id: number; name: string }[] = [];
       if (Array.isArray((response as any)?.result?.content)) {
-        drugs = (response as any).result.content.map((d: any) => ({ id: d.id, name: d.name }));
+        drugs = (response as any).result.content.map((d: any) => ({
+          id: d.id,
+          name: d.name,
+        }));
       }
       setSearchDrugs(drugs);
     } catch (error) {
@@ -1320,15 +1334,25 @@ const MedicalBillFinal: React.FC = () => {
                     <div className='col-span-1'></div>
                   </div>
                   {drugs.map((drug, index) => (
-                    <div key={index} className='grid grid-cols-12 gap-4 items-center mb-2'>
+                    <div
+                      key={index}
+                      className='grid grid-cols-12 gap-4 items-center mb-2'
+                    >
                       {/* Ô search thuốc */}
                       <div className='relative w-full col-span-3'>
                         <input
                           type='text'
-                          value={drug.drugId !== 0 ? (drug.drugName || "") : (searchTerms[index] || "")}
+                          value={
+                            drug.drugId !== 0
+                              ? drug.drugName || ""
+                              : searchTerms[index] || ""
+                          }
                           onChange={(e) => {
                             const value = e.target.value;
-                            setSearchTerms((prev) => ({ ...prev, [index]: value }));
+                            setSearchTerms((prev) => ({
+                              ...prev,
+                              [index]: value,
+                            }));
                             handleDrugChange(index, "drugName", value || "");
                             handleDrugChange(index, "drugId", 0);
                             if (value && value.length > 1) {
@@ -1346,19 +1370,24 @@ const MedicalBillFinal: React.FC = () => {
                             <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500'></div>
                           </div>
                         )}
-                        {searchDrugs && Array.isArray(searchDrugs) && searchDrugs.length > 0 && drug.drugId === 0 && (
-                          <div className='absolute z-[9999] w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 max-h-60 overflow-y-auto'>
-                            {searchDrugs.map((d: any) => (
-                              <button
-                                key={d.id}
-                                onClick={() => handleDrugSelect(index, d.id, d.name)}
-                                className='w-full text-left px-4 py-2 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none border-b border-gray-100 last:border-b-0'
-                              >
-                                {d.name}
-                              </button>
-                            ))}
-                          </div>
-                        )}
+                        {searchDrugs &&
+                          Array.isArray(searchDrugs) &&
+                          searchDrugs.length > 0 &&
+                          drug.drugId === 0 && (
+                            <div className='absolute z-[9999] w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 max-h-60 overflow-y-auto'>
+                              {searchDrugs.map((d: any) => (
+                                <button
+                                  key={d.id}
+                                  onClick={() =>
+                                    handleDrugSelect(index, d.id, d.name)
+                                  }
+                                  className='w-full text-left px-4 py-2 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none border-b border-gray-100 last:border-b-0'
+                                >
+                                  {d.name}
+                                </button>
+                              ))}
+                            </div>
+                          )}
                         {drug.drugId !== 0 && (
                           <button
                             type='button'
@@ -1377,7 +1406,9 @@ const MedicalBillFinal: React.FC = () => {
                       <input
                         type='number'
                         value={drug.dosage}
-                        onChange={(e) => handleDrugChange(index, "dosage", e.target.value)}
+                        onChange={(e) =>
+                          handleDrugChange(index, "dosage", e.target.value)
+                        }
                         className='w-full p-2 border rounded-lg text-gray-700 col-span-2'
                         placeholder='Enter quantity'
                         min='0.1'
@@ -1386,7 +1417,9 @@ const MedicalBillFinal: React.FC = () => {
                       <input
                         type='number'
                         value={drug.duration}
-                        onChange={(e) => handleDrugChange(index, "duration", e.target.value)}
+                        onChange={(e) =>
+                          handleDrugChange(index, "duration", e.target.value)
+                        }
                         className='w-full p-2 border rounded-lg text-gray-700 col-span-2'
                         placeholder='Enter days'
                         min='1'
@@ -1394,14 +1427,22 @@ const MedicalBillFinal: React.FC = () => {
                       <input
                         type='text'
                         value={drug.frequency}
-                        onChange={(e) => handleDrugChange(index, "frequency", e.target.value)}
+                        onChange={(e) =>
+                          handleDrugChange(index, "frequency", e.target.value)
+                        }
                         className='w-full p-2 border rounded-lg text-gray-700 col-span-2'
                         placeholder='e.g., Twice a day'
                       />
                       <input
                         type='text'
                         value={drug.specialInstructions}
-                        onChange={(e) => handleDrugChange(index, "specialInstructions", e.target.value)}
+                        onChange={(e) =>
+                          handleDrugChange(
+                            index,
+                            "specialInstructions",
+                            e.target.value
+                          )
+                        }
                         className='w-full p-2 border rounded-lg text-gray-700 col-span-2'
                         placeholder='Take after meals'
                       />
