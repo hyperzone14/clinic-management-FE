@@ -75,6 +75,7 @@ interface ImageResponseDTO {
 
 interface DrugFormData {
   drugId: number;
+  drugName?: string;
   dosage: string;
   duration: string;
   frequency: string;
@@ -163,6 +164,7 @@ const MedicalBillFinal: React.FC = () => {
   const [symptoms, setSymptoms] = useState<Symptom[]>([]);
   const [isSearching, setIsSearching] = useState<boolean>(false);
 
+
   const [fault, setFault] = useState<boolean>(false);
   const [loadingPredictions, setLoadingPredictions] = useState<boolean>(false);
   const [switchValue, setSwitchValue] = useState<"LLM" | "Train data">("LLM");
@@ -171,6 +173,11 @@ const MedicalBillFinal: React.FC = () => {
     dispatch(clearPredictionsLLM());
     dispatch(clearPredictionsTrain());
   }, [dispatch]);
+  
+  // New states for drug search
+  //const [searchDrugs, setSearchDrugs] = useState<{ id: number; name: string }[]>([]);
+  //const [isSearchingDrugs, setIsSearchingDrugs] = useState<boolean>(false);
+  //const [searchTerms, setSearchTerms] = useState<{ [index: number]: string }>({});
 
   // Check doctor access on component mount
   useEffect(() => {
@@ -557,14 +564,17 @@ const MedicalBillFinal: React.FC = () => {
       finalDiagnosis: symptom.name,
     }));
 
-    // Find matching drugs from availableDrugs based on name
+    // Find matching drugs from availableDrugs based on id
     const prescribedDrugs: DrugFormData[] = symptom.prescribedDrugs.map(
       (prescribedDrug) => {
-        const matchingDrug = availableDrugs.find(
-          (d) => d.name === prescribedDrug.drugName
-        );
+        // Ưu tiên lấy drugId, nếu không có thì lấy id
+        const drugId = (prescribedDrug as any).drugId !== undefined ? (prescribedDrug as any).drugId : (prescribedDrug as any).id;
+        // Ưu tiên lấy drugName, nếu không có thì lấy name
+        const drugName = (prescribedDrug as any).drugName !== undefined ? (prescribedDrug as any).drugName : (prescribedDrug as any).name;
+        const matchingDrug = availableDrugs.find((d) => d.id === drugId);
         return {
-          drugId: matchingDrug?.id || 0,
+          drugId: matchingDrug?.id || drugId || 0,
+          drugName: matchingDrug?.name || drugName || "",
           dosage: prescribedDrug.dosage.toString(),
           duration: prescribedDrug.duration.toString(),
           frequency: prescribedDrug.frequency,
@@ -670,6 +680,44 @@ const MedicalBillFinal: React.FC = () => {
         />
       );
     }
+  };
+
+  // Thêm hàm tìm kiếm thuốc
+  const searchDrugsByName = async (keyword: string) => {
+    if (!keyword || keyword.trim().length < 2) {
+      setSearchDrugs([]);
+      return;
+    }
+
+    setIsSearchingDrugs(true);
+    try {
+      const response = await apiService.get(`/drug/search?keyword=${encodeURIComponent(keyword.trim())}`);
+      // Lấy đúng mảng content từ response
+      let drugs: { id: number; name: string }[] = [];
+      if (Array.isArray((response as any)?.result?.content)) {
+        drugs = (response as any).result.content.map((d: any) => ({ id: d.id, name: d.name }));
+      }
+      setSearchDrugs(drugs);
+    } catch (error) {
+      setSearchDrugs([]);
+    } finally {
+      setIsSearchingDrugs(false);
+    }
+  };
+
+  // Thêm hàm này sau handleDrugChange
+  const handleDrugSelect = (index: number, id: number, name: string) => {
+    setDrugs((prevDrugs) => {
+      const newDrugs = [...prevDrugs];
+      newDrugs[index] = {
+        ...newDrugs[index],
+        drugId: id,
+        drugName: name,
+      };
+      return newDrugs;
+    });
+    setSearchTerms((prev) => ({ ...prev, [index]: "" }));
+    setSearchDrugs([]);
   };
 
   if (loading) {
@@ -1262,129 +1310,109 @@ const MedicalBillFinal: React.FC = () => {
                   </button>
                 </div>
 
-                <div className='overflow-hidden rounded-xl border border-gray-200'>
-                  <table className='min-w-full divide-y divide-gray-200'>
-                    <thead className='bg-gray-50'>
-                      <tr>
-                        <th className='px-6 py-4 text-left text-sm font-medium text-gray-500'>
-                          Medicine Name
-                        </th>
-                        <th className='px-6 py-4 text-left text-sm font-medium text-gray-500'>
-                          Quantity
-                        </th>
-                        <th className='px-6 py-4 text-left text-sm font-medium text-gray-500'>
-                          Duration
-                        </th>
-                        <th className='px-6 py-4 text-left text-sm font-medium text-gray-500'>
-                          Frequency
-                        </th>
-                        <th className='px-6 py-4 text-left text-sm font-medium text-gray-500'>
-                          Instructions
-                        </th>
-                        <th className='w-20'></th>
-                      </tr>
-                    </thead>
-                    <tbody className='bg-white divide-y divide-gray-200'>
-                      {drugs.map((drug, index) => (
-                        <tr
-                          key={index}
-                          className='hover:bg-gray-50 transition-colors'
-                        >
-                          <td className='px-6 py-4'>
-                            <select
-                              value={drug.drugId}
-                              onChange={(e) =>
-                                handleDrugChange(
-                                  index,
-                                  "drugId",
-                                  parseInt(e.target.value)
-                                )
-                              }
-                              className='w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                            >
-                              <option value=''>Select Medicine</option>
-                              {availableDrugs.map((d) => (
-                                <option key={d.id} value={d.id}>
-                                  {d.name} ({d.standardDosage})
-                                </option>
-                              ))}
-                            </select>
-                          </td>
-                          <td className='px-6 py-4'>
-                            <input
-                              type='number'
-                              value={drug.dosage}
-                              onChange={(e) =>
-                                handleDrugChange(
-                                  index,
-                                  "dosage",
-                                  e.target.value
-                                )
-                              }
-                              className='w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                              placeholder='Enter quantity'
-                              min='0.1'
-                              step='0.1'
-                            />
-                          </td>
-                          <td className='px-6 py-4'>
-                            <input
-                              type='number'
-                              value={drug.duration}
-                              onChange={(e) =>
-                                handleDrugChange(
-                                  index,
-                                  "duration",
-                                  e.target.value
-                                )
-                              }
-                              className='w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                              placeholder='Enter days'
-                              min='1'
-                            />
-                          </td>
-                          <td className='px-6 py-4'>
-                            <input
-                              type='text'
-                              value={drug.frequency}
-                              onChange={(e) =>
-                                handleDrugChange(
-                                  index,
-                                  "frequency",
-                                  e.target.value
-                                )
-                              }
-                              className='w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                              placeholder='e.g., Twice a day'
-                            />
-                          </td>
-                          <td className='px-6 py-4'>
-                            <input
-                              type='text'
-                              value={drug.specialInstructions}
-                              onChange={(e) =>
-                                handleDrugChange(
-                                  index,
-                                  "specialInstructions",
-                                  e.target.value
-                                )
-                              }
-                              className='w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                              placeholder='Take after meals'
-                            />
-                          </td>
-                          <td className='px-6 py-4'>
-                            <button
-                              onClick={() => removeDrugField(index)}
-                              className='p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors'
-                            >
-                              <Trash2 className='h-5 w-5' />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className='rounded-xl border border-gray-200 p-4'>
+                  <div className='grid grid-cols-12 gap-4 font-semibold text-gray-500 mb-2'>
+                    <div className='col-span-3'>Medicine Name</div>
+                    <div className='col-span-2'>Quantity</div>
+                    <div className='col-span-2'>Duration</div>
+                    <div className='col-span-2'>Frequency</div>
+                    <div className='col-span-2'>Instructions</div>
+                    <div className='col-span-1'></div>
+                  </div>
+                  {drugs.map((drug, index) => (
+                    <div key={index} className='grid grid-cols-12 gap-4 items-center mb-2'>
+                      {/* Ô search thuốc */}
+                      <div className='relative w-full col-span-3'>
+                        <input
+                          type='text'
+                          value={drug.drugId !== 0 ? (drug.drugName || "") : (searchTerms[index] || "")}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            setSearchTerms((prev) => ({ ...prev, [index]: value }));
+                            handleDrugChange(index, "drugName", value || "");
+                            handleDrugChange(index, "drugId", 0);
+                            if (value && value.length > 1) {
+                              searchDrugsByName(value);
+                            } else {
+                              setSearchDrugs([]);
+                            }
+                          }}
+                          className='w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                          placeholder='Search medicine...'
+                          autoComplete='off'
+                        />
+                        {isSearchingDrugs && (
+                          <div className='absolute right-3 top-1/2 transform -translate-y-1/2'>
+                            <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500'></div>
+                          </div>
+                        )}
+                        {searchDrugs && Array.isArray(searchDrugs) && searchDrugs.length > 0 && drug.drugId === 0 && (
+                          <div className='absolute z-[9999] w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 max-h-60 overflow-y-auto'>
+                            {searchDrugs.map((d: any) => (
+                              <button
+                                key={d.id}
+                                onClick={() => handleDrugSelect(index, d.id, d.name)}
+                                className='w-full text-left px-4 py-2 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none border-b border-gray-100 last:border-b-0'
+                              >
+                                {d.name}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                        {drug.drugId !== 0 && (
+                          <button
+                            type='button'
+                            onClick={() => {
+                              handleDrugChange(index, "drugId", 0);
+                              handleDrugChange(index, "drugName", "");
+                            }}
+                            className='absolute right-2 top-2 text-gray-400 hover:text-red-500'
+                            title='Clear selection'
+                          >
+                            <Trash2 className='h-4 w-4' />
+                          </button>
+                        )}
+                      </div>
+                      {/* Các input còn lại */}
+                      <input
+                        type='number'
+                        value={drug.dosage}
+                        onChange={(e) => handleDrugChange(index, "dosage", e.target.value)}
+                        className='w-full p-2 border rounded-lg text-gray-700 col-span-2'
+                        placeholder='Enter quantity'
+                        min='0.1'
+                        step='0.1'
+                      />
+                      <input
+                        type='number'
+                        value={drug.duration}
+                        onChange={(e) => handleDrugChange(index, "duration", e.target.value)}
+                        className='w-full p-2 border rounded-lg text-gray-700 col-span-2'
+                        placeholder='Enter days'
+                        min='1'
+                      />
+                      <input
+                        type='text'
+                        value={drug.frequency}
+                        onChange={(e) => handleDrugChange(index, "frequency", e.target.value)}
+                        className='w-full p-2 border rounded-lg text-gray-700 col-span-2'
+                        placeholder='e.g., Twice a day'
+                      />
+                      <input
+                        type='text'
+                        value={drug.specialInstructions}
+                        onChange={(e) => handleDrugChange(index, "specialInstructions", e.target.value)}
+                        className='w-full p-2 border rounded-lg text-gray-700 col-span-2'
+                        placeholder='Take after meals'
+                      />
+                      <button
+                        onClick={() => removeDrugField(index)}
+                        className='p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors col-span-1'
+                      >
+                        <Trash2 className='h-5 w-5' />
+                      </button>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
