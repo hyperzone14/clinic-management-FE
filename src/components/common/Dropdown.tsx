@@ -34,6 +34,7 @@ const Dropdown: React.FC<DropdownProps> = ({
 
   const [roles, setRoles] = useState<string[] | null>(null);
   const isDoctor = roles?.includes("ROLE_DOCTOR");
+  const isNurse = roles?.includes("ROLE_NURSE");
 
   const handleReduce = (data: string | null | undefined) => {
     if (data == null) return ""; // handles both null and undefined
@@ -134,7 +135,7 @@ const Dropdown: React.FC<DropdownProps> = ({
           <span className='ms-5'>Doctor Calendar</span>
         </div>
       </li>
-      <li
+      {/* <li
         className='px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors'
         onClick={() => {
           navigate("/manual-checkin");
@@ -145,7 +146,7 @@ const Dropdown: React.FC<DropdownProps> = ({
           <PiClockCountdown size={25} className='text-black font-bold' />
           <span className='ms-5'>Manual Check-in</span>
         </div>
-      </li>
+      </li> */}
     </>
   );
 
@@ -199,10 +200,10 @@ const Dropdown: React.FC<DropdownProps> = ({
           <hr />
 
           {/* Common Menu Items */}
-          {commonMenuItems}
+          {isNurse ? <></> : commonMenuItems}
 
           {/* Role-specific Menu Items */}
-          {isDoctor ? doctorMenuItems : patientMenuItems}
+          {isDoctor ? doctorMenuItems : isNurse ? <></> : patientMenuItems}
 
           <hr />
           {/* Logout Section */}
