@@ -123,7 +123,7 @@ const Home = () => {
                 patients. We have a team of experienced doctors and nurses who
                 are dedicated to providing the best care to our patients.
               </p>
-              {currentRole !== "ROLE_DOCTOR" ? (
+              {currentRole !== "ROLE_DOCTOR" && currentRole !== "ROLE_NURSE" ? (
                 <button
                   className='mt-5 bg-[#4567b7] text-white py-2 px-5 rounded-md'
                   onClick={() => {
