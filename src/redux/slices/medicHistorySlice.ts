@@ -284,6 +284,28 @@ export const deleteMedicalRecord = createAsyncThunk(
   }
 );
 
+// Thunk mới cho admin, đồng bộ với tableSlice
+export const fetchAdminRecords = createAsyncThunk(
+  "medicHistory/fetchAdminRecords",
+  async (_, { getState, rejectWithValue }) => {
+    try {
+      const state = getState() as any;
+      const { currentPage, rowsPerPage } = state.table;
+      const response = await apiService.get<PaginatedResponse>(
+        `/medical-bills?page=${currentPage - 1}&size=${rowsPerPage}`
+      );
+      return {
+        content: response.content,
+        totalPages: response.totalPages,
+        totalElements: response.totalElements,
+        currentPage: response.number + 1,
+      };
+    } catch (error: any) {
+      return rejectWithValue(error?.message || "Failed to fetch records");
+    }
+  }
+);
+
 const medicHistorySlice = createSlice({
   name: "medicHistory",
   initialState,
@@ -412,6 +434,24 @@ const medicHistorySlice = createSlice({
         state.records = state.records.filter((r) => r.id !== action.payload);
         state.filteredRecords = [...state.records];
         state.totalElements -= 1;
+      })
+      .addCase(fetchAdminRecords.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchAdminRecords.fulfilled, (state, action) => {
+        state.loading = false;
+        state.records = action.payload.content;
+        state.filteredRecords = action.payload.content;
+        state.totalPages = action.payload.totalPages;
+        state.totalElements = action.payload.totalElements;
+        state.currentPage = action.payload.currentPage;
+      })
+      .addCase(fetchAdminRecords.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+        state.records = [];
+        state.filteredRecords = [];
       });
   },
 });

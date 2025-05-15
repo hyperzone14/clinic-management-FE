@@ -316,4 +316,10 @@ export const adminRoutes: Routes[] = [
     location: "PreMedicalBillManagement",
     roles: ["ROLE_CLIENT_OWNER"],
   },
+  {
+    id: 7,
+    path: "medical-bill",
+    location: "MedicalBillManagement",
+    roles: ["ROLE_CLIENT_OWNER"],
+  },
 ];
