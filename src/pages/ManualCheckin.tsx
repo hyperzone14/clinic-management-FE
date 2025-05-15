@@ -256,7 +256,7 @@ const ManualCheckin = () => {
                 </div>
               ) : (
                 <>
-                  <div className='w-9/12 space-y-4 h-[10rem] pr-4 overflow-y-auto'>
+                  <div className='w-9/12 space-y-4 h-[20rem] pr-4 overflow-y-auto'>
                     {appointments.map((appointment, index) => (
                       <ManualCheckinCard
                         key={`${appointment.id}-${appointment.appointmentStatus}`}

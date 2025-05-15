@@ -27,6 +27,8 @@ import {
 } from "../redux/slices/botTrainSlice";
 import { Switch } from "@mui/material";
 import "../styles/switchSetup.css";
+import { fetchDepartments } from "../redux/slices/departmentSlice";
+import { getDoctorById } from "../redux/slices/doctorSlice";
 
 interface LocationState {
   patientId: number;
@@ -137,6 +139,7 @@ const MedicalBillFinal: React.FC = () => {
   const { currentBill, availableDrugs, loading } = useAppSelector(
     (state) => state.medicalBill
   );
+  const departmentInfo = useAppSelector((state) => state.department);
   const predictionsLLM = useAppSelector((state) => state.botLLM.predictions);
   const predictionsTrain = useAppSelector(
     (state) => state.botTrain.predictions
@@ -168,10 +171,28 @@ const MedicalBillFinal: React.FC = () => {
   const [loadingPredictions, setLoadingPredictions] = useState<boolean>(false);
   const [switchValue, setSwitchValue] = useState<"LLM" | "Train data">("LLM");
 
+  const doctorInfo = useAppSelector((state) => state.doctor);
+  const doctorId = state.doctorId;
+  const [department, setDepartment] = useState<string>("");
+
   useEffect(() => {
     dispatch(clearPredictionsLLM());
     dispatch(clearPredictionsTrain());
   }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(getDoctorById(doctorId));
+    dispatch(fetchDepartments());
+    const departmentId = doctorInfo.doctors.find(
+      (doctor) => doctor.id === doctorId
+    )?.departmentId;
+
+    const departmentName = departmentInfo.departments.find(
+      (dept) => dept.id === departmentId
+    )?.name;
+
+    setDepartment(departmentName || "");
+  }, [departmentInfo.departments, dispatch, doctorId, doctorInfo]);
 
   // New states for drug search
   const [searchDrugs, setSearchDrugs] = useState<
@@ -844,11 +865,17 @@ const MedicalBillFinal: React.FC = () => {
         <div className='mb-12'>
           <Title id={12} />
           <div className='mt-10 mx-16 px-3'>
-            <div className='grid grid-cols-2 justify-between'>
+            <div className='grid grid-cols-3 justify-between'>
               <div className='col-span-1 flex'>
                 <p className='font-bold text-2xl'>Doctor Name: </p>
                 <span className='ms-5 text-2xl text-[#A9A9A9]'>
                   {currentBill.doctorName}
+                </span>
+              </div>
+              <div className='col-span-1 flex'>
+                <p className='font-bold text-2xl'>Department: </p>
+                <span className='ms-5 text-2xl text-[#A9A9A9]'>
+                  {department}
                 </span>
               </div>
               <div className='col-span-1 flex'>
