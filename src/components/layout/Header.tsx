@@ -3,7 +3,11 @@ import { getHeaderRoutes, Routes } from "../../utils/pageRoutes.ts";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Dropdown from "../common/Dropdown.tsx";
 import { useSelector } from "react-redux";
-import { RootState, useAppDispatch } from "../../redux/store.ts";
+import {
+  RootState,
+  useAppDispatch,
+  // useAppSelector,
+} from "../../redux/store.ts";
 import { PiUserCircleLight } from "react-icons/pi";
 import { JwtUtils } from "../../utils/security/jwt/JwtUtils";
 import { logout, setCredentials } from "../../redux/slices/authSlice";
@@ -19,6 +23,8 @@ export const Header = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const [headerRoutes, setHeaderRoutes] = useState<Routes[]>([]);
+  // const patientInfo = useSelector((state: RootState) => state.userManage.users);
+  // const doctorInfo = useAppSelector((state) => state.doctorManage.doctors);
 
   useEffect(() => {
     const initializeUserData = () => {
@@ -26,6 +32,17 @@ export const Header = () => {
       const email = JwtUtils.getEmail();
       const username = JwtUtils.getUsername();
       const id = AuthService.getIdFromToken();
+      // const userRole = AuthService.getRolesFromToken();
+
+      //   let username: string | undefined; // Declare username outside the blocks
+
+      // if (userRole.includes("ROLE_PATIENT")) {
+      //   const user = patientInfo.find((user) => user.id.toString() === id);
+      //   username = user?.username; // Assign username if user is found
+      // } else if (userRole.includes("ROLE_DOCTOR")) {
+      //   const user = doctorInfo.find((user) => user.id.toString() === id);
+      //   username = user?.username; // Assign username if user is found
+      // }
 
       if (token && email && username && id) {
         // Restore user data to Redux state

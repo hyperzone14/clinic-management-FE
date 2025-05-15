@@ -74,4 +74,10 @@ export const titleSteps = [
     title: "Lab tests result",
     subTitle: "Make sure all lab tests result is complete before proceeding.",
   },
+  {
+    id: 14,
+    title: "Doctor information",
+    subTitle:
+      "All the doctor information, securely managed for personalized care",
+  },
 ];
