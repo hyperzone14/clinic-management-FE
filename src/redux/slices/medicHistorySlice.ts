@@ -22,7 +22,11 @@ export interface ExaminationDetail {
   patientName: string;
   doctorName: string;
   examinationType: string;
+  labDepartment: string;
+  labPrice: string;
+  status: string;
   examinationResult: string;
+  createdAt: string;
   imageResponseDTO: ImageResponse[];
 }
 
