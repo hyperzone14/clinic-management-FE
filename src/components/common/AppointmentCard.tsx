@@ -24,6 +24,7 @@ interface AppointmentCardProps {
   onPatientClick: (appointment: any, index: number) => void;
   onStatusChange: (index: number, status: StatusType) => void;
   showLabTestStatusesOnly?: boolean;
+  disableStatusChange?: boolean;
 }
 
 const AppointmentCard: React.FC<AppointmentCardProps> = ({
@@ -32,6 +33,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
   onPatientClick,
   onStatusChange,
   showLabTestStatusesOnly = false,
+  disableStatusChange = false,
 }) => {
   const formatTimeSlot = (timeSlot: string) => {
     const timeMap: Record<string, string> = {
@@ -221,6 +223,7 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
             status={appointment.status}
             onStatusChange={(newStatus) => onStatusChange(index, newStatus)}
             showLabTestStatusesOnly={showLabTestStatusesOnly}
+            disableStatusChange={disableStatusChange}
           />
         </div>
       </div>

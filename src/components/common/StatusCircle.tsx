@@ -31,6 +31,7 @@ interface StatusCircleProps {
   onStatusChange?: (newStatus: StatusType) => void;
   isManualCheckin?: boolean;
   showLabTestStatusesOnly?: boolean;
+  disableStatusChange?: boolean;
 }
 
 const STATUS_STYLES: Record<StatusType, StatusStyle> = {
@@ -91,6 +92,7 @@ const StatusCircle: React.FC<StatusCircleProps> = ({
   onStatusChange,
   isManualCheckin = false,
   showLabTestStatusesOnly = false,
+  disableStatusChange = false,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -153,11 +155,11 @@ const StatusCircle: React.FC<StatusCircleProps> = ({
       case 'checked-in':
         return ['pre_examination_completed', 'cancelled'];
       case 'pre_examination_completed':
-        return ['success', 'lab_test_required'];
+        return ['success', 'cancelled'];
       case 'lab_test_required':
-        return ['lab_test_completed'];
+        return ['lab_test_completed', 'cancelled'];
       case 'lab_test_completed':
-        return ['success'];
+        return ['success', 'cancelled'];
       default:
         return [];
     }
@@ -176,16 +178,18 @@ const StatusCircle: React.FC<StatusCircleProps> = ({
     setIsMenuOpen(false);
   };
 
+  const canOpenMenu = isClickable() && !disableStatusChange;
+
   return (
     <div className="relative">
       <div
-        onClick={() => isClickable() && setIsMenuOpen(!isMenuOpen)}
+        onClick={() => canOpenMenu && setIsMenuOpen(!isMenuOpen)}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         className={`w-10 h-10 rounded-full flex items-center justify-center shadow-sm transition-all duration-200 ease-in-out transform
-          ${isClickable() ? "hover:scale-105 cursor-pointer" : "cursor-not-allowed opacity-75"}`}
+          ${canOpenMenu ? "hover:scale-105 cursor-pointer" : "cursor-not-allowed opacity-75"}`}
         style={{ 
-          backgroundColor: isHovered && isClickable() ? 
+          backgroundColor: isHovered && canOpenMenu ? 
             currentStyle.hoverBackground : 
             currentStyle.background 
         }}
@@ -193,7 +197,7 @@ const StatusCircle: React.FC<StatusCircleProps> = ({
         {currentStyle.icon}
       </div>
 
-      {isMenuOpen && isClickable() && (
+      {isMenuOpen && canOpenMenu && (
         <div className="absolute right-0 mt-3 w-48 rounded-lg shadow-lg bg-white ring-1 ring-black/5 z-50 overflow-hidden transform transition-all duration-200 ease-in-out">
           <div className="py-1">
             {getNextStatuses(normalizedStatus, isManualCheckin).map((statusOption) => (

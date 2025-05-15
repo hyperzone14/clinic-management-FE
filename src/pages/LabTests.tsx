@@ -129,7 +129,11 @@ const LabTests: React.FC = () => {
   //   });
   // };
 
-  const handleCardClick = (id: number) => {
+  const handleCardClick = (id: number, status: string) => {
+    if (status === 'UNPAID') {
+      toast.warning('Please complete the payment before proceeding with the lab test');
+      return;
+    }
     navigate(`/lab-tests/${id}`);
   };
 
@@ -249,8 +253,10 @@ const LabTests: React.FC = () => {
             {Array.isArray(labTests) && labTests.map((test) => (
               <div
                 key={test.id}
-                className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() => handleCardClick(test.id)}
+                className={`bg-white rounded-2xl shadow-sm p-6 transition-shadow ${
+                  test.status === 'UNPAID' ? 'cursor-not-allowed opacity-75' : 'hover:shadow-md cursor-pointer'
+                }`}
+                onClick={() => handleCardClick(test.id, test.status)}
               >
                 <div className="grid grid-cols-3 gap-4">
                   <div>
