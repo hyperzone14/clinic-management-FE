@@ -1,7 +1,6 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { fetchAdminRecords } from "../../redux/slices/medicHistorySlice";
-import { setCurrentPage, setRowsPerPage } from "../../redux/slices/tableSlice";
 import { TextField } from "@mui/material";
 import AdminTable, { Column } from "../../components/admin/AdminTable";
 import { Eye } from "lucide-react";
@@ -28,7 +27,7 @@ interface MedicalRecord {
 
 const MedicalBillManagement: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { records, loading, error, totalPages, totalElements } = useAppSelector(
+  const { records, loading, error } = useAppSelector(
     (state) => state.medicHistory
   );
   const { currentPage, rowsPerPage } = useAppSelector((state) => state.table);
@@ -63,14 +62,8 @@ const MedicalBillManagement: React.FC = () => {
   };
 
   // Xử lý đổi trang
-  const handlePageChange = useCallback((page: number) => {
-    dispatch(setCurrentPage(page));
-  }, [dispatch]);
 
   // Xử lý đổi số dòng/trang
-  const handleRowsPerPageChange = useCallback((rows: number) => {
-    dispatch(setRowsPerPage(rows));
-  }, [dispatch]);
 
   const columns: Column<MedicalRecord>[] = [
     {
@@ -157,7 +150,7 @@ const MedicalBillManagement: React.FC = () => {
       <Dialog
         open={openDetail}
         onClose={handleCloseDetail}
-        maxWidth="md"
+        maxWidth="lg"
         fullWidth
       >
         <DialogTitle className="flex justify-between items-center">
@@ -168,7 +161,7 @@ const MedicalBillManagement: React.FC = () => {
         </DialogTitle>
         <DialogContent>
           {selectedRecord && (
-            <div className="p-4">
+            <div className="p-4 w-full">
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div>
                   <h3 className="font-bold">Patient Information</h3>
@@ -201,13 +194,13 @@ const MedicalBillManagement: React.FC = () => {
               {selectedRecord.prescribedDrugs.length > 0 && (
                 <div className="mb-6">
                   <h3 className="font-bold mb-2">Prescribed Drugs</h3>
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
+                  <div className="overflow-x-auto w-full">
+                    <table className="min-w-full divide-y divide-gray-200 w-full">
                       <thead>
                         <tr>
-                          <th className="px-4 py-2">Drug Name</th>
-                          <th className="px-4 py-2">Dosage</th>
-                          <th className="px-4 py-2">Instructions</th>
+                          <th className="px-4 py-2 text-left">Drug Name</th>
+                          <th className="px-4 py-2 text-left">Dosage</th>
+                          <th className="px-4 py-2 text-left">Instructions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -225,15 +218,15 @@ const MedicalBillManagement: React.FC = () => {
               )}
 
               {selectedRecord.examinationDetails.length > 0 && (
-                <div>
+                <div className="mt-6">
                   <h3 className="font-bold mb-2">Examination Details</h3>
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
+                  <div className="overflow-x-auto w-full">
+                    <table className="min-w-full divide-y divide-gray-200 w-full">
                       <thead>
                         <tr>
-                          <th className="px-4 py-2">Type</th>
-                          <th className="px-4 py-2">Result</th>
-                          <th className="px-4 py-2">Price</th>
+                          <th className="px-4 py-2 text-left">Type</th>
+                          <th className="px-4 py-2 text-left">Result</th>
+                          <th className="px-4 py-2 text-left">Price</th>
                         </tr>
                       </thead>
                       <tbody>
