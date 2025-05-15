@@ -181,8 +181,16 @@ const MedicalBillFinal: React.FC = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    dispatch(getDoctorById(doctorId));
-    dispatch(fetchDepartments());
+    // Chỉ gọi API khi doctorId có giá trị và doctorInfo chưa được load
+    if (doctorId && !doctorInfo.doctors.some(doctor => doctor.id === doctorId)) {
+      dispatch(getDoctorById(doctorId));
+    }
+    
+    // Chỉ gọi API khi departments chưa được load
+    if (departmentInfo.departments.length === 0) {
+      dispatch(fetchDepartments());
+    }
+    
     const departmentId = doctorInfo.doctors.find(
       (doctor) => doctor.id === doctorId
     )?.departmentId;
@@ -193,6 +201,15 @@ const MedicalBillFinal: React.FC = () => {
 
     setDepartment(departmentName || "");
   }, [departmentInfo.departments, dispatch, doctorId, doctorInfo]);
+
+  // Thay thế bằng useEffect để lấy departments từ redux store
+  useEffect(() => {
+    if (departmentInfo.departments.length > 0) {
+      // Lấy tên của tất cả departments từ redux store
+      const departmentNames = departmentInfo.departments.map(dept => dept.name);
+      setDepartments(departmentNames);
+    }
+  }, [departmentInfo.departments]);
 
   // New states for drug search
   const [searchDrugs, setSearchDrugs] = useState<
@@ -251,24 +268,6 @@ const MedicalBillFinal: React.FC = () => {
       });
     }
   }, [currentBill]);
-
-  // Fetch departments on mount
-  useEffect(() => {
-    const fetchDepartments = async () => {
-      try {
-        const response = await apiService.get("/lab_department");
-        console.log("Departments response:", response);
-        // Response is directly the array we need
-        setDepartments(response as string[]); // Add type assertion
-      } catch (error) {
-        console.error("Failed to fetch departments:", error);
-        toast.error("Failed to load departments");
-        setDepartments([]);
-      }
-    };
-
-    fetchDepartments();
-  }, []);
 
   // Fetch lab tests when department changes
   useEffect(() => {
@@ -544,34 +543,35 @@ const MedicalBillFinal: React.FC = () => {
     }
 
     setIsSearching(true);
-    console.log("Searching for symptom:", term);
 
     try {
       const encodedTerm = encodeURIComponent(term.trim());
-      console.log("API call to:", `/symptom/name/${encodedTerm}`);
-
-      const response = await apiService.get(`/symptom/name/${encodedTerm}`);
-      console.log("API response:", response);
+      const response = await apiService.get(`/symptom/search?name=${encodedTerm}`);
 
       // Check if we got a valid response
-      if (response && typeof response === "object" && "result" in response) {
-        console.log("Setting symptoms:", [response.result as Symptom]);
-        setSymptoms([response.result as Symptom]);
+      if (response && typeof response === "object") {
+        // Kiểm tra cấu trúc phản hồi mới (paginated response)
+        if ("content" in response && Array.isArray(response.content)) {
+          setSymptoms(response.content as Symptom[]);
+        }
+        // Kiểm tra cấu trúc phản hồi cũ
+        else if ("result" in response) {
+          if (Array.isArray(response.result)) {
+            setSymptoms(response.result as Symptom[]);
+          } else {
+            setSymptoms([response.result as Symptom]);
+          }
+        } else {
+          setSymptoms([]);
+        }
       } else {
-        console.log("No symptoms found in response");
         setSymptoms([]);
       }
     } catch (error: any) {
-      // Log detailed error information
-      console.error("Failed to fetch symptoms:", error);
-      console.error("Error response:", error.response);
-
       // Don't show error for 404, just clear symptoms
       if (error?.response?.status === 404) {
-        console.log("404 error - no symptoms found");
         setSymptoms([]);
       } else {
-        console.error("Other error fetching symptoms:", error);
         toast.error("Error searching for symptoms");
         setSymptoms([]);
       }
@@ -1037,44 +1037,6 @@ const MedicalBillFinal: React.FC = () => {
                   Final Diagnosis
                 </label>
                 <div className='relative'>
-                  {/* <textarea
-                    value={medicalInfo.finalDiagnosis || ""}
-                    onChange={(e) =>
-                      handleMedicalInfoChange("finalDiagnosis", e.target.value)
-                    }
-                    className='w-full p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                    rows={3}
-                    placeholder='Enter or search for final diagnosis...'
-                    disabled={medicalInfo.isHealthy}
-                  />
-                  {isSearching && (
-                    <div className='absolute right-3 top-3 flex items-center space-x-2 bg-blue-50 px-3 py-1 rounded-lg'>
-                      <div className='flex items-center justify-center'>
-                        <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500'></div>
-                      </div>
-                      <span className='text-sm text-blue-600 font-medium'>
-                        Searching...
-                      </span>
-                    </div>
-                  )}
-                  {symptoms.length > 0 && medicalInfo.finalDiagnosis && (
-                    <div className='absolute z-10 w-full bg-white border border-gray-200 rounded-xl shadow-lg mt-1 max-h-60 overflow-y-auto'>
-                      {symptoms.map((symptom) => (
-                        <button
-                          key={symptom.id}
-                          onClick={() => handleSymptomSelect(symptom)}
-                          className='w-full text-left px-4 py-3 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none border-b border-gray-100 last:border-b-0'
-                        >
-                          <p className='font-medium text-gray-800'>
-                            {symptom.name}
-                          </p>
-                          <p className='text-sm text-gray-500 mt-1'>
-                            {symptom.description}
-                          </p>
-                        </button>
-                      ))}
-                    </div>
-                  )} */}
                   <FaNotesMedical
                     className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400'
                     size={20}
@@ -1100,7 +1062,7 @@ const MedicalBillFinal: React.FC = () => {
                     </div>
                   )}
                   {symptoms.length > 0 && medicalInfo.finalDiagnosis && (
-                    <div className='absolute z-10 w-full bg-white border border-gray-200 rounded-xl shadow-lg mt-1 max-h-60 overflow-y-auto'>
+                    <div className='absolute z-50 w-full bg-white border border-gray-200 rounded-xl shadow-lg mt-1 max-h-60 overflow-y-auto'>
                       {symptoms.map((symptom) => (
                         <button
                           key={symptom.id}
