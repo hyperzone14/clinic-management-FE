@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiService } from '../utils/axios-config';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { Loader2 } from 'lucide-react';
 import Title from '../components/common/Title';
 import { FileManager } from '../redux/slices/examinationSlice';
@@ -135,7 +136,10 @@ const LabTestDetail: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (!labTest || !examId) return;
+    if (!labTest || !examId) {
+      toast.error('Invalid lab test information');
+      return;
+    }
 
     if (!result.trim()) {
       toast.error('Please provide examination result');
@@ -149,6 +153,14 @@ const LabTestDetail: React.FC = () => {
       
       if (!files || files.length === 0) {
         toast.error('Please upload at least one image');
+        setLoading(false);
+        return;
+      }
+
+      // Kiểm tra loại file
+      const invalidFiles = files.filter(file => !file.type.startsWith('image/'));
+      if (invalidFiles.length > 0) {
+        toast.error('Please upload only image files (PNG, JPG, JPEG)');
         setLoading(false);
         return;
       }
@@ -221,6 +233,18 @@ const LabTestDetail: React.FC = () => {
 
   return (
     <div className="w-full">
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       <div className="mt-16">
         <h1 className="text-4xl font-bold font-sans my-5 text-center">
           LAB TEST DETAIL
@@ -347,7 +371,7 @@ const LabTestDetail: React.FC = () => {
           <div className="flex justify-center items-center gap-4 my-20">
             <button
               onClick={handleSubmit}
-              disabled={loading || !result.trim() || !(previewUrls[examId]?.length > 0)}
+              disabled={loading}
               className="bg-[#4567b7] hover:bg-[#3E5CA3] text-white px-8 py-4 rounded-lg transition duration-300 ease-in-out text-xl disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
