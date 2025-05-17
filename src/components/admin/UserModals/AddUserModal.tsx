@@ -120,7 +120,7 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
         //   : "An error occurred while saving the profile.";
 
         toast.error(
-          "The email has already been used by a doctor, please change to another email"
+          "The email has already been used by a patient, please change to another email"
         );
       }
 
@@ -177,16 +177,16 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
   return (
     <>
       <ToastContainer />
-      <Dialog open={openAdd} onClose={handleModalClose} maxWidth="sm" fullWidth>
+      <Dialog open={openAdd} onClose={handleModalClose} maxWidth='sm' fullWidth>
         <DialogTitle>Add New Patient</DialogTitle>
         <DialogContent>
           <form onSubmit={(e) => e.preventDefault()}>
             <TextField
-              label="Name"
-              name="fullName"
-              variant="outlined"
+              label='Name'
+              name='fullName'
+              variant='outlined'
               fullWidth
-              margin="normal"
+              margin='normal'
               value={newUser.fullName}
               onChange={handleChange}
               error={!!errors.fullName}
@@ -194,11 +194,11 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
               required
             />
             <TextField
-              label="Citizen ID"
-              name="citizenId"
-              variant="outlined"
+              label='Citizen ID'
+              name='citizenId'
+              variant='outlined'
               fullWidth
-              margin="normal"
+              margin='normal'
               value={newUser.citizenId}
               onChange={handleChange}
               error={!!errors.citizenId}
@@ -206,54 +206,54 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
               required
             />
             <TextField
-              label="Email"
-              name="email"
-              variant="outlined"
+              label='Email'
+              name='email'
+              variant='outlined'
               fullWidth
-              margin="normal"
+              margin='normal'
               value={newUser.email}
               onChange={handleChange}
               error={!!errors.email}
               helperText={errors.email}
-              type="email"
+              type='email'
               required
             />
             <TextField
-              label="Password"
-              name="password"
-              variant="outlined"
+              label='Password'
+              name='password'
+              variant='outlined'
               fullWidth
-              margin="normal"
+              margin='normal'
               value={newUser.password}
               onChange={handleChange}
               error={!!errors.password}
               helperText={errors.password}
-              type="password"
+              type='password'
               required
             />
             <TextField
               select
-              label="Gender"
-              name="gender"
-              variant="outlined"
+              label='Gender'
+              name='gender'
+              variant='outlined'
               fullWidth
-              margin="normal"
+              margin='normal'
               value={newUser.gender}
               onChange={handleChange}
               error={!!errors.gender}
               helperText={errors.gender}
               required
             >
-              <MenuItem value="MALE">Male</MenuItem>
-              <MenuItem value="FEMALE">Female</MenuItem>
-              <MenuItem value="OTHER">Other</MenuItem>
+              <MenuItem value='MALE'>Male</MenuItem>
+              <MenuItem value='FEMALE'>Female</MenuItem>
+              <MenuItem value='OTHER'>Other</MenuItem>
             </TextField>
             <TextField
-              label="Address"
-              name="address"
-              variant="outlined"
+              label='Address'
+              name='address'
+              variant='outlined'
               fullWidth
-              margin="normal"
+              margin='normal'
               value={newUser.address}
               onChange={handleChange}
               error={!!errors.address}
@@ -261,12 +261,12 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
               required
             />
             <TextField
-              label="Date of Birth"
-              name="birthDate"
-              variant="outlined"
+              label='Date of Birth'
+              name='birthDate'
+              variant='outlined'
               fullWidth
-              margin="normal"
-              type="date"
+              margin='normal'
+              type='date'
               value={newUser.birthDate}
               onChange={handleDateChange}
               error={!!errors.birthDate}
@@ -321,14 +321,14 @@ const AddUserModal: React.FC<AddModalProps> = ({ openAdd, handleClose }) => {
           </form>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleModalClose} color="secondary">
+          <Button onClick={handleModalClose} color='secondary'>
             Cancel
           </Button>
           <Button
             onClick={handleSave}
-            color="primary"
-            variant="contained"
-            type="button"
+            color='primary'
+            variant='contained'
+            type='button'
           >
             Save
           </Button>

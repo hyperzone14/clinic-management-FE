@@ -134,9 +134,9 @@ const ManualCheckin = () => {
   const [currentFilters, setCurrentFilters] = useState<SearchFilters>({});
 
   useEffect(() => {
-    const isDoctor = AuthService.hasRole("ROLE_DOCTOR");
-    if (!isDoctor) {
-      toast.error("Access denied: Doctor credentials required");
+    const isNurse = AuthService.hasRole("ROLE_NURSE");
+    if (!isNurse) {
+      toast.error("Access denied: Nurse credentials required");
       return;
     }
     const today = new Date().toISOString().split("T")[0];

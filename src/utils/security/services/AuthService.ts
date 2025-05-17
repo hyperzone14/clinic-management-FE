@@ -154,6 +154,7 @@ export const AuthService = {
     const roles = this.getRolesFromToken();
     if (roles.includes("ROLE_DOCTOR")) return "ROLE_DOCTOR";
     if (roles.includes("ROLE_PATIENT")) return "ROLE_PATIENT";
+    if (roles.includes("ROLE_NURSE")) return "ROLE_NURSE";
     return "GUEST";
   },
 };

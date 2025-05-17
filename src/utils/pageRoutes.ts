@@ -31,6 +31,14 @@ export const getHeaderRoutes = (role: string): Routes[] => {
       { id: 1, path: "/", location: "Home" },
       { id: 2, path: "/schedule", location: "Schedule" },
       { id: 3, path: "/lab-tests", location: "LabTests" },
+      // { id: 4, path: "/pre_exam", location: "Pre-Examination" },
+      // { id: 5, path: "/lab-test-payment", location: "Lab Test Payment" },
+    ];
+  } else if (role === "ROLE_NURSE") {
+    return [
+      { id: 1, path: "/", location: "Home" },
+      { id: 2, path: "/manual-checkin", location: "ManualCheckin" },
+      { id: 3, path: "/manual-booking", location: "ManualBooking" },
       { id: 4, path: "/pre_exam", location: "Pre-Examination" },
       { id: 5, path: "/lab-test-payment", location: "Lab Test Payment" },
     ];
@@ -135,7 +143,7 @@ export const pageRoutes: Routes[] = [
     id: 8,
     path: "/manual-checkin",
     location: "ManualCheckin",
-    roles: ["ROLE_DOCTOR"],
+    roles: ["ROLE_NURSE"],
   },
   {
     id: 9,
@@ -195,6 +203,7 @@ export const pageRoutes: Routes[] = [
     id: 15,
     path: "/manual-booking",
     location: "ManualBooking",
+    roles: ["ROLE_NURSE"],
   },
   {
     id: 16,
@@ -206,7 +215,7 @@ export const pageRoutes: Routes[] = [
     id: 17,
     path: "/pre_exam",
     location: "Pre-Examination",
-    roles: ["ROLE_DOCTOR"],
+    roles: ["ROLE_NURSE"],
     children: [
       {
         id: 151,
@@ -232,7 +241,7 @@ export const pageRoutes: Routes[] = [
     id: 19,
     path: "/lab-test-payment",
     location: "LabTestPayment",
-    roles: ["ROLE_DOCTOR"],
+    roles: ["ROLE_NURSE"],
     children: [
       {
         id: 191,
