@@ -285,20 +285,48 @@ export const deleteMedicalRecord = createAsyncThunk(
 );
 
 // Thunk mới cho admin, đồng bộ với tableSlice
+// export const fetchAdminRecords = createAsyncThunk(
+//   "medicHistory/fetchAdminRecords",
+//   async (_, { getState, rejectWithValue }) => {
+//     try {
+//       const state = getState() as any;
+//       const { currentPage, rowsPerPage } = state.table;
+//       const response = await apiService.get<PaginatedResponse>(
+//         `/medical-bills?page=${currentPage - 1}&size=${rowsPerPage}`
+//       );
+//       return {
+//         content: response.content,
+//         totalPages: response.totalPages,
+//         totalElements: response.totalElements,
+//         currentPage: response.number + 1,
+//       };
+//     } catch (error: any) {
+//       return rejectWithValue(error?.message || "Failed to fetch records");
+//     }
+//   }
+// );
+
 export const fetchAdminRecords = createAsyncThunk(
   "medicHistory/fetchAdminRecords",
-  async (_, { getState, rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      const state = getState() as any;
-      const { currentPage, rowsPerPage } = state.table;
-      const response = await apiService.get<PaginatedResponse>(
-        `/medical-bills?page=${currentPage - 1}&size=${rowsPerPage}`
+      // First, fetch with page 0 and size 1 to get total elements
+      const initialResponse = await apiService.get<PaginatedResponse>(
+        `/medical-bills?page=0&size=1`
       );
+
+      const totalElements = initialResponse.totalElements;
+
+      // Then fetch all records in a single request
+      const response = await apiService.get<PaginatedResponse>(
+        `/medical-bills?page=0&size=${totalElements}`
+      );
+
       return {
         content: response.content,
-        totalPages: response.totalPages,
         totalElements: response.totalElements,
-        currentPage: response.number + 1,
+        totalPages: 1, // Since we're getting all data at once
+        currentPage: 1,
       };
     } catch (error: any) {
       return rejectWithValue(error?.message || "Failed to fetch records");
