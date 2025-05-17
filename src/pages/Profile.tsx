@@ -25,17 +25,19 @@ const Profile = () => {
   return (
     <>
       <ToastContainer />
-      <div className="w-full">
-        <div className="flex flex-col my-5 mx-10 justify-center items-center">
-          <h1 className="text-5xl font-bold font-sans my-5">Profile</h1>
+      <div className='w-full'>
+        <div className='flex flex-col my-5 mx-10 justify-center items-center'>
+          <h1 className='text-5xl font-bold font-sans my-5'>Profile</h1>
         </div>
 
-        <div className="grid grid-cols-12 gap-4 mx-10">
-          <div className="col-span-3">
+        <div className='grid grid-cols-12 gap-4 mx-10'>
+          <div className='col-span-3'>
             <UserImage fullName={auth.username ?? undefined} />
           </div>
-          <div className="col-span-9 mb-16">
+          <div className='col-span-9 mb-16'>
             {currentRole.includes("ROLE_PATIENT") && currentId ? (
+              <PatientProfile id={currentId} />
+            ) : currentRole.includes("ROLE_NURSE") && currentId ? (
               <PatientProfile id={currentId} />
             ) : (
               <DoctorProfile id={currentId ?? ""} />

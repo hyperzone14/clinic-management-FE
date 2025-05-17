@@ -14,6 +14,7 @@ import { logout, setCredentials } from "../../redux/slices/authSlice";
 import { AuthService } from "../../utils/security/services/AuthService.ts";
 
 export const Header = () => {
+  const currentRole = AuthService.getRolesFromToken();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const auth = useSelector((state: RootState) => state.auth);
@@ -139,20 +140,35 @@ export const Header = () => {
 
           <div className='flex justify-center'>
             <ul className='flex gap-10 md:pe-10 md:me-3 lg:pe-0 lg:me-10'>
-              {headerRoutes.map((route) => (
-                <li key={route.id}>
-                  <Link
-                    to={route.path}
-                    className={`font-bold font-sans text-lg hover:text-[#4567b7] hover:underline transition duration-50 ease-in-out whitespace-nowrap ${
-                      location.pathname === route.path
-                        ? "text-[#4567b7] underline"
-                        : ""
-                    }`}
-                  >
-                    {route.location}
-                  </Link>
-                </li>
-              ))}
+              {currentRole.includes("ROLE_NURSE")
+                ? headerRoutes.map((route) => (
+                    <li key={route.id}>
+                      <Link
+                        to={route.path}
+                        className={`font-bold font-sans text-lg hover:text-[#4567b7] hover:underline transition duration-50 ease-in-out whitespace-nowrap ${
+                          location.pathname === route.path
+                            ? "text-[#4567b7] underline"
+                            : ""
+                        }`}
+                      >
+                        {route.name}
+                      </Link>
+                    </li>
+                  ))
+                : headerRoutes.map((route) => (
+                    <li key={route.id}>
+                      <Link
+                        to={route.path}
+                        className={`font-bold font-sans text-lg hover:text-[#4567b7] hover:underline transition duration-50 ease-in-out whitespace-nowrap ${
+                          location.pathname === route.path
+                            ? "text-[#4567b7] underline"
+                            : ""
+                        }`}
+                      >
+                        {route.location}
+                      </Link>
+                    </li>
+                  ))}
             </ul>
           </div>
 

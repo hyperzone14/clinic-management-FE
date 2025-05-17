@@ -332,7 +332,8 @@ const Feedback = () => {
                         >
                           <FaAngleLeft
                             className={`text-white text-2xl ${
-                              activeButtons[index]
+                              // activeButtons[index]
+                              activeNotFeedbackedButtons[index]
                                 ? "transform -rotate-90 transition-transform duration-300"
                                 : "transition-transform duration-300"
                             }`}

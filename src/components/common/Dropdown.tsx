@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { FaRegUser } from "react-icons/fa";
 import { PiUserCircleLight } from "react-icons/pi";
-import { IoNewspaperOutline } from "react-icons/io5";
+import { IoCalendarOutline, IoNewspaperOutline } from "react-icons/io5";
 import { PiClockCountdown } from "react-icons/pi";
 import { RiCalendarCheckLine } from "react-icons/ri";
 import { IoMdLogOut } from "react-icons/io";
@@ -11,6 +11,7 @@ import { RootState } from "../../redux/store";
 import { AuthService } from "../../utils/security/services/AuthService";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { MdOutlinePayments } from "react-icons/md";
 
 interface DropdownProps {
   isOpen: boolean;
@@ -105,6 +106,53 @@ const Dropdown: React.FC<DropdownProps> = ({
           <span className='ms-5'>Profile</span>
         </div>
       </li>
+      {/* <li
+        className='px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors'
+        onClick={() => {
+          navigate("/booking-bill");
+          onClose();
+        }}
+      >
+        <div className='flex items-center my-1'>
+          <IoNewspaperOutline size={25} className='text-black font-bold' />
+          <span className='ms-5'>Booking Bill</span>
+        </div>
+      </li> */}
+    </>
+  );
+
+  const nurseMemuItems = (
+    <>
+      <li
+        className='px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors'
+        onClick={() => {
+          navigate("/manual-booking");
+          onClose();
+        }}
+      >
+        <div className='flex items-center my-1'>
+          <IoCalendarOutline size={25} className='text-black font-bold' />
+          <span className='ms-5'>Manual Booking</span>
+        </div>
+      </li>
+      <li
+        className='px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors'
+        onClick={() => {
+          navigate("/lab-test-payment");
+          onClose();
+        }}
+      >
+        <div className='flex items-center my-1'>
+          <MdOutlinePayments size={25} className='text-black font-bold' />
+          <span className='ms-5'>Lab Test Payment</span>
+        </div>
+      </li>
+    </>
+  );
+
+  // Doctor-specific menu items
+  const doctorMenuItems = (
+    <>
       <li
         className='px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors'
         onClick={() => {
@@ -117,12 +165,6 @@ const Dropdown: React.FC<DropdownProps> = ({
           <span className='ms-5'>Booking Bill</span>
         </div>
       </li>
-    </>
-  );
-
-  // Doctor-specific menu items
-  const doctorMenuItems = (
-    <>
       <li
         className='px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors'
         onClick={() => {
@@ -152,18 +194,32 @@ const Dropdown: React.FC<DropdownProps> = ({
 
   // Patient-specific menu items
   const patientMenuItems = (
-    <li
-      className='px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors'
-      onClick={() => {
-        navigate("/medical-history");
-        onClose();
-      }}
-    >
-      <div className='flex items-center my-1'>
-        <PiClockCountdown size={25} className='text-black font-bold' />
-        <span className='ms-5'>Medical History</span>
-      </div>
-    </li>
+    <>
+      <li
+        className='px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors'
+        onClick={() => {
+          navigate("/booking-bill");
+          onClose();
+        }}
+      >
+        <div className='flex items-center my-1'>
+          <IoNewspaperOutline size={25} className='text-black font-bold' />
+          <span className='ms-5'>Booking Bill</span>
+        </div>
+      </li>
+      <li
+        className='px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors'
+        onClick={() => {
+          navigate("/medical-history");
+          onClose();
+        }}
+      >
+        <div className='flex items-center my-1'>
+          <PiClockCountdown size={25} className='text-black font-bold' />
+          <span className='ms-5'>Medical History</span>
+        </div>
+      </li>
+    </>
   );
 
   return (
@@ -200,10 +256,14 @@ const Dropdown: React.FC<DropdownProps> = ({
           <hr />
 
           {/* Common Menu Items */}
-          {isNurse ? <></> : commonMenuItems}
+          {commonMenuItems}
 
           {/* Role-specific Menu Items */}
-          {isDoctor ? doctorMenuItems : isNurse ? <></> : patientMenuItems}
+          {isDoctor
+            ? doctorMenuItems
+            : isNurse
+            ? nurseMemuItems
+            : patientMenuItems}
 
           <hr />
           {/* Logout Section */}

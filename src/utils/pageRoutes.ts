@@ -6,6 +6,7 @@ export interface Routes {
   location: string;
   children?: Routes[];
   roles?: string[];
+  name?: string;
 }
 
 export const getHeaderRoutes = (role: string): Routes[] => {
@@ -36,11 +37,21 @@ export const getHeaderRoutes = (role: string): Routes[] => {
     ];
   } else if (role === "ROLE_NURSE") {
     return [
-      { id: 1, path: "/", location: "Home" },
-      { id: 2, path: "/manual-checkin", location: "ManualCheckin" },
-      { id: 3, path: "/manual-booking", location: "ManualBooking" },
-      { id: 4, path: "/pre_exam", location: "Pre-Examination" },
-      { id: 5, path: "/lab-test-payment", location: "Lab Test Payment" },
+      { id: 1, path: "/", location: "Home", name: "Home" },
+      {
+        id: 2,
+        path: "/manual-checkin",
+        location: "ManualCheckin",
+        name: "Manual Check In",
+      },
+      // { id: 3, path: "/manual-booking", location: "ManualBooking" },
+      {
+        id: 4,
+        path: "/pre_exam",
+        location: "Pre-Examination",
+        name: "Pre Examination",
+      },
+      // { id: 5, path: "/lab-test-payment", location: "Lab Test Payment" },
     ];
   } else {
     return [
@@ -99,7 +110,7 @@ export const pageRoutes: Routes[] = [
     id: 5,
     path: "/medical-history",
     location: "MedicHistory",
-    roles: ["ROLE_PATIENT, ROLE_DOCTOR"],
+    roles: ["ROLE_PATIENT, ROLE_DOCTOR", "ROLE_NURSE"],
     children: [
       {
         id: 51,
