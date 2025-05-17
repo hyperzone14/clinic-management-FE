@@ -159,6 +159,7 @@ const PreExamination: React.FC = () => {
                       index={index}
                       onPatientClick={handlePatientClick}
                       onStatusChange={handleStatusChange}
+                      disableStatusChange={true}
                     />
                   ))}
                 </div>

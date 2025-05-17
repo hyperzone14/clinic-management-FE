@@ -243,6 +243,14 @@ const MedicDetail: React.FC = () => {
                             </span>
                           </div>
                         )}
+                        {exam.labPrice && (
+                          <div className='flex'>
+                            <p className='font-bold text-2xl'>Price: </p>
+                            <span className='ms-4 text-2xl text-[#A9A9A9]'>
+                              ${exam.labPrice}
+                            </span>
+                          </div>
+                        )}
                       </div>
 
                       {exam.imageResponseDTO &&
@@ -286,6 +294,19 @@ const MedicDetail: React.FC = () => {
               </div>
             </div>
           )}
+
+        {/* Add Total Price Section */}
+        {selectedRecord.examinationDetails && selectedRecord.examinationDetails.length > 0 && (
+          <div className='mt-6 mx-16 px-3 border-t pt-4'>
+            <div className='flex justify-end items-center'>
+              <p className='font-bold text-2xl mr-4'>Total Price: </p>
+              <span className='text-2xl text-[#A9A9A9]'>
+                ${selectedRecord.examinationDetails.reduce((total, exam) => 
+                  total + (parseFloat(exam.labPrice) || 0), 0).toFixed(2)}
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Doctor Final conclude & Note */}
         {(selectedRecord.note && selectedRecord.note.trim() !== "") ||

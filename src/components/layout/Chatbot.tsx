@@ -32,44 +32,56 @@ const Chatbot = () => {
     if (!content) return "";
     const cleanedContent = content.replace("@bot", "").trim();
     
+    const normalizeMarkdownList = (text: string) => {
+      return text
+        .split('\n')
+        .map(line => {
+          if (/^\s*-\s+/.test(line)) {
+            return line.replace(/^\s*-\s+/, '- ');
+          }
+          return line.trim();
+        })
+        .join('\n')
+        .replace(/\n{2,}/g, '\n\n');
+    };
+
     try {
-      // Parse the outer JSON first
+      // Parse outer JSON
       const jsonContent = JSON.parse(cleanedContent);
-      
-      // If we have a result.message structure, parse that first
+      // Nếu có trường answer, chỉ lấy answer đem đi chuẩn hóa markdown
+      if (jsonContent.answer) {
+        if (typeof jsonContent.answer === 'string') {
+          return normalizeMarkdownList(
+            jsonContent.answer
+              .replace(/\n/g, '\n\n')
+              .replace(/•/g, '-')
+          );
+        }
+        return jsonContent.answer;
+      }
+      // Nếu có result.message dạng JSON lồng, giữ logic cũ
       if (jsonContent.result && jsonContent.result.message) {
         try {
-          // Parse the inner JSON in result.message
           const innerContent = JSON.parse(jsonContent.result.message);
           if (innerContent.answer) {
-            // Handle payment response
             if (typeof innerContent.answer === 'string' && innerContent.answer.includes("Payment Link Generated")) {
               const paymentData = JSON.parse(innerContent.answer);
               return `## ${paymentData.message}\n\n[Click here to pay](${paymentData.data.paymentUrl})\n\n*Note: This link expires in ${paymentData.data.expiresIn}*`;
             }
-            // Return the answer directly for normal responses
+            if (typeof innerContent.answer === 'string') {
+              return normalizeMarkdownList(
+                innerContent.answer
+                  .replace(/\n/g, '\n\n')
+                  .replace(/•/g, '-')
+              );
+            }
             return innerContent.answer;
           }
         } catch (innerError) {
-          // If parsing inner JSON fails, return the message as is
           return jsonContent.result.message;
         }
       }
-  
-      // Fallback to original logic for other message types
-      if (jsonContent.answer) {
-        if (typeof jsonContent.answer === 'string' && jsonContent.answer.includes("Payment Link Generated")) {
-          const paymentData = JSON.parse(jsonContent.answer);
-          return `## ${paymentData.message}\n\n[Click here to pay](${paymentData.data.paymentUrl})\n\n*Note: This link expires in ${paymentData.data.expiresIn}*`;
-        }
-        return jsonContent.answer;
-      }
-  
-      // Handle the direct payment link format
-      if (jsonContent.message === "Payment Link Generated!" && jsonContent.data?.paymentUrl) {
-        return `## ${jsonContent.message}\n\n[Click here to pay](${jsonContent.data.paymentUrl})\n\n*Note: This link expires in ${jsonContent.data.expiresIn}*`;
-      }
-  
+      // Các trường hợp khác giữ nguyên
       if (jsonContent.message && jsonContent.data) {
         const dataStr = Object.entries(jsonContent.data)
           .map(([key, value]) => {
@@ -81,18 +93,18 @@ const Chatbot = () => {
           .join('\n');
         return `**Message**: ${jsonContent.message}\n\n**Data**:\n${dataStr}`;
       }
-  
       if (typeof jsonContent === 'string') {
         return jsonContent;
       }
-  
       return typeof cleanedContent === 'object' ? 
         JSON.stringify(cleanedContent) : 
         cleanedContent;
-  
     } catch (e) {
-      // If not JSON, return as is
-      return cleanedContent;
+      return normalizeMarkdownList(
+        cleanedContent
+          .replace(/\n/g, '\n\n')
+          .replace(/•/g, '-')
+      );
     }
   };
 

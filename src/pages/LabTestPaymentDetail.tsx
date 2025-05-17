@@ -69,6 +69,10 @@ const LabTestPaymentDetail: React.FC = () => {
           `/medical-bills/${id}`
         );
         setMedicalBill(response);
+        const unpaidTestIds = response.examinationDetails
+          .filter((test) => test.status === "UNPAID")
+          .map((test) => test.id);
+        setSelectedLabTests(unpaidTestIds);
       } catch (error) {
         console.error("Failed to fetch medical bill details:", error);
         toast.error("Unable to load medical bill details");
@@ -113,42 +117,8 @@ const LabTestPaymentDetail: React.FC = () => {
     return age;
   };
 
-  // const getTotalAmount = () => {
-  //   if (!medicalBill?.examinationDetails) return 0;
-
-  //   // If there are selected tests, only sum those, otherwise return the totalUnpaidAmount
-  //   if (selectedLabTests.length > 0) {
-  //     return medicalBill.examinationDetails
-  //       .filter(test => selectedLabTests.includes(test.id))
-  //       .reduce((sum, test) => sum + parseFloat(test.labPrice || '0'), 0);
-  //   }
-
-  //   return 0;
-  // };
-
   const handleBackClick = () => {
     navigate("/lab-test-payment");
-  };
-
-  const handleLabTestToggle = (testId: number) => {
-    if (selectedLabTests.includes(testId)) {
-      setSelectedLabTests(selectedLabTests.filter((id) => id !== testId));
-    } else {
-      setSelectedLabTests([...selectedLabTests, testId]);
-    }
-  };
-
-  const selectAllLabTests = () => {
-    if (!medicalBill?.examinationDetails) return;
-
-    const unpaidTestIds = medicalBill.examinationDetails
-      .filter((test) => test.status === "UNPAID")
-      .map((test) => test.id);
-    setSelectedLabTests(unpaidTestIds);
-  };
-
-  const deselectAllLabTests = () => {
-    setSelectedLabTests([]);
   };
 
   const handleSubmitPayment = async () => {
@@ -323,18 +293,7 @@ const LabTestPaymentDetail: React.FC = () => {
           {/* Selection controls */}
           <div className='flex justify-between mb-4'>
             <div className='flex space-x-2'>
-              <button
-                onClick={selectAllLabTests}
-                className='px-3 py-1.5 bg-[#87ceeb] text-white rounded-lg hover:bg-[#70b8d9] transition-colors text-sm'
-              >
-                Select All
-              </button>
-              <button
-                onClick={deselectAllLabTests}
-                className='px-3 py-1.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm'
-              >
-                Deselect All
-              </button>
+              {/* Xóa các nút Select All và Deselect All */}
             </div>
 
             <button
@@ -369,20 +328,13 @@ const LabTestPaymentDetail: React.FC = () => {
                   className={`flex justify-between items-center p-4 rounded-lg transition-colors ${
                     test.status === "PAID"
                       ? "bg-[#edf9f2] opacity-70 cursor-default"
-                      : selectedLabTests.includes(test.id)
-                      ? "bg-[#edf9f2] border border-[#34a85a] cursor-pointer"
-                      : "bg-[#f7f7f7] hover:bg-[#edf9f2] cursor-pointer"
+                      : "bg-[#edf9f2] border border-[#34a85a] cursor-default"
                   }`}
-                  onClick={() =>
-                    test.status !== "PAID" && handleLabTestToggle(test.id)
-                  }
                 >
                   <div className='flex items-center'>
                     {test.status !== "PAID" && (
                       <div className='w-5 h-5 border rounded mr-3 flex items-center justify-center bg-white'>
-                        {selectedLabTests.includes(test.id) && (
-                          <div className='w-3 h-3 bg-[#34a85a] rounded-sm'></div>
-                        )}
+                        <div className='w-3 h-3 bg-[#34a85a] rounded-sm'></div>
                       </div>
                     )}
                     <MdOutlineScience className='w-7 h-7 text-[#87ceeb] mr-3' />
