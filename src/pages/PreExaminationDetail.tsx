@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { apiService } from "../utils/axios-config";
 import Title from "../components/common/Title";
 import { ClipboardList, Save } from "lucide-react";
-import { RootState, useAppDispatch } from "../redux/store";
+import { useAppDispatch } from "../redux/store";
 import {
   updateAppointmentStatus,
   AppointmentStatus,
 } from "../redux/slices/scheduleSlice";
-import { getDoctorById } from "../redux/slices/doctorSlice";
-import { useSelector } from "react-redux";
-import { fetchDepartments } from "../redux/slices/departmentSlice";
+// import { getDoctorById } from "../redux/slices/doctorSlice";
+// import { useSelector } from "react-redux";
+// import { fetchDepartments } from "../redux/slices/departmentSlice";
 
 interface PreExaminationFormData {
   patientId: number;
@@ -27,9 +27,9 @@ interface PreExaminationFormData {
 }
 
 const PreExaminationDetail: React.FC = () => {
-  const doctorInfo = useSelector((state: RootState) => state.doctor);
-  const departmentInfo = useSelector((state: RootState) => state.department);
-  const [department, setDepartment] = useState<string>("");
+  // const doctorInfo = useSelector((state: RootState) => state.doctor);
+  // const departmentInfo = useSelector((state: RootState) => state.department);
+  // const [department, setDepartment] = useState<string>("");
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -54,19 +54,19 @@ const PreExaminationDetail: React.FC = () => {
     temperature: "",
   });
 
-  useEffect(() => {
-    dispatch(getDoctorById(doctorId));
-    dispatch(fetchDepartments());
-    const departmentId = doctorInfo.doctors.find(
-      (doctor) => doctor.id === doctorId
-    )?.departmentId;
+  // useEffect(() => {
+  //   dispatch(getDoctorById(doctorId));
+  //   dispatch(fetchDepartments());
+  //   const departmentId = doctorInfo.doctors.find(
+  //     (doctor) => doctor.id === doctorId
+  //   )?.departmentId;
 
-    const departmentName = departmentInfo.departments.find(
-      (dept) => dept.id === departmentId
-    )?.name;
+  //   const departmentName = departmentInfo.departments.find(
+  //     (dept) => dept.id === departmentId
+  //   )?.name;
 
-    setDepartment(departmentName || "");
-  }, [departmentInfo.departments, dispatch, doctorId, doctorInfo]);
+  //   setDepartment(departmentName || "");
+  // }, [departmentInfo.departments, dispatch, doctorId, doctorInfo]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -237,20 +237,18 @@ const PreExaminationDetail: React.FC = () => {
         <div className='mb-12'>
           <Title id={14} />
           <div className='mt-10 mx-16 px-3'>
-            <div className='grid grid-cols-3 gap-4 items-center'>
-              <div className='col-span-1 flex'>
-                <p className='font-bold text-2xl'>Doctor Name: </p>
-                <span className='ms-5 text-2xl text-gray-400'>
-                  {doctorName}
-                </span>
-              </div>
-              <div className='col-span-2 flex'>
+            {/* <div className='grid grid-cols-3 gap-4 items-center'> */}
+            <div className='col-span-1 flex'>
+              <p className='font-bold text-2xl'>Doctor Name: </p>
+              <span className='ms-5 text-2xl text-gray-400'>{doctorName}</span>
+            </div>
+            {/* <div className='col-span-2 flex'>
                 <p className='font-bold text-2xl'>Department: </p>
                 <span className='ms-5 text-2xl text-gray-400'>
                   {department}
                 </span>
-              </div>
-            </div>
+              </div> */}
+            {/* </div> */}
           </div>
         </div>
 
