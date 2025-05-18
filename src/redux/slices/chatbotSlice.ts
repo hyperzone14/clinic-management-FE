@@ -4,6 +4,7 @@ import { apiService } from '../../utils/axios-config';
 import { CompatClient } from '@stomp/stompjs';
 import { createStompClient } from '../../utils/websocket-config';
 import { RootState } from '../store';
+import { JwtUtils } from "../../utils/security/jwt/JwtUtils";
 
 // Types remain the same but let's ensure Message type is strict
 export interface Message {
@@ -92,9 +93,11 @@ export const initializeWebSocket = createAsyncThunk<
 
       stompClientInstance = createStompClient();
 
+      const token = JwtUtils.getToken();
+
       await new Promise<void>((resolve, reject) => {
         stompClientInstance?.connect(
-          {},
+          token ? { Authorization: `Bearer ${token}` } : {},
           () => {
             console.log('WebSocket connected successfully');
             dispatch(setConnected(true));
