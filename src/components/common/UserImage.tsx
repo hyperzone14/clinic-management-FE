@@ -11,9 +11,10 @@ import "react-toastify/dist/ReactToastify.css";
 
 interface UserImageProps {
   fullName?: string;
+  id: string;
 }
 
-const UserImage: React.FC<UserImageProps> = ({ fullName }) => {
+const UserImage: React.FC<UserImageProps> = ({ fullName, id }) => {
   // const dispatch = useDispatch();
   // const [imageURL, setImageURL] = useState<string | null>(null);
 
@@ -73,8 +74,8 @@ const UserImage: React.FC<UserImageProps> = ({ fullName }) => {
 
   return (
     <>
-      <div className="col-span-1 bg-[#fff] rounded-lg shadow-lg w-full h-fit">
-        <div className="flex flex-col justify-center items-center">
+      <div className='col-span-1 bg-[#fff] rounded-lg shadow-lg w-full h-fit'>
+        <div className='flex flex-col justify-center items-center'>
           {/* Display the uploaded image or icon conditionally */}
           {/* {imageURL ? (
             <img
@@ -85,13 +86,17 @@ const UserImage: React.FC<UserImageProps> = ({ fullName }) => {
           ) : ( */}
           <PiUserCircleLight
             size={80}
-            className="bg-[#4567B7] text-white font-bold p-2 rounded-full mt-5 mb-3"
+            className='bg-[#4567B7] text-white font-bold p-2 rounded-full mt-5 mb-3'
           />
           {/* )} */}
         </div>
-        <div className="flex flex-col justify-center items-center">
-          <span className="text-lg font-bold mb-5">{fullName}</span>
+        <div className='flex flex-col justify-center items-center'>
+          <span className='text-lg font-bold mb-2'>{fullName}</span>
         </div>
+        <div className='flex flex-col justify-center items-center mb-5'>
+          <span className='text-sm text-gray-500'>ID: {id}</span>
+        </div>
+
         {/* <div className="flex flex-col justify-center items-center mt-2 mb-7">
           Button to upload image
           <label htmlFor="imageUpload" className="cursor-pointer">

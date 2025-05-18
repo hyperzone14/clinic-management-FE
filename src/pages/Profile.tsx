@@ -32,7 +32,10 @@ const Profile = () => {
 
         <div className='grid grid-cols-12 gap-4 mx-10'>
           <div className='col-span-3'>
-            <UserImage fullName={auth.username ?? undefined} />
+            <UserImage
+              fullName={auth.username ?? undefined}
+              id={currentId ?? ""}
+            />
           </div>
           <div className='col-span-9 mb-16'>
             {currentRole.includes("ROLE_PATIENT") && currentId ? (
