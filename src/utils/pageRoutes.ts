@@ -32,6 +32,7 @@ export const getHeaderRoutes = (role: string): Routes[] => {
       { id: 1, path: "/", location: "Home" },
       { id: 2, path: "/schedule", location: "Schedule" },
       { id: 3, path: "/lab-tests", location: "LabTests" },
+      { id: 4, path: "/feedback", location: "Feedback" },
       // { id: 4, path: "/pre_exam", location: "Pre-Examination" },
       // { id: 5, path: "/lab-test-payment", location: "Lab Test Payment" },
     ];
