@@ -11,7 +11,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 interface UserImageProps {
   fullName?: string;
-  id: string;
+  id?: string;
 }
 
 const UserImage: React.FC<UserImageProps> = ({ fullName, id }) => {
