@@ -204,12 +204,20 @@ const MedicalBillFinal: React.FC = () => {
 
   // Thay thế bằng useEffect để lấy departments từ redux store
   useEffect(() => {
-    if (departmentInfo.departments.length > 0) {
-      // Lấy tên của tất cả departments từ redux store
-      const departmentNames = departmentInfo.departments.map(dept => dept.name);
-      setDepartments(departmentNames);
-    }
-  }, [departmentInfo.departments]);
+    const fetchLabDepartments = async () => {
+      try {
+        const response = await apiService.get('/lab_department');
+        if (response && Array.isArray(response)) {
+          setDepartments(response);
+        }
+      } catch (error) {
+        console.error('Error fetching lab departments:', error);
+        toast.error('Failed to load lab departments');
+      }
+    };
+
+    fetchLabDepartments();
+  }, []);
 
   // New states for drug search
   const [searchDrugs, setSearchDrugs] = useState<

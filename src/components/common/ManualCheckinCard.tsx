@@ -25,6 +25,7 @@ export enum AppointmentStatus {
   CONFIRMED = "CONFIRMED",
   LAB_TEST_REQUIRED = "LAB_TEST_REQUIRED",
   LAB_TEST_COMPLETED = "LAB_TEST_COMPLETED",
+  PRE_EXAMINATION_COMPLETED = "PRE_EXAMINATION_COMPLETED",
 }
 
 // Map AppointmentStatus to StatusType
@@ -47,6 +48,8 @@ const mapAppointmentStatusToStatusType = (
       return "lab_test_required" as StatusType;
     case AppointmentStatus.LAB_TEST_COMPLETED:
       return "lab_test_completed" as StatusType;
+    case AppointmentStatus.PRE_EXAMINATION_COMPLETED:
+      return "pre_examination_completed" as StatusType;
     default:
       return "pending" as StatusType;
   }
@@ -97,6 +100,8 @@ const getBadgeStyles = (status: string = AppointmentStatus.PENDING): string => {
       return "bg-orange-100 text-orange-800";
     case AppointmentStatus.LAB_TEST_COMPLETED:
       return "bg-sky-100 text-sky-800";
+    case AppointmentStatus.PRE_EXAMINATION_COMPLETED:
+      return "bg-indigo-100 text-indigo-800";
     default:
       return "";
   }
@@ -117,6 +122,8 @@ const getCardStyles = (status: string = AppointmentStatus.PENDING): string => {
       return "hover:shadow-lg hover:bg-gray-50 cursor-pointer";
     case AppointmentStatus.LAB_TEST_COMPLETED:
       return "";
+    case AppointmentStatus.PRE_EXAMINATION_COMPLETED:
+      return "bg-indigo-100 text-indigo-800";
     default:
       return "";
   }
@@ -137,6 +144,8 @@ const getTooltipMessage = (
       return "Appointment cancelled";
     case AppointmentStatus.CONFIRMED:
       return "Appointment confirmed";
+    case AppointmentStatus.PRE_EXAMINATION_COMPLETED:
+      return "Pre-examination completed";
     default:
       return "";
   }
@@ -209,6 +218,10 @@ const ManualCheckinCard: React.FC<ManualCheckinProps> = ({
                 }${
         enumStatus === AppointmentStatus.LAB_TEST_COMPLETED
           ? "border-sky-500"
+          : ""
+      }${
+        enumStatus === AppointmentStatus.PRE_EXAMINATION_COMPLETED
+          ? "border-indigo-500"
           : ""
       }
                 ${getCardStyles(appointment.appointmentStatus)}

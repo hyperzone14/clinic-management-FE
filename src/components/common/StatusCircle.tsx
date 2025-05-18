@@ -143,7 +143,7 @@ const StatusCircle: React.FC<StatusCircleProps> = ({
         case 'checked-in':
           return ['cancelled'];
         case 'pre_examination_completed':
-          return ['success', 'lab_test_required'];
+          return ['cancelled'];
         default:
           return [];
       }
