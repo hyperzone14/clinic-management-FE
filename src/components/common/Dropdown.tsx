@@ -256,7 +256,7 @@ const Dropdown: React.FC<DropdownProps> = ({
           <hr />
 
           {/* Common Menu Items */}
-          {isNurse ? <></> : commonMenuItems}
+          {commonMenuItems}
 
           {/* Role-specific Menu Items */}
           {isDoctor
