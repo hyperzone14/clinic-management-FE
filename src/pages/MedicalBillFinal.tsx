@@ -175,6 +175,8 @@ const MedicalBillFinal: React.FC = () => {
   const doctorId = state.doctorId;
   const [department, setDepartment] = useState<string>("");
 
+  const [drugErrors, setDrugErrors] = useState<{ [key: number]: boolean }>({});
+
   useEffect(() => {
     dispatch(clearPredictionsLLM());
     dispatch(clearPredictionsTrain());
@@ -430,6 +432,17 @@ const MedicalBillFinal: React.FC = () => {
     }
   };
 
+  const validateDrugs = () => {
+    const errors: { [key: number]: boolean } = {};
+    const isValid = drugs.every((drug, index) => {
+      const isDrugValid = drug.drugId !== 0 && drug.drugName;
+      errors[index] = !isDrugValid;
+      return isDrugValid;
+    });
+    setDrugErrors(errors);
+    return isValid;
+  };
+
   const handleSubmitTreatment = async () => {
     if (!currentBill) {
       toast.error("No medical bill found");
@@ -445,6 +458,12 @@ const MedicalBillFinal: React.FC = () => {
     // Check if syndrome is empty
     if (!medicalInfo.syndrome) {
       toast.error("Please enter Syndrome before submitting treatment");
+      return;
+    }
+
+    // Validate drugs
+    if (!validateDrugs()) {
+      toast.error("Please select valid medicines for all prescriptions");
       return;
     }
 
@@ -761,6 +780,7 @@ const MedicalBillFinal: React.FC = () => {
     });
     setSearchTerms((prev) => ({ ...prev, [index]: "" }));
     setSearchDrugs([]);
+    setDrugErrors((prev) => ({ ...prev, [index]: false }));
   };
 
   if (loading) {
@@ -1357,11 +1377,17 @@ const MedicalBillFinal: React.FC = () => {
                             } else {
                               setSearchDrugs([]);
                             }
+                            setDrugErrors((prev) => ({ ...prev, [index]: false }));
                           }}
-                          className='w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                          className={`w-full p-2 border rounded-lg text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            drugErrors[index] ? 'border-red-500' : ''
+                          }`}
                           placeholder='Search medicine...'
                           autoComplete='off'
                         />
+                        {drugErrors[index] && (
+                          <p className="text-red-500 text-sm mt-1">Please select a valid medicine</p>
+                        )}
                         {isSearchingDrugs && (
                           <div className='absolute right-3 top-1/2 transform -translate-y-1/2'>
                             <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500'></div>
