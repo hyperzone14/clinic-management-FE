@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+// import { ToastContainer } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
 // import ProgressBar from "../../components/common/ProgressBar";
 import Title from "../../components/common/Title";
 
@@ -78,7 +78,7 @@ const Finish: React.FC = () => {
 
   return (
     <>
-      <ToastContainer />
+      {/* <ToastContainer /> */}
       <div className='w-full'>
         {/* <div className='flex flex-col my-5 mx-10 justify-center items-center'>
           <h1 className='text-4xl font-bold font-sans my-5'>BOOKING CENTER</h1>

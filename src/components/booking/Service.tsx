@@ -13,6 +13,8 @@ import { RootState, AppDispatch } from "../../redux/store";
 import { fetchDepartments } from "../../redux/slices/departmentSlice";
 import { AuthService } from "../../utils/security/services/AuthService";
 import { setUserId } from "../../redux/slices/authSlice";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface DoctorInfo {
   id: number;
@@ -218,6 +220,9 @@ const Service: React.FC<ServiceProps> = ({ isManualBooking = false }) => {
   };
 
   const handleServiceTypeSelect = (newServiceType: string) => {
+    toast.success(
+      `You have selected ${newServiceType === "By date" ? "date" : "doctor"}`
+    );
     setServiceType(newServiceType);
     setType("");
     setWorkingDays([]);
@@ -237,6 +242,9 @@ const Service: React.FC<ServiceProps> = ({ isManualBooking = false }) => {
   const handleDoctorSelect = (doctorId: number, doctorName: string) => {
     const doctor = doctorsWithDepartments.find((d) => d.doctor.id === doctorId);
     if (doctor) {
+      toast.success(
+        `You have selected ${doctor.doctor.fullName} from ${doctor.department.name}`
+      );
       const newWorkingDays = handleWorkingDaysChange(doctor.doctor.workingDays);
       setType(doctorName);
       dispatch(
@@ -256,6 +264,7 @@ const Service: React.FC<ServiceProps> = ({ isManualBooking = false }) => {
     departmentId: number,
     departmentName: string
   ) => {
+    toast.success(`You have selected ${departmentName}`);
     setType(departmentName);
     setWorkingDays([]); // Reset working days when selecting department
     dispatch(
@@ -276,6 +285,7 @@ const Service: React.FC<ServiceProps> = ({ isManualBooking = false }) => {
 
   return (
     <>
+      {/* <ToastContainer /> */}
       <div className='w-full'>
         <div className='mt-12 grid grid-cols-3'>
           <div className='col-span-2'>

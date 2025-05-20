@@ -297,7 +297,10 @@ const LabTestPaymentDetail: React.FC = () => {
             </div>
 
             <button
-              onClick={handleSubmitPayment}
+              onClick={() => (
+                handleSubmitPayment(),
+                window.scrollTo({ top: 0, behavior: "smooth" })
+              )}
               disabled={selectedLabTests.length === 0 || isSubmitting}
               className={`flex items-center px-4 py-1.5 rounded-lg text-white text-sm transition-colors ${
                 selectedLabTests.length > 0 && !isSubmitting
