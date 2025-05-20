@@ -7,7 +7,7 @@ import { FaUserDoctor } from "react-icons/fa6";
 import { FaRegCalendarAlt } from "react-icons/fa";
 import { BsCurrencyDollar } from "react-icons/bs";
 import { format } from 'date-fns';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface MedicalBill {
   id: number;
@@ -38,6 +38,23 @@ const LabTestPayment: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const today = new Date().toISOString().split('T')[0];
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
+  // Check for payment success state
+  useEffect(() => {
+    const state = location.state as { paymentSuccess?: boolean };
+    if (state?.paymentSuccess) {
+      scrollToTop();
+      toast.success("Payment successful!");
+    }
+  }, [location]);
 
   // Fetch medical bills
   useEffect(() => {

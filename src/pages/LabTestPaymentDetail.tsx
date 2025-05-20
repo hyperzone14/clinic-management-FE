@@ -141,11 +141,8 @@ const LabTestPaymentDetail: React.FC = () => {
         examinationTypes
       );
 
-      // Success message
-      toast.success("Payment submitted successfully");
-
-      // Navigate back to the lab test payment screen
-      navigate("/lab-test-payment");
+      // Navigate back to the lab test payment screen with success state
+      navigate("/lab-test-payment", { state: { paymentSuccess: true } });
     } catch (error) {
       console.error("Payment submission failed:", error);
       toast.error("Failed to submit payment");

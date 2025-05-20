@@ -424,8 +424,7 @@ const MedicalBillFinal: React.FC = () => {
         "LAB_TEST_REQUIRED"
       );
 
-      toast.success("Lab tests requested successfully");
-      navigate("/schedule");
+      navigate("/schedule", { state: { labTestSubmitted: true } });
     } catch (error) {
       console.error("Failed to submit lab tests:", error);
       toast.error("Failed to submit lab tests");
@@ -519,8 +518,7 @@ const MedicalBillFinal: React.FC = () => {
         "SUCCESS"
       );
 
-      toast.success("Treatment submitted successfully");
-      navigate("/schedule");
+      navigate("/schedule", { state: { treatmentCompleted: true } });
     } catch (error) {
       toast.error("Failed to submit treatment");
       console.error("Failed to submit treatment:", error);

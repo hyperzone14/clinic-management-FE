@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../redux/store";
 import {
   fetchDoctorAppointments,
@@ -49,11 +49,32 @@ const STATUS_ORDER: Record<StatusType, number> = {
 const Schedule: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const [currentPage, setCurrentPage] = useState(0);
   const pageSize = 10;
   const { appointments, loading, error, totalPages } = useAppSelector(
     (state) => state.schedule
   );
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
+  // Check for lab test submission state
+  useEffect(() => {
+    const state = location.state as { labTestSubmitted?: boolean; treatmentCompleted?: boolean };
+    if (state?.labTestSubmitted) {
+      scrollToTop();
+      toast.success("Lab tests have been successfully requested");
+    }
+    if (state?.treatmentCompleted) {
+      scrollToTop();
+      toast.success("Treatment has been successfully completed");
+    }
+  }, [location]);
 
   // Sort appointments based on status order
   const sortedAppointments = [...appointments]
