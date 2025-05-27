@@ -25,7 +25,7 @@ const Dropdown: React.FC<DropdownProps> = ({
   isOpen,
   onClose,
   onLogout,
-  userName,
+  // userName,
   userEmail,
 }) => {
   const profile = useSelector((state: RootState) => state.profile);
@@ -39,8 +39,8 @@ const Dropdown: React.FC<DropdownProps> = ({
 
   const handleReduce = (data: string | null | undefined) => {
     if (data == null) return ""; // handles both null and undefined
-    if (data.length > 10) {
-      return data.slice(0, 10) + "...";
+    if (data.length > 15) {
+      return data.slice(0, 15) + "...";
     }
     return data; // return full string if 8 characters or less
   };
@@ -248,7 +248,7 @@ const Dropdown: React.FC<DropdownProps> = ({
                 />
               )}
               <div className='flex flex-col'>
-                <span className='ms-5'>{handleReduce(userName)}</span>
+                {/* <span className='ms-5'>{handleReduce(userName)}</span> */}
                 <span className='ms-5'>{handleReduce(userEmail)}</span>
               </div>
             </div>

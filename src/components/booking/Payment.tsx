@@ -118,7 +118,7 @@ const Purchase: React.FC = () => {
           </div>
           <div className='grid grid-cols-2 gap-4 my-12 px-10 justify-items-center'>
             <div className='col-span-1 flex items-center justify-end'>
-              <p className='text-2xl font-bold text-[#34A85A] text-end max-w-md'>
+              <p className='text-2xl font-bold text-[#34A85A] text-end'>
                 {currentAppointment
                   ? `Confirm Your Booking for ${currentAppointment.appointmentDate}`
                   : "Please select an appointment first"}
