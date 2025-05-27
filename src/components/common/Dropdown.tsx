@@ -39,8 +39,8 @@ const Dropdown: React.FC<DropdownProps> = ({
 
   const handleReduce = (data: string | null | undefined) => {
     if (data == null) return ""; // handles both null and undefined
-    if (data.length > 15) {
-      return data.slice(0, 15) + "...";
+    if (data.length > 10) {
+      return data.slice(0, 10) + "...";
     }
     return data; // return full string if 8 characters or less
   };
