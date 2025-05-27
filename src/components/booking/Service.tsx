@@ -108,11 +108,11 @@ const DoctorCard: React.FC<{
           </div>
           <div className='flex my-3'>
             <FaUserDoctor className='w-8 h-8' />
-            <p className='ms-5 text-2xl'>{doctor.department.name}</p>
+            <p className='ms-4 text-2xl'>{doctor.department.name}</p>
           </div>
           <div className='flex my-3'>
             <FaRegCalendarAlt className='w-8 h-8' />
-            <p className='ms-5 text-2xl'>
+            <p className='ms-6 text-2xl'>
               {doctor.doctor.workingDays.join(", ")}
             </p>
           </div>
