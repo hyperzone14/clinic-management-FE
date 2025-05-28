@@ -9,8 +9,8 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import { AuthService } from "../../utils/security/services/AuthService";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+// import { toast, ToastContainer } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
 import { MdOutlinePayments } from "react-icons/md";
 
 interface DropdownProps {
@@ -49,16 +49,16 @@ const Dropdown: React.FC<DropdownProps> = ({
     try {
       const userRoles = AuthService.getRolesFromToken();
       setRoles(userRoles);
-      if (!userRoles) {
-        toast.error("No roles found or user is not authenticated");
-      }
+      // if (!userRoles) {
+      //   toast.error("No roles found or user is not authenticated");
+      // }
     } catch (err) {
       console.error("Error fetching roles:", err);
-      toast.error(
-        `Error fetching roles: ${
-          err instanceof Error ? err.message : "Unknown error"
-        }`
-      );
+      // toast.error(
+      //   `Error fetching roles: ${
+      //     err instanceof Error ? err.message : "Unknown error"
+      //   }`
+      // );
     }
   }, []);
 
@@ -224,7 +224,7 @@ const Dropdown: React.FC<DropdownProps> = ({
 
   return (
     <>
-      <ToastContainer />
+      {/* <ToastContainer /> */}
       <div
         ref={dropdownRef}
         className={`absolute right-2 mt-2 w-60 bg-white rounded-lg shadow-lg z-10

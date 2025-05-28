@@ -29,8 +29,8 @@ import { ProtectedRoute } from "./utils/security/components/ProtectedRoute";
 import NotPermitted from "./pages/Adminpages/NotPermitted";
 import { AuthService } from "./utils/security/services/AuthService";
 import Prescription from "./pages/Prescription";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+// import { ToastContainer } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
 
 const ConditionalChatbot: React.FC = () => {
   const userRole = AuthService.getRolesFromToken();
@@ -87,7 +87,7 @@ const pageComponents = import.meta.glob(["./pages/*.tsx", "./pages/**/*.tsx"]);
 function App() {
   return (
     <Provider store={store}>
-      <ToastContainer />
+      {/* <ToastContainer /> */}
       <BrowserRouter>
         <Suspense
           fallback={

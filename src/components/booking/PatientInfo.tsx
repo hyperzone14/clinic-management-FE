@@ -45,11 +45,43 @@ const PatientInfo = () => {
     return date.toISOString().split("T")[0];
   };
 
+  // const handleDateChange = (date: Date | null) => {
+  //   const today = new Date();
+  //   today.setHours(0, 0, 0, 0);
+
+  //   if (date && date < today) {
+  //     setSelectedDate(date);
+  //     setFormData((prevData) => ({
+  //       ...prevData,
+  //       birthDate: formatDateForBackend(date),
+  //     }));
+  //   } else {
+  //     setSelectedDate(null);
+  //     setFormData((prevData) => ({
+  //       ...prevData,
+  //       birthDate: "", // Clear the birth date
+  //     }));
+
+  //     // Toast notification for invalid date selection
+  //     toast.error("Please select a valid date");
+  //   }
+  // };
+
   const handleDateChange = (date: Date | null) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    if (date && date < today) {
+    if (!date) {
+      setSelectedDate(null);
+      setFormData((prevData) => ({
+        ...prevData,
+        birthDate: "",
+      }));
+      toast.error("Please select a valid date");
+      return;
+    }
+
+    if (date < today) {
       setSelectedDate(date);
       setFormData((prevData) => ({
         ...prevData,
@@ -59,10 +91,8 @@ const PatientInfo = () => {
       setSelectedDate(null);
       setFormData((prevData) => ({
         ...prevData,
-        birthDate: "", // Clear the birth date
+        birthDate: "",
       }));
-
-      // Toast notification for invalid date selection
       toast.error("Please select a valid date");
     }
   };
