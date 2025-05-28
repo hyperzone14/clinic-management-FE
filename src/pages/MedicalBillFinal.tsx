@@ -29,6 +29,7 @@ import { Switch } from "@mui/material";
 import "../styles/switchSetup.css";
 import { fetchDepartments } from "../redux/slices/departmentSlice";
 import { getDoctorById } from "../redux/slices/doctorSlice";
+import { fetchMedicalRecordsByPatientId } from "../redux/slices/medicHistorySlice";
 
 interface LocationState {
   patientId: number;
@@ -146,6 +147,7 @@ const MedicalBillFinal: React.FC = () => {
   );
   const errorLLM = useAppSelector((state) => state.botLLM.error);
   const errorTrain = useAppSelector((state) => state.botTrain.error);
+  useAppSelector((state) => state.medicHistory);
 
   const state = location.state as LocationState;
 
@@ -781,6 +783,19 @@ const MedicalBillFinal: React.FC = () => {
     setDrugErrors((prev) => ({ ...prev, [index]: false }));
   };
 
+  const handleViewHistory = async () => {
+    if (!currentBill) {
+      toast.error("No medical bill found");
+      return;
+    }
+    try {
+      await dispatch(fetchMedicalRecordsByPatientId(currentBill.patientId)).unwrap();
+      window.open(`/medical-history?patientId=${currentBill.patientId}`, "_blank");
+    } catch (error) {
+      toast.error("Failed to load medical history");
+    }
+  };
+
   if (loading) {
     return (
       <div className='flex justify-center items-center min-h-[400px]'>
@@ -865,12 +880,7 @@ const MedicalBillFinal: React.FC = () => {
               </div>
               <div className='col-span-1 flex justify-end'>
                 <button
-                  onClick={() =>
-                    window.open(
-                      `/medical-history?id=${currentBill.patientId}`,
-                      "_blank"
-                    )
-                  }
+                  onClick={handleViewHistory}
                   className='flex items-center px-6 py-3 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors'
                 >
                   <ClipboardList className='h-5 w-5 mr-2' />

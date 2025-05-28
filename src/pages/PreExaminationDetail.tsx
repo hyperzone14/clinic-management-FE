@@ -10,6 +10,7 @@ import {
   updateAppointmentStatus,
   AppointmentStatus,
 } from "../redux/slices/scheduleSlice";
+import { fetchMedicalRecordsByPatientId } from "../redux/slices/medicHistorySlice";
 // import { getDoctorById } from "../redux/slices/doctorSlice";
 // import { useSelector } from "react-redux";
 // import { fetchDepartments } from "../redux/slices/departmentSlice";
@@ -184,6 +185,15 @@ const PreExaminationDetail: React.FC = () => {
     }
   };
 
+  const handleViewHistory = async () => {
+    try {
+      await dispatch(fetchMedicalRecordsByPatientId(patientId)).unwrap();
+      window.open(`/medical-history?patientId=${patientId}`, "_blank");
+    } catch (error) {
+      toast.error("Failed to load medical history");
+    }
+  };
+
   if (!location.state) {
     toast.error("Missing required information");
     navigate("/pre_exam");
@@ -220,9 +230,7 @@ const PreExaminationDetail: React.FC = () => {
               </div>
               <div className='col-span-1 flex justify-end'>
                 <button
-                  onClick={() =>
-                    window.open(`/medical-history?id=${patientId}`, "_blank")
-                  }
+                  onClick={handleViewHistory}
                   className='flex items-center px-6 py-3 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors'
                 >
                   <ClipboardList className='h-5 w-5 mr-2' />
