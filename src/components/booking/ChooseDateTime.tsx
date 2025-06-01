@@ -147,7 +147,7 @@ const ChooseDateTime: React.FC = () => {
         return true; // Return true or handle the case where workingDaysArray is undefined
       }
 
-      return !workingDaysArray.includes(dayOfWeek);
+      return isBeforeToday || !workingDaysArray.includes(dayOfWeek);
     }
     return isBeforeToday || isWeekend;
   };
