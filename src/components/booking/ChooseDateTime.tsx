@@ -260,7 +260,7 @@ const ChooseDateTime: React.FC = () => {
       return "No doctors available";
     }
 
-    return doctors.map((doc) => `Dr. ${doc.fullName}`).join(", ");
+    return doctors.map((doc) => `${doc.fullName}`).join(", ");
   };
 
   const prefetchWeekData = (startDate: Date) => {
