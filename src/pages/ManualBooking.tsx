@@ -41,6 +41,7 @@ const ManualBooking = () => {
     (state: RootState) => state.appointment.currentAppointment
   );
   const paymentStatus = useSelector((state: RootState) => state.payment);
+  const [loading, setLoading] = useState(false);
 
   const totalSteps = steps.length;
   const completedSteps = Object.keys(completed).length;
@@ -146,6 +147,42 @@ const ManualBooking = () => {
   };
 
   // Main function to handle Next button click
+  // const handleNextButton = async () => {
+  //   const validation = validateStep(activeStep);
+
+  //   if (!validation.isValid) {
+  //     toast.error(validation.errorMessage);
+  //     return;
+  //   }
+
+  //   // Special handling for date & time step
+  //   if (activeStep === 2) {
+  //     const success = await handleDateTimeSubmission();
+  //     if (!success) {
+  //       return;
+  //     }
+  //   }
+
+  //   // Special handling for payment step
+  //   if (activeStep === 3) {
+  //     const paymentConfirmed = await handlePaymentStatusCheck();
+  //     if (!paymentConfirmed) {
+  //       return;
+  //     }
+  //   }
+
+  //   // Mark the current step as completed
+  //   const newCompleted = { ...completed };
+  //   newCompleted[activeStep] = true;
+  //   setCompleted(newCompleted);
+
+  //   // Move to the next step
+  //   setActiveStep((prevActiveStep) => prevActiveStep + 1);
+
+  //   // Scroll to top when moving to next step
+  //   window.scrollTo({ top: 0, behavior: "smooth" });
+  // };
+
   const handleNextButton = async () => {
     const validation = validateStep(activeStep);
 
@@ -154,18 +191,22 @@ const ManualBooking = () => {
       return;
     }
 
+    setLoading(true); // Start loading
+
     // Special handling for date & time step
-    if (activeStep === 2) {
+    if (activeStep === 1) {
       const success = await handleDateTimeSubmission();
       if (!success) {
+        setLoading(false); // Stop loading if failed
         return;
       }
     }
 
     // Special handling for payment step
-    if (activeStep === 3) {
+    if (activeStep === 2) {
       const paymentConfirmed = await handlePaymentStatusCheck();
       if (!paymentConfirmed) {
+        setLoading(false); // Stop loading if failed
         return;
       }
     }
@@ -180,6 +221,8 @@ const ManualBooking = () => {
 
     // Scroll to top when moving to next step
     window.scrollTo({ top: 0, behavior: "smooth" });
+
+    setLoading(false); // Stop loading after everything is done
   };
 
   // Function to render the appropriate step component
@@ -220,7 +263,12 @@ const ManualBooking = () => {
             })}
           </Stepper>
           <div>
-            {allStepsCompleted || activeStep === steps.length ? (
+            {loading ? (
+              <div className='flex justify-center items-center my-10'>
+                {/* Simple spinner, you can use any spinner component or library */}
+                <div className='loader border-4 border-blue-200 border-t-blue-600 rounded-full w-12 h-12 animate-spin'></div>
+              </div>
+            ) : allStepsCompleted || activeStep === steps.length ? (
               <div className='text-center mt-10'>
                 <h2 className='text-2xl font-bold text-green-600'>
                   Booking Complete!
