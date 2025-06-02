@@ -35,7 +35,7 @@ const useBookingValidation = ({
           return { isValid: true, errorMessage: "" };
 
         case 1: // Date & Time selection step
-          // console.log(infoList.date, infoList.time, infoList.timeSlot);
+          console.log(infoList.date, infoList.time, infoList.timeSlot);
           if (!infoList.date || !infoList.time) {
             return {
               isValid: false,
