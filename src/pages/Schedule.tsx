@@ -139,7 +139,7 @@ const Schedule: React.FC = () => {
           `/medical-bills/top/patient/${appointment.patientId}`
         );
 
-        navigate("/medical-bill-final", {
+        navigate("/medical-bill", {
           state: {
             patientId: Number(appointment.patientId),
             patientName: appointment.patientName,
